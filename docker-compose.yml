@@ -29,7 +29,7 @@ services:
     networks:
       - lang
 
-  #docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+  # OLLAMA GPU
   ollama:
     image: ollama/ollama:0.3.14
     ports:
@@ -45,6 +45,16 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
+
+  # OLLAMA
+  ollama:
+    image: ollama/ollama:0.3.14
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - lang
 
 volumes:
   langflow-postgres:
