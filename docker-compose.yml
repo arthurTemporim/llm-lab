@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  langflow:
+    build:
+      context: .
+      dockerfile: ./docker/langflow.Dockerfile
+    container_name: langflow
+    ports:
+      - 7860:7860
+    #runtime: nvidia
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: all
+    #          capabilities: [gpu]
+    #environment:
+    #  - NVIDIA_VISIBLE_DEVICES=all
+
