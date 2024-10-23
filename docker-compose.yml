@@ -13,6 +13,8 @@ services:
       # This variable defines where the logs, file storage, monitor data and secret keys are stored.
     volumes:
       - langflow-data:/app/langflow
+    networks:
+      - lang
 
   postgres:
     image: postgres:16
@@ -24,8 +26,32 @@ services:
       - "5432:5432"
     volumes:
       - langflow-postgres:/var/lib/postgresql/data
+    networks:
+      - lang
+
+  #docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama
+  ollama:
+    image: ollama/ollama:0.3.14
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - lang
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
 volumes:
   langflow-postgres:
   langflow-data:
+  ollama:
 
+
+networks:
+  lang:
+    driver: bridge
