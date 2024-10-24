@@ -1,0 +1,74 @@
+services:
+  langflow:
+    image: langflowai/langflow:1.0.19
+    container_name: langflow
+    #pull_policy: always
+    restart: unless-stopped
+    ports:
+      - "7860:7860"
+    depends_on:
+      - postgres
+    environment:
+      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5432/langflow
+      # This variable defines where the logs, file storage, monitor data and secret keys are stored.
+    volumes:
+      - langflow-data:/app/langflow
+    networks:
+      - lang
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: langflow
+      POSTGRES_PASSWORD: langflow
+      POSTGRES_DB: langflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - langflow-postgres:/var/lib/postgresql/data
+    networks:
+      - lang
+
+  # OLLAMA GPU
+  ollama:
+    image: ollama/ollama:0.3.14
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - lang
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # OLLAMA CPU
+  ollama-cpu:
+    image: ollama/ollama:0.3.14
+    container_name: ollama-cpu
+    restart: unless-stopped
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - lang
+
+volumes:
+  langflow-postgres:
+  langflow-data:
+  ollama:
+
+
+networks:
+  lang:
+    driver: bridge
+
