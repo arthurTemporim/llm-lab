@@ -26,6 +26,8 @@ postgres
 
 * Access `http://localhost:7860/` to see the main page of langflow
 
+* Import simple projects using the UI and the file `modules/langflow/lang_flow.json`
+
 
 #### Ollama
 
