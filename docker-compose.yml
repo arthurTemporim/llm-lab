@@ -30,6 +30,7 @@ services:
   # OLLAMA GPU
   ollama:
     image: ollama/ollama:0.3.14
+    container_name: ollama
     ports:
       - "11434:11434"
     volumes:
@@ -45,14 +46,15 @@ services:
               capabilities: [gpu]
 
   # OLLAMA CPU
-  #ollama-cpu:
-  #  image: ollama/ollama:0.3.14
-  #  ports:
-  #    - "11434:11434"
-  #  volumes:
-  #    - ollama:/root/.ollama
-  #  networks:
-  #    - lang
+  ollama-cpu:
+    image: ollama/ollama:0.3.14
+    container_name: ollama-cpu
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - lang
 
 volumes:
   langflow-postgres:
@@ -63,3 +65,4 @@ volumes:
 networks:
   lang:
     driver: bridge
+
