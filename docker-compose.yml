@@ -2,6 +2,7 @@ services:
   langflow:
     image: langflowai/langflow:1.0.19
     #pull_policy: always
+    restart: unless-stopped
     ports:
       - "7860:7860"
     depends_on:
@@ -16,6 +17,7 @@ services:
 
   postgres:
     image: postgres:16
+    restart: unless-stopped
     environment:
       POSTGRES_USER: langflow
       POSTGRES_PASSWORD: langflow
@@ -30,6 +32,7 @@ services:
   # OLLAMA GPU
   ollama:
     image: ollama/ollama:0.3.14
+    restart: unless-stopped
     container_name: ollama
     ports:
       - "11434:11434"
@@ -48,6 +51,7 @@ services:
   # OLLAMA CPU
   ollama-cpu:
     image: ollama/ollama:0.3.14
+    restart: unless-stopped
     container_name: ollama-cpu
     ports:
       - "11435:11434"
