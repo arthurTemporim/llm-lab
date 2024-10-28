@@ -3,7 +3,7 @@ services:
     build: 
       context: .
       dockerfile: ./Dockerfile
-    container_name: jupyter_notebook
+    container_name: jupyter
     restart: unless-stopped
     user: root
     environment:
@@ -14,6 +14,13 @@ services:
     volumes:
       - ./notebooks:/home/jupyter
     working_dir: /home/jupyter
+    networks:
+      - lang
     ports:
       - 8888:8888
     command: "start-notebook.sh --NotebookApp.token="
+
+networks:
+  lang:
+    external: true
+
