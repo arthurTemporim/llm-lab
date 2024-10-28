@@ -1,0 +1,19 @@
+services:
+  jupyter:
+    build: 
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: jupyter_notebook
+    restart: unless-stopped
+    user: root
+    environment:
+      - NB_USER=jupyter
+      - NB_UID=1000
+      - NB_GID=100
+      - CHOWN_HOME=yes
+    volumes:
+      - ./notebooks:/home/jupyter
+    working_dir: /home/jupyter
+    ports:
+      - 8888:8888
+    command: "start-notebook.sh --NotebookApp.token="

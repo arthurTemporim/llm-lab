@@ -3,8 +3,8 @@
 # ./ollama_send_pronpt.sh
 
 
-model_name="llama3.2"
-url="http://localhost:11434"
+model_name="gemma2"
+url="http://ollama:11434"
 prompt="Why the sky is blue?"
 stream="false"
 

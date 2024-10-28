@@ -1,0 +1,4 @@
+numpy==1.24.2
+pandas==2.0.0
+langchain==0.3.4
+langchain-ollama==0.2.0
