@@ -1,0 +1,41 @@
+services:
+  # OLLAMA GPU
+  #ollama:
+  #  image: ollama/ollama:0.3.14
+  #  container_name: ollama
+  #  restart: unless-stopped
+  #  ports:
+  #    - "11434:11434"
+  #  volumes:
+  #    - ollama:/root/.ollama
+  #  networks:
+  #    - lang
+  #  deploy:
+  #    resources:
+  #      reservations:
+  #        devices:
+  #          - driver: nvidia
+  #            count: all
+  #            capabilities: [gpu]
+
+  # OLLAMA CPU
+  ollama-cpu:
+    image: ollama/ollama:0.3.14
+    container_name: ollama-cpu
+    restart: unless-stopped
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - lang
+
+volumes:
+  langflow-postgres:
+  langflow-data:
+  ollama:
+
+networks:
+  lang:
+    name: lang
+    #driver: bridge
