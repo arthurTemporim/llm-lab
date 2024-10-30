@@ -4,8 +4,12 @@
 
 
 model_name="gemma2"
+stream=false
 url="http://localhost:11435"
-url="$url/api/pull"
 
-curl "$url" -d "{ \"name\": \"$model_name\" }"
+echo "Ollama pulling $model_name on $url"
+curl "$url/api/pull" -d "{\"name\":\"$model_name\", \"stream\":$stream}"
+echo ""
 
+echo "Ollama listing current local models on $url"
+curl "$url/api/tags"
