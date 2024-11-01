@@ -30,12 +30,31 @@ services:
     networks:
       - lang
 
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: lang
+      POSTGRES_PASSWORD: lang
+      POSTGRES_MULTIPLE_DATABASES: "langflow, langwatch"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lang -d langwatch"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./init/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
+    networks:
+      - lang
+
 volumes:
-  langflow-postgres:
-  langflow-data:
+  postgres:
   ollama:
 
 networks:
   lang:
     name: lang
-    #driver: bridge

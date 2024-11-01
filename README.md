@@ -11,7 +11,7 @@ This repo is organized as follows:
 ├── modules
 │   ├── langchain
 │   ├── langflow
-│   └── ollama
+│   └── common-services
 └── scripts
 ```
 

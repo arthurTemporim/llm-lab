@@ -6,33 +6,40 @@ services:
     restart: unless-stopped
     ports:
       - "7860:7860"
-    depends_on:
-      - postgres
+    #depends_on:
+    #  - postgres
     environment:
-      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5432/langflow
+      - LANGFLOW_DATABASE_URL=postgresql://lang:lang@postgres:5432/langflow
+      - LANGWATCH_ENDPOINT="http://localhost:3000"
       # This variable defines where the logs, file storage, monitor data and secret keys are stored.
     volumes:
       - langflow-data:/app/langflow
     networks:
       - lang
 
-  postgres:
-    image: postgres:16
-    container_name: postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: langflow
-      POSTGRES_PASSWORD: langflow
-      POSTGRES_DB: langflow
-    ports:
-      - "5432:5432"
-    volumes:
-      - langflow-postgres:/var/lib/postgresql/data
-    networks:
-      - lang
+  #postgres:
+  #  image: postgres:16
+  #  container_name: postgres
+  #  restart: unless-stopped
+  #  environment:
+  #    POSTGRES_USER: lang
+  #    POSTGRES_PASSWORD: lang
+  #    POSTGRES_DB: langflow
+  #    POSTGRES_DB: langwatch
+  #  healthcheck:
+  #    test: ["CMD-SHELL", "pg_isready -U lang -d langwatch"]
+  #    interval: 10s
+  #    timeout: 5s
+  #    retries: 5
+  #  ports:
+  #    - "5432:5432"
+  #  volumes:
+  #    - postgres:/var/lib/postgresql/data
+  #  networks:
+  #    - lang
 
 volumes:
-  langflow-postgres:
+  #postgres:
   langflow-data:
   ollama:
 
