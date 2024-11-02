@@ -1,8 +1,7 @@
-version: "3.8"
-
 services:
   app:
     image: langwatch/langwatch:latest
+    container_name: langwatch
     environment:
       SKIP_ENV_VALIDATION: true
       DISABLE_PII_REDACTION: true
@@ -17,10 +16,6 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      #postgres:
-      #  condition: service_healthy
-      redis:
-        condition: service_healthy
       opensearch:
         condition: service_healthy
     networks:
@@ -47,20 +42,6 @@ services:
     pull_policy: always
     environment:
       - DISABLE_EVALUATORS_PRELOAD=true
-    networks:
-      - lang
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - lang
 
@@ -116,7 +97,6 @@ services:
       - lang
 
 volumes:
-  redis-data:
   opensearch-data:
 
 networks:

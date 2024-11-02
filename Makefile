@@ -13,19 +13,26 @@ init:
 	make langflow
 	make langchain
 
-restart:
-	cd $(modules_dir)langflow && docker compose down && docker compose up -d
-	cd $(modules_dir)langchain && docker compose down && docker compose up -d
-	cd $(modules_dir)langwatch && docker compose down && docker compose up -d
-	cd $(modules_dir)common-services && docker compose down && docker compose up -d
-	echo "Langflow is up and Running"
+start:
+	cd $(modules_dir)common-services && docker compose up -d
+	cd $(modules_dir)langflow && docker compose up -d
+	cd $(modules_dir)langchain && docker compose up -d
+	cd $(modules_dir)langwatch && docker compose up -d
+	echo "Finished starting"
+
+down:
+	cd $(modules_dir)common-services && docker compose down 
+	cd $(modules_dir)langflow && docker compose down
+	cd $(modules_dir)langchain && docker compose down
+	cd $(modules_dir)langwatch && docker compose down
+	echo "Finished down"
 
 build:
 	cd $(modules_dir)langflow && docker compose build
 	cd $(modules_dir)langchain && docker compose build
 	cd $(modules_dir)common-services && docker compose build
 	cd $(modules_dir)langwatch && docker compose build
-	echo "Langflow is up and Running"
+	echo "Finished building"
 
 langflow:
 	cd $(modules_dir)langflow && docker compose up -d

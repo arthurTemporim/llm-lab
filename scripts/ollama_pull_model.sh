@@ -3,7 +3,7 @@
 # ./ollama_pull_model.sh
 
 
-model_name="gemma2"
+model_name="llama3.2"
 stream=false
 url="http://localhost:11435"
 
