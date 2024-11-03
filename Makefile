@@ -16,8 +16,13 @@ init:
 start:
 	cd $(modules_dir)common-services && docker compose up -d
 	cd $(modules_dir)langflow && docker compose up -d
-	cd $(modules_dir)langchain && docker compose up -d
+	echo "Finished starting"
+
+start-full:
+	cd $(modules_dir)common-services && docker compose up -d
 	cd $(modules_dir)langwatch && docker compose up -d
+	cd $(modules_dir)langflow && docker compose up -d
+	cd $(modules_dir)langchain && docker compose up -d
 	echo "Finished starting"
 
 down:
@@ -28,11 +33,16 @@ down:
 	echo "Finished down"
 
 build:
+	cd $(modules_dir)common-services && docker compose build
 	cd $(modules_dir)langflow && docker compose build
 	cd $(modules_dir)langchain && docker compose build
-	cd $(modules_dir)common-services && docker compose build
 	cd $(modules_dir)langwatch && docker compose build
 	echo "Finished building"
+
+common-services:
+	cd $(modules_dir)common-services && docker compose up -d
+	cd scripts/ && ./ollama_pull_model.sh &
+	echo "Ollama is pulling a model in background, service up and running"
 
 langflow:
 	cd $(modules_dir)langflow && docker compose up -d
@@ -43,8 +53,3 @@ langwatch:
 langchain:
 	cd $(modules_dir)langchain && docker compose up -d
 	echo "Langchain is up and Running"
-
-common-services:
-	cd $(modules_dir)common-services && docker compose up -d
-	cd scripts/ && ./ollama_pull_model.sh &
-	echo "Ollama is pulling a model in background, service up and running"
