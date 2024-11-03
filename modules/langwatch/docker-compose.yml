@@ -2,6 +2,7 @@ services:
   app:
     image: langwatch/langwatch:latest
     container_name: langwatch
+    restart: always
     environment:
       SKIP_ENV_VALIDATION: true
       DISABLE_PII_REDACTION: true
