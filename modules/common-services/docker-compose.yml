@@ -37,7 +37,7 @@ services:
     environment:
       POSTGRES_USER: lang
       POSTGRES_PASSWORD: lang
-      POSTGRES_MULTIPLE_DATABASES: "langflow, langwatch"
+      POSTGRES_MULTIPLE_DATABASES: "langflow, langwatch, vectordb"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U lang -d langwatch"]
       interval: 10s
@@ -48,6 +48,27 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
       - ./init/create-multiple-postgresql-databases.sh:/docker-entrypoint-initdb.d/create-multiple-postgresql-databases.sh
+    networks:
+      - lang
+
+  pgvector:
+    image: ankane/pgvector
+    container_name: pgvector
+    restart: always
+    environment:
+      POSTGRES_USER: lang
+      POSTGRES_PASSWORD: lang
+      POSTGRES_DB: vectordb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lang -d vectordb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/vector_data
+      - ./init/pgvector.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - lang
 
@@ -70,6 +91,7 @@ services:
 volumes:
   redis-data:
   postgres:
+  pgvector:
   ollama:
 
 networks:

@@ -1,0 +1,1 @@
+# postgresql://lang:lang@pgvector:5432/vectordb

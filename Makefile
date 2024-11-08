@@ -9,9 +9,7 @@ user := $(shell whoami)
 # it shares "lang" network with others docker-compose files
 init:
 	make common-services
-	make build
 	make langflow
-	make langchain
 
 start:
 	cd $(modules_dir)common-services && docker compose up -d
