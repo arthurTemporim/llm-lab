@@ -2,39 +2,20 @@ services:
   langflow:
     image: langflowai/langflow:1.0.19
     container_name: langflow
-    #pull_policy: always
-    restart: unless-stopped
+    restart: always
     ports:
       - "7860:7860"
-    depends_on:
-      - postgres
     environment:
-      - LANGFLOW_DATABASE_URL=postgresql://langflow:langflow@postgres:5432/langflow
-      # This variable defines where the logs, file storage, monitor data and secret keys are stored.
+      - LANGFLOW_DATABASE_URL=postgresql://lang:lang@postgres:5432/langflow
+      - LANGWATCH_ENDPOINT=http://langwatch:3000
+    env_file: ".env"
     volumes:
       - langflow-data:/app/langflow
     networks:
       - lang
 
-  postgres:
-    image: postgres:16
-    container_name: postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: langflow
-      POSTGRES_PASSWORD: langflow
-      POSTGRES_DB: langflow
-    ports:
-      - "5432:5432"
-    volumes:
-      - langflow-postgres:/var/lib/postgresql/data
-    networks:
-      - lang
-
 volumes:
-  langflow-postgres:
   langflow-data:
-  ollama:
 
 networks:
   lang:
