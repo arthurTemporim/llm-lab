@@ -8,6 +8,8 @@ services:
     environment:
       - LANGFLOW_DATABASE_URL=postgresql://lang:lang@postgres:5432/langflow
       - LANGWATCH_ENDPOINT=http://langwatch:3000
+      - LANGFLOW_AUTO_LOGIN=False
+      - LANGFLOW_NEW_USER_IS_ACTIVE=False
     env_file: ".env"
     volumes:
       - langflow-data:/app/langflow
