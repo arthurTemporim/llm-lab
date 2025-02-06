@@ -1,6 +1,6 @@
 services:
   langflow:
-    image: langflowai/langflow:v1.1.1
+    image: langflowai/langflow:v1.1.4
     container_name: langflow
     restart: always
     ports:

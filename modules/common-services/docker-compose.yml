@@ -1,7 +1,7 @@
 services:
   # OLLAMA GPU
   ollama:
-    image: ollama/ollama:0.3.14
+    image: ollama/ollama:0.5.7
     container_name: ollama
     restart: always
     ports:
@@ -20,7 +20,7 @@ services:
 
   # OLLAMA CPU
   ollama-cpu:
-    image: ollama/ollama:0.3.14
+    image: ollama/ollama:0.5.7
     container_name: ollama-cpu
     restart: always
     ports:
