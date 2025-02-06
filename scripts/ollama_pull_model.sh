@@ -1,13 +1,18 @@
 #!/bin/bash
 # Ex:
 # ./ollama_pull_models.sh
+# Example of models, but it can use more than 10G in total
+#models=(
+#"llama3.2"
+#"mistral"
+#"deepseek-r1"
+#"deepseek-coder-v2"
+#"mxbai-embed-large"
+#"nomic-embed-text"
+#)
 
 models=(
 "llama3.2"
-"mistral"
-"deepseek-r1"
-"deepseek-coder-v2"
-"mxbai-embed-large"
 "nomic-embed-text"
 )
 stream=false
