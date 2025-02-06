@@ -37,9 +37,9 @@ services:
     environment:
       POSTGRES_USER: lang
       POSTGRES_PASSWORD: lang
-      POSTGRES_MULTIPLE_DATABASES: "langflow, langwatch, vectordb"
+      POSTGRES_MULTIPLE_DATABASES: "langflow, langdata, vectordb"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lang -d langwatch"]
+      test: ["CMD-SHELL", "pg_isready -U lang -d langdata"]
       interval: 10s
       timeout: 5s
       retries: 5
