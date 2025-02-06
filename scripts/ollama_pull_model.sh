@@ -2,7 +2,14 @@
 # Ex:
 # ./ollama_pull_models.sh
 
-models=("llama3.2" "gemma2" "mistral" "mxbai-embed-large")
+models=(
+"llama3.2"
+"mistral"
+"deepseek-r1"
+"deepseek-coder-v2"
+"mxbai-embed-large"
+"nomic-embed-text"
+)
 stream=false
 url="http://localhost:11435"
 
