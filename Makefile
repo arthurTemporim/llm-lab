@@ -22,6 +22,9 @@ start-full:
 	cd $(modules_dir)langchain && docker compose up -d
 	echo "Finished starting"
 
+logs:
+	cd $(modules_dir)langflow && docker compose logs -f
+
 down:
 	cd $(modules_dir)common-services && docker compose down 
 	cd $(modules_dir)langflow && docker compose down
