@@ -1,7 +1,7 @@
 services:
   # OLLAMA GPU
   ollama:
-    image: ollama/ollama:0.5.7
+    image: ollama/ollama:0.6.2
     container_name: ollama
     restart: always
     ports:
@@ -20,7 +20,7 @@ services:
 
   # OLLAMA CPU
   ollama-cpu:
-    image: ollama/ollama:0.5.7
+    image: ollama/ollama:0.6.2
     container_name: ollama-cpu
     restart: always
     ports:
@@ -52,7 +52,7 @@ services:
       - lang
 
   pgvector:
-    image: ankane/pgvector
+    image: pgvector/pgvector:0.8.0-pg16
     container_name: pgvector
     restart: always
     environment:

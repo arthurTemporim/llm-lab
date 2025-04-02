@@ -1,14 +1,10 @@
 services:
   langflow:
-    image: langflowai/langflow:1.1.4
+    image: langflowai/langflow:1.2.0
     container_name: langflow
     restart: always
     ports:
       - "7860:7860"
-    environment:
-      - LANGFLOW_DATABASE_URL=postgresql://lang:lang@postgres:5432/langflow
-      - LANGFLOW_AUTO_LOGIN=False
-      - LANGFLOW_NEW_USER_IS_ACTIVE=False
     env_file: ".env"
     volumes:
       - langflow-data:/app/langflow

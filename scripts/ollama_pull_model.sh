@@ -13,6 +13,9 @@
 
 models=(
 "llama3.2"
+"gemma3"
+"deepseek-r1"
+"deepseek-coder"
 "nomic-embed-text"
 )
 stream=false

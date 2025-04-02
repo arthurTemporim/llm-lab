@@ -42,6 +42,6 @@ common-services:
 langflow:
 	cd $(modules_dir)langflow && docker compose up -d
 
-langchain:
+notebook:
 	cd $(modules_dir)langchain && docker compose up -d
 	echo "Langchain is up and Running"
