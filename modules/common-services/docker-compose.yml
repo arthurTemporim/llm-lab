@@ -1,7 +1,7 @@
 services:
   # OLLAMA GPU
   ollama:
-    image: ollama/ollama:0.3.14
+    image: ollama/ollama:0.6.4
     container_name: ollama
     restart: always
     ports:
@@ -20,7 +20,7 @@ services:
 
   # OLLAMA CPU
   ollama-cpu:
-    image: ollama/ollama:0.3.14
+    image: ollama/ollama:0.6.4
     container_name: ollama-cpu
     restart: always
     ports:
@@ -37,9 +37,9 @@ services:
     environment:
       POSTGRES_USER: lang
       POSTGRES_PASSWORD: lang
-      POSTGRES_MULTIPLE_DATABASES: "langflow, langwatch, vectordb"
+      POSTGRES_MULTIPLE_DATABASES: "langflow, langdata, vectordb"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lang -d langwatch"]
+      test: ["CMD-SHELL", "pg_isready -U lang -d langdata"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,7 +52,7 @@ services:
       - lang
 
   pgvector:
-    image: ankane/pgvector
+    image: pgvector/pgvector:0.8.0-pg16
     container_name: pgvector
     restart: always
     environment:
