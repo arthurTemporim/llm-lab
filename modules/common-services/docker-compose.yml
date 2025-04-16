@@ -31,7 +31,7 @@ services:
       - lang
 
   postgres:
-    image: pgvector/pgvector:0.8.0-pg17
+    image: pgvector/pgvector:pg17
     container_name: postgres
     restart: always
     environment:
