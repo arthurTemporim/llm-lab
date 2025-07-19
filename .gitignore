@@ -174,3 +174,5 @@ cython_debug/
 # Rasa
 *.tar.gz
 .rasa
+.keras
+.config
