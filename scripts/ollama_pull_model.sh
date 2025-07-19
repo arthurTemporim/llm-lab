@@ -13,7 +13,7 @@
 
 models=(
 "llama3.2"
-"gemma3"
+"gemma3n"
 "nomic-embed-text"
 )
 stream=false
