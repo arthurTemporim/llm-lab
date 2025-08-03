@@ -48,7 +48,12 @@ common-services: check-env
 	echo "Ollama is pulling a model in background, service up and running"
 
 langflow: check-env
-	cd $(modules_dir)langflow && docker compose up -d
+	cd $(modules_dir)langflow
+	if [ ! -f .env ]; then \
+		echo ".env file not found. Creating from example.env..."; \
+		cp example.env .env; \
+	fi
+	docker compose up -d
 
 notebook: check-env
 	cd $(modules_dir)langchain && docker compose up -d
