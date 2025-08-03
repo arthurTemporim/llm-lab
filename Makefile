@@ -13,7 +13,7 @@ user := $(shell whoami)
 check-env:
 	@if [ ! -f langflow/.env ]; then \
 		echo "langflow/.env not found. Creating from langflow/example.env..."; \
-		cp langflow/example.env langflow/.env; \
+		cp $(modules_dir)langflow/example.env $(modules_dir)langflow/.env; \
 	else \
 		echo "langflow/.env exists."; \
 	fi
