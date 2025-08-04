@@ -1,24 +1,25 @@
-# Load .env file if it exists
--include .env
-export $(shell sed 's/=.*//' .env 2>/dev/null)
-
-# Variables
-current_dir := $(shell pwd)/
-modules_dir := $(current_dir)modules/
-user := $(shell whoami)
-
-.PHONY: check-env init start start-full logs down build \
+.PHONY: check-env check-langflow-env init start start-full logs down build \
         common-services langflow notebook
 
+# Check for root .env
 check-env:
-	@if [ ! -f langflow/.env ]; then \
-		echo "langflow/.env not found. Creating from langflow/example.env..."; \
-		cp $(modules_dir)langflow/example.env $(modules_dir)langflow/.env; \
+	@if [ ! -f .env ]; then \
+		echo ".env not found in root. Creating from example.env if available..."; \
+		if [ -f example.env ]; then cp example.env .env; else echo "No example.env in root, skipping."; fi \
 	else \
-		echo "langflow/.env exists."; \
+		echo ".env exists in root. Not overwriting."; \
 	fi
 
-init: check-env
+# Check for langflow/.env in modules
+check-langflow-env:
+	@if [ ! -f $(modules_dir)langflow/.env ]; then \
+		echo "$(modules_dir)langflow/.env not found. Creating from example.env..."; \
+		cp $(modules_dir)langflow/example.env $(modules_dir)langflow/.env; \
+	else \
+		echo "$(modules_dir)langflow/.env exists. Not overwriting."; \
+	fi
+
+init: check-env check-langflow-env
 	make common-services
 	make langflow
 
@@ -30,7 +31,7 @@ start: check-env
 start-full: check-env
 	cd $(modules_dir)common-services && docker compose up -d
 	cd $(modules_dir)langflow && docker compose up -d
-	cd $(modules_dir)langchain && docker compose up -d
+	cd $(modules_dir)notebooks && docker compose up -d
 	echo "Finished full start"
 
 logs: check-env
@@ -39,13 +40,13 @@ logs: check-env
 down: check-env
 	cd $(modules_dir)common-services && docker compose down
 	cd $(modules_dir)langflow && docker compose down
-	cd $(modules_dir)langchain && docker compose down
+	cd $(modules_dir)notebooks && docker compose down
 	echo "All services stopped"
 
-build: check-env
+build: check-env check-langflow-env
 	cd $(modules_dir)common-services && docker compose build
 	cd $(modules_dir)langflow && docker compose build
-	cd $(modules_dir)langchain && docker compose build
+	cd $(modules_dir)notebooks && docker compose build
 	echo "Finished building all modules"
 
 common-services: check-env
@@ -53,10 +54,11 @@ common-services: check-env
 	cd scripts/ && ./ollama_pull_model.sh &
 	echo "Ollama model pull started in background"
 
-langflow: check-env
+langflow: check-env check-langflow-env
 	cd $(modules_dir)langflow && docker compose up -d
 	echo "Langflow is up and running"
 
 notebook: check-env
-	cd $(modules_dir)langchain && docker compose up -d
-	echo "Langchain is up and running"
+	cd $(modules_dir)notebooks && docker compose up -d
+	echo "notebooks is up and running"
+
