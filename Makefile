@@ -1,5 +1,11 @@
-.PHONY: check-env check-langflow-env init start start-full logs down build \
-        common-services langflow notebook
+.PHONY: check-env check-langflow-env check-openwebui-env \
+        init start start-full logs down build \
+        common-services langflow notebook openwebui
+
+# Variables
+current_dir := $(shell pwd)/
+modules_dir := $(current_dir)modules/
+user := $(shell whoami)
 
 # Check for root .env
 check-env:
@@ -19,33 +25,48 @@ check-langflow-env:
 		echo "$(modules_dir)langflow/.env exists. Not overwriting."; \
 	fi
 
-init: check-env check-langflow-env
+# Check for openwebui/.env in modules
+check-openwebui-env:
+	@if [ ! -f $(modules_dir)openwebui/.env ]; then \
+		echo "$(modules_dir)openwebui/.env not found. Creating from example.env..."; \
+		cp $(modules_dir)openwebui/example.env $(modules_dir)openwebui/.env; \
+	else \
+		echo "$(modules_dir)openwebui/.env exists. Not overwriting."; \
+	fi
+
+init: check-env check-langflow-env check-openwebui-env
 	make common-services
 	make langflow
+	make openwebui
 
-start: check-env
+start: check-env check-langflow-env check-openwebui-env
 	cd $(modules_dir)common-services && docker compose up -d
 	cd $(modules_dir)langflow && docker compose up -d
+	cd $(modules_dir)openwebui && docker compose up -d
 	echo "Finished starting"
 
-start-full: check-env
+start-full: check-env check-langflow-env check-openwebui-env
 	cd $(modules_dir)common-services && docker compose up -d
 	cd $(modules_dir)langflow && docker compose up -d
+	cd $(modules_dir)openwebui && docker compose up -d
 	cd $(modules_dir)notebooks && docker compose up -d
 	echo "Finished full start"
 
-logs: check-env
+logs: check-env check-langflow-env check-openwebui-env
 	cd $(modules_dir)langflow && docker compose logs -f
+	cd $(modules_dir)openwebui && docker compose logs -f
 
-down: check-env
+down: check-env check-langflow-env check-openwebui-env
 	cd $(modules_dir)common-services && docker compose down
 	cd $(modules_dir)langflow && docker compose down
+	cd $(modules_dir)openwebui && docker compose down
 	cd $(modules_dir)notebooks && docker compose down
 	echo "All services stopped"
 
-build: check-env check-langflow-env
+build: check-env check-langflow-env check-openwebui-env
 	cd $(modules_dir)common-services && docker compose build
 	cd $(modules_dir)langflow && docker compose build
+	cd $(modules_dir)openwebui && docker compose build
 	cd $(modules_dir)notebooks && docker compose build
 	echo "Finished building all modules"
 
@@ -61,4 +82,8 @@ langflow: check-env check-langflow-env
 notebook: check-env
 	cd $(modules_dir)notebooks && docker compose up -d
 	echo "notebooks is up and running"
+
+openwebui: check-env check-openwebui-env
+	cd $(modules_dir)openwebui && docker compose up -d
+	echo "Open WebUI is up and running"
 
