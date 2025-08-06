@@ -6,7 +6,7 @@ models=(
 "llama3.2"
 "gemma3n"
 "llama3.2-vision"
-"gpt-oss"
+"gpt-oss:20b"
 "nomic-embed-text"
 )
 stream=false

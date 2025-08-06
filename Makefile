@@ -36,24 +36,14 @@ check-openwebui-env:
 
 init: check-env check-langflow-env check-openwebui-env
 	make common-services
-	make langflow
 	make openwebui
 
 start: check-env check-langflow-env check-openwebui-env
 	cd $(modules_dir)common-services && docker compose up -d
-	cd $(modules_dir)langflow && docker compose up -d
 	cd $(modules_dir)openwebui && docker compose up -d
-	echo "Finished starting"
-
-start-full: check-env check-langflow-env check-openwebui-env
-	cd $(modules_dir)common-services && docker compose up -d
-	cd $(modules_dir)langflow && docker compose up -d
-	cd $(modules_dir)openwebui && docker compose up -d
-	cd $(modules_dir)notebooks && docker compose up -d
 	echo "Finished full start"
 
 logs: check-env check-langflow-env check-openwebui-env
-	cd $(modules_dir)langflow && docker compose logs -f
 	cd $(modules_dir)openwebui && docker compose logs -f
 
 down: check-env check-langflow-env check-openwebui-env
@@ -79,7 +69,7 @@ langflow: check-env check-langflow-env
 	cd $(modules_dir)langflow && docker compose up -d
 	echo "Langflow is up and running"
 
-notebook: check-env
+notebooks: check-env
 	cd $(modules_dir)notebooks && docker compose up -d
 	echo "notebooks is up and running"
 
