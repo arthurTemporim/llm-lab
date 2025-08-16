@@ -8,8 +8,8 @@ current_dir := $(shell pwd)/
 modules_dir := $(current_dir)modules/
 scripts_dir := $(current_dir)scripts/
 
-OLLAMA_COMPOSE_FILE := docker-compose.ollama.yml
-COMMON_COMPOSE_FILE := docker-compose.services.yml
+OLLAMA_COMPOSE_FILE := docker-compose.yml
+COMMON_COMPOSE_FILE := docker-compose.yml
 DEFAULT_COMPOSE_FILE := docker-compose.yml
 
 mod_ollama := $(modules_dir)ollama
