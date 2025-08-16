@@ -1,40 +1,10 @@
+version: "3.9"
+
 services:
-  # OLLAMA GPU
-  ollama:
-    image: ollama/ollama:0.11.2
-    container_name: ollama
-    restart: always
-    env_file: ".env"
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama:/root/.ollama
-    networks:
-      - lang
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
-
-  # OLLAMA CPU
-  ollama-cpu:
-    image: ollama/ollama:0.11.2
-    container_name: ollama-cpu
-    restart: always
-    ports:
-      - "11435:11434"
-    volumes:
-      - ollama:/root/.ollama
-    networks:
-      - lang
-
   postgres:
     image: pgvector/pgvector:pg17
     container_name: postgres
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_USER: lang
       POSTGRES_PASSWORD: lang
@@ -55,7 +25,7 @@ services:
   redis:
     image: redis:alpine
     container_name: redis
-    restart: always
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
@@ -71,8 +41,6 @@ services:
 volumes:
   redis-data:
   postgres:
-  pgvector:
-  ollama:
 
 networks:
   lang:

@@ -1,0 +1,43 @@
+version: "3.9"
+
+services:
+  # ===================== O L L A M A  (GPU) =====================
+  ollama:
+    image: ollama/ollama:0.11.2
+    container_name: ollama
+    restart: unless-stopped
+    env_file: .env
+    # IMPORTANTE: não expor a porta 11434 pro host
+    # ports: []   # (deixe sem mapeamento)
+    volumes:
+      - ollama:/root/.ollama
+    networks:
+      - ollama_net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ===================== N G I N X  (Proxy + CORS + SSE) =====================
+  ollama-nginx:
+    image: nginx:1.27-alpine
+    container_name: ollama-nginx
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    ports:
+      - "8080:8080"        # Cloudflare Tunnel -> 192.168.15.210:8080
+    volumes:
+      - ./nginx/ollama.conf:/etc/nginx/conf.d/ollama.conf:ro
+    networks:
+      - ollama_net
+
+volumes:
+  ollama:
+
+networks:
+  ollama_net:
+    name: ollama_net
