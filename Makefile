@@ -68,7 +68,8 @@ start:
 start-full: start
 
 logs:
-	cd $(mod_openwebui) && docker compose logs -f
+	@echo "Showing combined logs of all active containers..."
+	@docker ps --format "{{.Names}}" | xargs -r docker logs -f
 
 down:
 	cd $(mod_ollama) && docker compose -f $(OLLAMA_COMPOSE_FILE) down
