@@ -8,10 +8,6 @@ current_dir := $(shell pwd)/
 modules_dir := $(current_dir)modules/
 scripts_dir := $(current_dir)scripts/
 
-OLLAMA_COMPOSE_FILE := docker-compose.yml
-COMMON_COMPOSE_FILE := docker-compose.yml
-DEFAULT_COMPOSE_FILE := docker-compose.yml
-
 mod_ollama := $(modules_dir)ollama
 mod_common := $(modules_dir)common-services
 mod_openwebui := $(modules_dir)openwebui
@@ -26,7 +22,7 @@ help:
 	@echo "  down            -> derruba todos os módulos"
 	@echo "  build           -> build em todos os módulos"
 	@echo "  logs            -> logs do openwebui"
-	@echo "  ollama          -> sobe o stack do ollama (nginx + ollama)"
+	@echo "  ollama          -> sobe o stack do ollama"
 	@echo "  ollama-logs     -> logs do ollama"
 	@echo "  ollama-down     -> derruba o ollama"
 	@echo "  common-services -> sobe postgres/redis"
@@ -57,12 +53,13 @@ init: create-envs
 	$(MAKE) common-services
 	$(MAKE) openwebui
 	$(MAKE) ollama
+	./scripts/ollama_pull_model.sh
 	@echo "Init done."
 
 start:
-	cd $(mod_common) && docker compose -f $(COMMON_COMPOSE_FILE) up -d
+	cd $(mod_common) && docker compose up -d
 	cd $(mod_openwebui) && docker compose up -d
-	cd $(mod_ollama) && docker compose -f $(OLLAMA_COMPOSE_FILE) up -d
+	cd $(mod_ollama) && docker compose up -d
 	@echo "Finished full start"
 
 start-full: start
@@ -71,24 +68,24 @@ logs:
 	cd $(mod_openwebui) && docker compose logs -f
 
 down:
-	cd $(mod_ollama) && docker compose -f $(OLLAMA_COMPOSE_FILE) down
+	cd $(mod_ollama) && docker compose down
 	cd $(mod_openwebui) && docker compose down
 	cd $(mod_langflow) && docker compose down
-	cd $(mod_common) && docker compose -f $(COMMON_COMPOSE_FILE) down
+	cd $(mod_common) && docker compose down
 	cd $(mod_notebooks) && docker compose down
 	@echo "All services stopped"
 
 build:
-	cd $(mod_common) && docker compose -f $(COMMON_COMPOSE_FILE) build
+	cd $(mod_common) && docker compose build
 	cd $(mod_langflow) && docker compose build
 	cd $(mod_openwebui) && docker compose build
 	cd $(mod_notebooks) && docker compose build
-	cd $(mod_ollama) && docker compose -f $(OLLAMA_COMPOSE_FILE) build
+	cd $(mod_ollama) && docker compose build
 	@echo "Finished building all modules"
 
 # =================== Módulos individuais ===================
 common-services:
-	cd $(mod_common) && docker compose -f $(COMMON_COMPOSE_FILE) up -d
+	cd $(mod_common) && docker compose up -d
 	cd $(scripts_dir) && ./ollama_pull_model.sh &
 	@echo "Common services are up"
 
@@ -105,12 +102,12 @@ openwebui:
 	@echo "Open WebUI is up and running"
 
 ollama:
-	cd $(mod_ollama) && docker compose -f $(OLLAMA_COMPOSE_FILE) up -d
-	@echo "Ollama stack is up (nginx + ollama)"
+	cd $(mod_ollama) && docker compose up -d
+	@echo "Ollama stack is up ollama"
 
 ollama-logs:
-	cd $(mod_ollama) && docker compose -f $(OLLAMA_COMPOSE_FILE) logs -f
+	cd $(mod_ollama) && docker compose logs -f
 
 ollama-down:
-	cd $(mod_ollama) && docker compose -f $(OLLAMA_COMPOSE_FILE) down
+	cd $(mod_ollama) && docker compose down
 	@echo "Ollama stack stopped"

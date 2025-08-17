@@ -6,11 +6,11 @@ models=(
 "llama3.2"
 "gemma3n"
 "llama3.2-vision"
-"gpt-oss:20b"
 "nomic-embed-text"
+"qwen3:8b"
 )
 stream=false
-url="http://localhost:11435"
+url="http://localhost:11434"
 
 for model_name in "${models[@]}"; do
   echo "Pulling model: $model_name from $url"
