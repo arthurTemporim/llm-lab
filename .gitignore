@@ -170,3 +170,9 @@ cython_debug/
 .npm
 .ipython
 .ipynb_checkpoints
+
+# Rasa
+*.tar.gz
+.rasa
+.keras
+.config

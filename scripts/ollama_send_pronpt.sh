@@ -4,7 +4,7 @@
 
 
 model_name="gemma2"
-url="http://localhost:11435"
+url="http://localhost:11434"
 prompt="Why the sky is blue?"
 stream="false"
 

@@ -1,25 +1,16 @@
 #!/bin/bash
 # Ex:
 # ./ollama_pull_models.sh
-# Example of models, but it can use more than 10G in total
-#models=(
-#"llama3.2"
-#"mistral"
-#"deepseek-r1"
-#"deepseek-coder-v2"
-#"mxbai-embed-large"
-#"nomic-embed-text"
-#)
 
 models=(
 "llama3.2"
-"gemma3"
-"deepseek-r1"
-"deepseek-coder"
+"gemma3n"
+"llama3.2-vision"
 "nomic-embed-text"
+"qwen3:8b"
 )
 stream=false
-url="http://localhost:11435"
+url="http://localhost:11434"
 
 for model_name in "${models[@]}"; do
   echo "Pulling model: $model_name from $url"

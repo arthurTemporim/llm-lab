@@ -1,0 +1,26 @@
+services:
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:0.3.14-cuda
+    restart: always
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui:/app/backend/data
+    env_file: ".env"
+    networks:
+      - lang
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  open-webui:
+
+networks:
+  lang:
+    external: true
+
