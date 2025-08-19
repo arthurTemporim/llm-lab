@@ -1,7 +1,8 @@
 .PHONY: help \
         create-envs init start start-full logs down build \
-        common-services langflow notebooks openwebui \
-        ollama ollama-down ollama-logs ollama-build
+        common-services langflow notebooks openwebui ollama litellm \
+        ollama-down ollama-logs ollama-build \
+        litellm-down litellm-logs litellm-build
 
 # =================== Variables ===================
 current_dir := $(shell pwd)/
@@ -13,101 +14,102 @@ mod_common := $(modules_dir)common-services
 mod_openwebui := $(modules_dir)openwebui
 mod_langflow := $(modules_dir)langflow
 mod_notebooks := $(modules_dir)notebooks
+mod_litellm := $(modules_dir)litellm
 
 help:
-	@echo "Targets principais:"
-	@echo "  init            -> cria .envs e sobe common-services + openwebui + ollama"
-	@echo "  create-envs     -> cria TODAS as .envs necessárias (root, ollama, langflow, openwebui)"
-	@echo "  start           -> sobe common-services + openwebui + ollama (assume .envs já criadas)"
-	@echo "  down            -> derruba todos os módulos"
-	@echo "  build           -> build em todos os módulos"
-	@echo "  logs            -> logs do openwebui"
-	@echo "  ollama          -> sobe o stack do ollama"
-	@echo "  ollama-logs     -> logs do ollama"
-	@echo "  ollama-down     -> derruba o ollama"
-	@echo "  common-services -> sobe postgres/redis"
-	@echo "  langflow        -> sobe langflow"
-	@echo "  notebooks       -> sobe notebooks"
+        @echo "Main targets:"
+        @echo "  init            -> creates .envs and starts common-services + openwebui + ollama + litellm"
+        @echo "  create-envs     -> creates ALL required .envs (root, ollama, langflow, openwebui, litellm)"
+        @echo "  start           -> starts common-services + openwebui + ollama + litellm (assumes .envs already created)"
+        @echo "  down            -> stops all modules"
+        @echo "  build           -> builds all modules"
+        @echo "  logs            -> openwebui logs"
+        @echo "  ollama          -> starts the ollama stack"
+        @echo "  ollama-logs     -> ollama logs"
+        @echo "  ollama-down     -> stops ollama"
+        @echo "  litellm         -> starts litellm"
+        @echo "  litellm-logs    -> litellm logs"
+        @echo "  litellm-down    -> stops litellm"
+        @echo "  common-services -> starts postgres/redis"
+        @echo "  langflow        -> starts langflow"
+        @echo "  notebooks       -> starts notebooks"
 
-# =================== Criação de .envs ===================
+# =================== .env creation ===================
 create-envs:
-	@if [ ! -f .env ]; then \
-		echo "[create-envs] criando .env na raiz"; \
-		if [ -f example.env ]; then cp example.env .env; else echo "OLLAMA_HOST=0.0.0.0" > .env; fi; \
-	fi
-	@if [ ! -f $(mod_langflow)/.env ]; then \
-		echo "[create-envs] criando .env para langflow"; \
-		if [ -f $(mod_langflow)/example.env ]; then cp $(mod_langflow)/example.env $(mod_langflow)/.env; fi; \
-	fi
-	@if [ ! -f $(mod_openwebui)/.env ]; then \
-		echo "[create-envs] criando .env para openwebui"; \
-		if [ -f $(mod_openwebui)/example.env ]; then cp $(mod_openwebui)/example.env $(mod_openwebui)/.env; fi; \
-	fi
-	@if [ ! -f $(mod_ollama)/.env ]; then \
-		echo "[create-envs] criando .env para ollama"; \
-		printf "OLLAMA_HOST=0.0.0.0\nOLLAMA_ORIGINS=app://obsidian.md*\nOLLAMA_KEEP_ALIVE=5m\nNVIDIA_VISIBLE_DEVICES=all\nNVIDIA_DRIVER_CAPABILITIES=compute,utility\n" > $(mod_ollama)/.env; \
-	fi
+        @if [ ! -f .env ]; then \
+                echo "[create-envs] creating .env in project root"; \
+                if [ -f example.env ]; then cp example.env .env; else echo "OLLAMA_HOST=0.0.0.0" > .env; fi; \
+        fi
+        @if [ ! -f $(mod_langflow)/.env ]; then \
+                echo "[create-envs] creating .env for langflow"; \
+                if [ -f $(mod_langflow)/example.env ]; then cp $(mod_langflow)/example.env $(mod_langflow)/.env; fi; \
+        fi
+        @if [ ! -f $(mod_openwebui)/.env ]; then \
+                echo "[create-envs] creating .env for openwebui"; \
+                if [ -f $(mod_openwebui)/example.env ]; then cp $(mod_openwebui)/example.env $(mod_openwebui)/.env; fi; \
+        fi
+        @if [ ! -f $(mod_ollama)/.env ]; then \
+                echo "[create-envs] creating .env for ollama"; \
+                if [ -f $(mod_ollama)/example.env ]; then cp $(mod_ollama)/example.env $(mod_ollama)/.env; fi; \
+        fi
+        @if [ ! -f $(mod_litellm)/.env ]; then \
+                echo "[create-envs] creating .env for litellm"; \
+                if [ -f $(mod_litellm)/example.env ]; then cp $(mod_litellm)/example.env $(mod_litellm)/.env; fi; \
+        fi
 
-# =================== Orquestração ===================
+# =================== Orchestration ===================
 init: create-envs
-	$(MAKE) common-services
-	$(MAKE) openwebui
-	$(MAKE) ollama
-	./scripts/ollama_pull_model.sh
-	@echo "Init done."
+	      $(MAKE) build
+	      $(MAKE) start
+        ./scripts/ollama_pull_model.sh
+        @echo "Init done."
 
 start:
-	cd $(mod_common) && docker compose up -d
-	cd $(mod_openwebui) && docker compose up -d
-	cd $(mod_ollama) && docker compose up -d
-	@echo "Finished full start"
-
-start-full: start
+        $(MAKE) common-services
+        $(MAKE) openwebui
+        $(MAKE) ollama
+        @echo "Finished full start"
 
 logs:
-	cd $(mod_openwebui) && docker compose logs -f
+        cd $(mod_openwebui) && docker compose logs -f
 
 down:
-	cd $(mod_ollama) && docker compose down
-	cd $(mod_openwebui) && docker compose down
-	cd $(mod_langflow) && docker compose down
-	cd $(mod_common) && docker compose down
-	cd $(mod_notebooks) && docker compose down
-	@echo "All services stopped"
+        cd $(mod_ollama) && docker compose down
+        cd $(mod_openwebui) && docker compose down
+        cd $(mod_langflow) && docker compose down
+        cd $(mod_common) && docker compose down
+        cd $(mod_notebooks) && docker compose down
+        cd $(mod_litellm) && docker compose down
+        @echo "All services stopped"
 
 build:
-	cd $(mod_common) && docker compose build
-	cd $(mod_langflow) && docker compose build
-	cd $(mod_openwebui) && docker compose build
-	cd $(mod_notebooks) && docker compose build
-	cd $(mod_ollama) && docker compose build
-	@echo "Finished building all modules"
+        cd $(mod_common) && docker compose build
+        cd $(mod_openwebui) && docker compose build
+        cd $(mod_ollama) && docker compose build
+        @echo "Finished building all modules"
 
-# =================== Módulos individuais ===================
+# =================== Individual modules ===================
 common-services:
-	cd $(mod_common) && docker compose up -d
-	cd $(scripts_dir) && ./ollama_pull_model.sh &
-	@echo "Common services are up"
+        cd $(mod_common) && docker compose up -d
+        cd $(scripts_dir) && ./ollama_pull_model.sh &
+        @echo "Common services are up"
 
 langflow:
-	cd $(mod_langflow) && docker compose up -d
-	@echo "Langflow is up and running"
+        cd $(mod_langflow) && docker compose up -d
+        @echo "Langflow is up and running"
 
 notebooks:
-	cd $(mod_notebooks) && docker compose up -d
-	@echo "Notebooks are up and running"
+        cd $(mod_notebooks) && docker compose up -d
+        @echo "Notebooks are up and running"
 
 openwebui:
-	cd $(mod_openwebui) && docker compose up -d
-	@echo "Open WebUI is up and running"
+        cd $(mod_openwebui) && docker compose up -d
+        @echo "Open WebUI is up and running"
 
 ollama:
-	cd $(mod_ollama) && docker compose up -d
-	@echo "Ollama stack is up ollama"
+        cd $(mod_ollama) && docker compose up -d
+        @echo "Ollama stack is up"
 
-ollama-logs:
-	cd $(mod_ollama) && docker compose logs -f
-
-ollama-down:
-	cd $(mod_ollama) && docker compose down
-	@echo "Ollama stack stopped"
+litellm:
+        cd $(mod_litellm) && docker compose up -d
+        @echo "LiteLLM is up and running"
