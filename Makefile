@@ -66,8 +66,8 @@ init: create-envs
 
 start:
 	$(MAKE) common-services
-	$(MAKE) openwebui
 	$(MAKE) ollama
+	$(MAKE) openwebui
 	@echo "Finished full start"
 
 logs:
@@ -91,7 +91,6 @@ build:
 # =================== Individual modules ===================
 common-services:
 	cd $(mod_common) && docker compose up -d
-	cd $(scripts_dir) && ./ollama_pull_model.sh &
 	@echo "Common services are up"
 
 langflow:
