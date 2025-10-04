@@ -50,9 +50,9 @@ create-envs:
 
 # =================== Orquestração ===================
 init: create-envs
+	$(MAKE) ollama
 	$(MAKE) common-services
 	$(MAKE) openwebui
-	$(MAKE) ollama
 	./scripts/ollama_pull_model.sh
 	@echo "Init done."
 
@@ -86,7 +86,6 @@ build:
 # =================== Módulos individuais ===================
 common-services:
 	cd $(mod_common) && docker compose up -d
-	cd $(scripts_dir) && ./ollama_pull_model.sh &
 	@echo "Common services are up"
 
 langflow:
