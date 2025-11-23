@@ -1,6 +1,8 @@
 services:
   openwebui:
-    image: ghcr.io/open-webui/open-webui:0.3.14-cuda
+    image: ghcr.io/open-webui/open-webui:0.3.14
+    # NVIDIA GPU PASS
+    #image: ghcr.io/open-webui/open-webui:0.3.14-cuda
     restart: always
     ports:
       - "3000:8080"
@@ -9,13 +11,14 @@ services:
     env_file: ".env"
     networks:
       - lang
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    # NVIDIA GPU PASS
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      devices:
+    #        - driver: nvidia
+    #          count: all
+    #          capabilities: [gpu]
 
 volumes:
   open-webui:
