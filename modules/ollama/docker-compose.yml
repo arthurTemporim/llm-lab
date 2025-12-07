@@ -1,8 +1,6 @@
-version: "3.9"
-
 services:
   ollama:
-    image: ollama/ollama:0.11.2
+    image: ollama/ollama:0.13.1
     container_name: ollama
     restart: unless-stopped
     env_file: .env
