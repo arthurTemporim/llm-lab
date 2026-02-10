@@ -176,3 +176,7 @@ cython_debug/
 .rasa
 .keras
 .config
+
+# LocalAI
+*models/
+*backends/

@@ -1,0 +1,25 @@
+services:
+  api:
+    #image: localai/localai:latest-aio-cpu
+    # For GPU support, use one of:
+    image: localai/localai:latest-aio-gpu-nvidia-cuda-13
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/readyz"]
+      interval: 1m
+      timeout: 10m
+      retries: 5
+    ports:
+      - 8080:8080
+    environment:
+      - DEBUG=true
+      - LOCALAI_BACKEND_ASSETS_PATH=/backends
+    volumes:
+      - ./models:/models:cached
+      - ./backends:/backends 
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
