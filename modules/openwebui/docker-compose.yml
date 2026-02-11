@@ -1,6 +1,7 @@
 services:
   openwebui:
     image: ghcr.io/open-webui/open-webui:0.7.0-cuda
+    container_name: openwebui
     restart: always
     ports:
       - "3000:8080"

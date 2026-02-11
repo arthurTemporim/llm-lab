@@ -1,8 +1,9 @@
 services:
-  api:
+  localai:
     #image: localai/localai:latest-aio-cpu
     # For GPU support, use one of:
     image: localai/localai:latest-aio-gpu-nvidia-cuda-13
+    container_name: localai
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/readyz"]
       interval: 1m
@@ -18,6 +19,8 @@ services:
     volumes:
       - ./models:/models:cached
       - ./backends:/backends 
+    networks:
+      - lang
     deploy:
       resources:
         reservations:
@@ -25,3 +28,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+
+networks:
+  lang:
+    external: true
+
