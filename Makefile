@@ -1,8 +1,9 @@
 .PHONY: help \
         create-envs init start start-full logs down build \
-        common-services langflow notebooks openwebui ollama litellm \
+        common-services langflow notebooks openwebui ollama litellm localai \
         ollama-down ollama-logs ollama-build \
-        litellm-down litellm-logs litellm-build
+        litellm-down litellm-logs litellm-build \
+        localai-down localai-logs localai-build
 
 # =================== Variables ===================
 current_dir := $(shell pwd)/
@@ -15,24 +16,20 @@ mod_openwebui := $(modules_dir)openwebui
 mod_langflow := $(modules_dir)langflow
 mod_notebooks := $(modules_dir)notebooks
 mod_litellm := $(modules_dir)litellm
+mod_localai := $(modules_dir)localai
 
 help:
 	@echo "Main targets:"
-	@echo "  init            -> creates .envs and starts common-services + openwebui + ollama + litellm"
-	@echo "  create-envs     -> creates ALL required .envs (root, ollama, langflow, openwebui, litellm)"
-	@echo "  start           -> starts common-services + openwebui + ollama + litellm (assumes .envs already created)"
-	@echo "  down            -> stops all modules"
-	@echo "  build           -> builds all modules"
-	@echo "  logs            -> openwebui logs"
-	@echo "  ollama          -> starts the ollama stack"
-	@echo "  ollama-logs     -> ollama logs"
-	@echo "  ollama-down     -> stops ollama"
-	@echo "  litellm         -> starts litellm"
-	@echo "  litellm-logs    -> litellm logs"
-	@echo "  litellm-down    -> stops litellm"
-	@echo "  common-services -> starts postgres/redis"
-	@echo "  langflow        -> starts langflow"
-	@echo "  notebooks       -> starts notebooks"
+	@echo "  init             -> creates .envs and starts services"
+	@echo "  create-envs      -> creates ALL required .envs (including localai)"
+	@echo "  start            -> starts common + openwebui + ollama + localai"
+	@echo "  down             -> stops all modules"
+	@echo "  build            -> builds all modules"
+	@echo "  logs             -> openwebui logs"
+	@echo "  ollama           -> starts the ollama stack"
+	@echo "  localai          -> starts the localai stack"
+	@echo "  localai-logs     -> localai logs"
+	@echo "  localai-down     -> stops localai"
 
 # =================== .env creation ===================
 create-envs:
@@ -40,6 +37,7 @@ create-envs:
 		echo "[create-envs] creating .env in project root"; \
 		if [ -f example.env ]; then cp example.env .env; else echo "OLLAMA_HOST=0.0.0.0" > .env; fi; \
 	fi
+	@$(scripts_dir)generate_localai_key.sh $(mod_localai)/.env
 	@if [ ! -f $(mod_langflow)/.env ]; then \
 		echo "[create-envs] creating .env for langflow"; \
 		if [ -f $(mod_langflow)/example.env ]; then cp $(mod_langflow)/example.env $(mod_langflow)/.env; fi; \
@@ -67,6 +65,7 @@ init: create-envs
 start:
 	$(MAKE) common-services
 	$(MAKE) ollama
+	$(MAKE) localai
 	$(MAKE) openwebui
 	@echo "Finished full start"
 
@@ -75,6 +74,7 @@ logs:
 
 down:
 	cd $(mod_ollama) && docker compose down
+	cd $(mod_localai) && docker compose down
 	cd $(mod_openwebui) && docker compose down
 	cd $(mod_langflow) && docker compose down
 	cd $(mod_common) && docker compose down
@@ -86,9 +86,13 @@ build:
 	cd $(mod_common) && docker compose build
 	cd $(mod_openwebui) && docker compose build
 	cd $(mod_ollama) && docker compose build
+	cd $(mod_localai) && docker compose build
 	@echo "Finished building all modules"
 
 # =================== Individual modules ===================
+
+# --- Services Restored Below ---
+
 common-services:
 	cd $(mod_common) && docker compose up -d
 	@echo "Common services are up"
@@ -109,7 +113,30 @@ ollama:
 	cd $(mod_ollama) && docker compose up -d
 	@echo "Ollama stack is up"
 
+ollama-logs:
+	cd $(mod_ollama) && docker compose logs -f
+
+ollama-down:
+	cd $(mod_ollama) && docker compose down
+
 litellm:
 	cd $(mod_litellm) && docker compose up -d
 	@echo "LiteLLM is up and running"
 
+litellm-logs:
+	cd $(mod_litellm) && docker compose logs -f
+
+litellm-down:
+	cd $(mod_litellm) && docker compose down
+
+# --- New LocalAI Services ---
+
+localai:
+	cd $(mod_localai) && docker compose up -d
+	@echo "LocalAI is up and running"
+
+localai-logs:
+	cd $(mod_localai) && docker compose logs -f
+
+localai-down:
+	cd $(mod_localai) && docker compose down
