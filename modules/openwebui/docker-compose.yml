@@ -10,6 +10,7 @@ services:
     env_file: ".env"
     networks:
       - lang
+    # NVIDIA GPU PASS
     deploy:
       resources:
         reservations:

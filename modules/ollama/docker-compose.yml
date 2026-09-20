@@ -1,6 +1,6 @@
 services:
   ollama:
-    image: ollama/ollama:0.20.7
+    image: ollama/ollama:0.34.2
     container_name: ollama
     restart: unless-stopped
     env_file: .env
@@ -10,6 +10,7 @@ services:
       - ollama:/root/.ollama
     networks:
       - lang
+    # NVIDIA GPU PASS
     deploy:
       resources:
         reservations:
