@@ -9,7 +9,8 @@ models=(
 "nomic-embed-text-v2-moe:latest"
 "tev1:4b"
 "lfm2.5:8b"
-"qwen3.8:27b-mlx"
+"qwen3-embedding:8b"
+"qwen3-vl:8b"
 )
 stream=false
 url="http://localhost:11434"
