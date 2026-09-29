@@ -3,11 +3,13 @@
 # ./ollama_pull_models.sh
 
 models=(
-"llama3.2"
-"gemma3n"
-"llama3.2-vision"
-"nomic-embed-text"
-"qwen3:8b"
+"llama3.2:3b"
+"gemma4:12b"
+"llama3.2-vision:11b"
+"nomic-embed-text-v2-moe:latest"
+"tev1:4b"
+"lfm2.5:8b"
+"qwen3.8:27b-mlx"
 )
 stream=false
 url="http://localhost:11434"
