@@ -180,3 +180,7 @@ cython_debug/
 # LocalAI
 *models/
 *backends/
+
+# Langflow
+modules/langflow/Fetch
+modules/langflow/Use
