@@ -1,6 +1,6 @@
 services:
   ollama:
-    image: ollama/ollama:0.13.1
+    image: ollama/ollama:0.35.0
     container_name: ollama
     restart: unless-stopped
     env_file: .env
@@ -11,13 +11,13 @@ services:
     networks:
       - lang
     # NVIDIA GPU PASS
-    #deploy:
-    #  resources:
-    #    reservations:
-    #      devices:
-    #        - driver: nvidia
-    #          count: all
-    #          capabilities: [gpu]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 volumes:
   ollama:
 

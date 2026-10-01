@@ -176,3 +176,11 @@ cython_debug/
 .rasa
 .keras
 .config
+
+# LocalAI
+*models/
+*backends/
+
+# Langflow
+modules/langflow/Fetch
+modules/langflow/Use
