@@ -10,6 +10,7 @@ models=(
 "tev1:4b" # 5G
 "lfm2.5:8b" # 5G
 "qwen3-embedding:8b" # 5G
+"embeddinggemma-2:740m" # 1G
 "qwen3-vl:8b" # 6G
 "nimble:9b" # 10G
 )
