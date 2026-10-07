@@ -1,65 +1,93 @@
-# LangFlow
+# Langflow
 
-Here there is configs and definitions about langflow.
+Low-code visual builder for LLM chains, agents and RAG flows.
 
-- [LangFlow](https://www.langflow.org/pt/)
+## Overview
 
-## Run
+| | |
+|---|---|
+| Documentation | [Langflow](https://docs.langflow.org/) |
+| Image | built from `modules/langflow/Dockerfile` (base `langflowai/langflow:1.12.3`, plus `langflow[bundles]` and `lfx-bundles[litellm]`) |
+| Container(s) | `langflow` |
+| GPU | Not used |
+| Make target | `make langflow` (rebuild with `make build`) |
 
-### Docker
+## What it is used for
 
-To run locally using docker:
+* Drag-and-drop design of flows, agents and RAG pipelines.
+* Calls Ollama or LiteLLM as model providers.
+* `langflow.json` holds example flows to import.
 
-```sh
-docker compose up --build -d
-```
+## Access
 
-This will run these services:
+| What | Host (browser, CLI) | Inside the `lang` network |
+|---|---|---|
+| Web UI / API | http://localhost:7860 | http://langflow:7860 |
 
-```sh
-NAMES
-ollama
-ollama-cpu
-langflow
-postgres
-```
+Default login: `lang` / `lang` (`LANGFLOW_SUPERUSER`, `LANGFLOW_SUPERUSER_PASSWORD`).
 
-* Access `http://localhost:7860/` to see the main page of langflow
-
-* Import simple projects using the UI and the file `modules/langflow/lang_flow.json`
-
-
-#### Ollama
-
-* [Ollama](https://ollama.com/)
-* [Ollama api doc](https://github.com/ollama/ollama/blob/main/docs/api.md)
-* [Ollama api pull model](https://github.com/ollama/ollama/blob/main/docs/api.md#pull-a-model)
-
-* There will be 2 servers of **Ollama** running if you have all the docker+GPU configs, fell free to comment or remove ollama with gpu service of the docker-compose.
-    * `http://localhost:11434/` - GPU
-    * `http://localhost:11435/` - CPU
-
-* On the langflow page you need to use the container netwrok names:
-    * `http://ollama:11434` - GPU
-    * `http://ollama-cpu:11434` - CPU
-
-
-* After the ollama server is up, download a model. Note that the model only need to be dowloaded once, because the two ollama servers share the same docker volume.
+## Quick start
 
 ```sh
-curl http://localhost:11434/api/pull -d '{
-  "name": "llama3.2"
-}'
+make langflow
+make langflow-logs
 ```
 
-* Or run the scripts:
+Open http://localhost:7860, log in, then import `modules/langflow/langflow.json` from the UI to get example flows.
+
+## Configuration
+
+Edit `modules/langflow/.env` (created by `make create-envs` from `example.env`), then `make langflow` to apply.
+
+| Variable | Default | Description |
+|---|---|---|
+| `LANGFLOW_PORT` | `7860` | Host port |
+| `LANGFLOW_DATABASE_URL` | `postgresql://lang:lang@postgres:5432/langflow` | Shared Postgres. Credentials must match `common-services` |
+| `LANGFLOW_SUPERUSER` / `LANGFLOW_SUPERUSER_PASSWORD` | `lang` / `lang` | Admin account. Change the password |
+| `LANGFLOW_AUTO_LOGIN` | `false` | Skip the login page when `true` |
+| `LANGFLOW_NEW_USER_IS_ACTIVE` | `false` | New users need an admin to activate them |
+| `LANGFLOW_LOG_LEVEL` | `debug` | Log verbosity |
+| `LANGFLOW_SSRF_ALLOWED_HOSTS` | commented out | Hosts that components may call, if blocked by SSRF protection |
+
+In components, use container names, not `localhost`:
+
+* Ollama: `http://ollama:11434`
+* LiteLLM: `http://litellm:4000`
+
+## Connections
+
+| Direction | Module | How |
+|---|---|---|
+| Depends on | `common-services` | Postgres database `langflow` (flows are stored there) |
+| Depends on | `ollama` | Optional, runtime: model provider |
+| Depends on | `litellm` | Optional, runtime: model gateway |
+| Used by | none | |
+
+## Storage
+
+| Data | Where | Survives `down` |
+|---|---|---|
+| Flows, users | Postgres database `langflow` | yes |
+| Extra state | `langflow-data` named volume | yes |
+
+## Operations
 
 ```sh
-./scripts/ollama_pull_model.sh
+make langflow-down     # stop, keep data
+make build             # rebuild the custom image
 ```
 
-* Send a message to verify if its working fine:
+Upgrade: change the base image tag in `Dockerfile`, then rebuild and `make langflow`.
 
-```sh
-./scripts/ollama_send_pronpt.sh
-```
+## Troubleshooting
+
+| Symptom | Cause / fix |
+|---|---|
+| Cannot reach Ollama from a component | Use `http://ollama:11434`, not `localhost` |
+| `database "langflow" does not exist` | `make databases` |
+| New user cannot log in | Activate the user as the superuser (`LANGFLOW_NEW_USER_IS_ACTIVE=false`) |
+| Port already in use | Change `LANGFLOW_PORT` |
+
+## Notes
+
+* Defaults are for local development only.

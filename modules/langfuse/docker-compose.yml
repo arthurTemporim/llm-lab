@@ -2,8 +2,9 @@
 #   postgres, redis, minio -> modules/common-services (network "lang")
 #   clickhouse             -> this module
 # Start common-services first (make common-services).
+# .env is loaded as a whole (env_file); the block below only maps/derives values.
 x-langfuse-env: &langfuse-env
-  NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
+  NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:${LANGFUSE_PORT:-3001}}
   DATABASE_URL: ${DATABASE_URL:-postgresql://lang:lang@postgres:5432/langfuse}
   SALT: ${SALT:?set SALT in .env}
   ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env}
@@ -47,6 +48,7 @@ services:
     image: langfuse/langfuse-worker:${LANGFUSE_VERSION:-4.54}
     container_name: langfuse-worker
     restart: unless-stopped
+    env_file: .env
     depends_on:
       clickhouse:
         condition: service_healthy
@@ -54,7 +56,7 @@ services:
       <<: *langfuse-env
       LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://minio:9000}
     ports:
-      - "127.0.0.1:3030:3030"
+      - "127.0.0.1:${LANGFUSE_WORKER_PORT:-3030}:3030"
     networks:
       - lang
 
@@ -62,6 +64,7 @@ services:
     image: langfuse/langfuse:${LANGFUSE_VERSION:-4.54}
     container_name: langfuse-web
     restart: unless-stopped
+    env_file: .env
     depends_on:
       clickhouse:
         condition: service_healthy
@@ -83,7 +86,7 @@ services:
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-}
       AUTH_DISABLE_SIGNUP: ${AUTH_DISABLE_SIGNUP:-false}
     ports:
-      - "${LANGFUSE_PORT:-3000}:3000"
+      - "${LANGFUSE_PORT:-3001}:3000"
     networks:
       - lang
 
@@ -91,6 +94,7 @@ services:
     image: clickhouse/clickhouse-server:25.12
     container_name: langfuse-clickhouse
     restart: unless-stopped
+    env_file: .env
     user: "101:101"
     environment:
       CLICKHOUSE_DB: default

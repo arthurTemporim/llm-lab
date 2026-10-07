@@ -1,24 +1,16 @@
 services:
   openwebui:
-    #image: ghcr.io/open-webui/open-webui:0.7.0-cuda
-    image: dyrnq/open-webui:main-cuda
+    # CPU image. docker-compose.gpu.yml swaps it for the CUDA one.
+    image: ghcr.io/open-webui/open-webui:v0.11.4
     container_name: openwebui
-    restart: always
+    restart: unless-stopped
+    env_file: .env
     ports:
-      - "3000:8080"
+      - "${OPENWEBUI_PORT:-3000}:8080"
     volumes:
       - open-webui:/app/backend/data
-    env_file: ".env"
     networks:
       - lang
-    # NVIDIA GPU PASS
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
 
 volumes:
   open-webui:
@@ -26,4 +18,3 @@ volumes:
 networks:
   lang:
     external: true
-
