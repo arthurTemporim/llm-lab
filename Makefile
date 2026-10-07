@@ -24,7 +24,7 @@ help:
 	@echo "  make start            common-services + ollama + localai + openwebui"
 	@echo "  make build            build every module that has a Dockerfile"
 	@echo "  make down             stop all modules (data is kept)"
-	@echo "  make logs             openwebui logs"
+	@echo "  make logs             follow the logs of all running modules"
 	@echo "  make create-envs      example.env -> .env for every module (never overwrites)"
 	@echo "  make check-env        verify values that must match across modules"
 	@echo "  make databases        create the postgres databases (idempotent)"
@@ -65,7 +65,11 @@ down:
 	@for m in $$(printf '%s\n' $(MODULES) | tac); do $(call compose,$$m) down || exit 1; done
 	@echo "All services stopped"
 
-logs: openwebui-logs
+# Follow every module at once (modules that are not running just print nothing and exit).
+logs:
+	@trap 'kill 0' INT TERM; \
+	$(foreach m,$(MODULES),$(call compose,$(m)) logs -f --tail=20 & ) \
+	wait
 
 # =================== Modules ===================
 # common-services creates the "lang" network, so every other module needs it first.
