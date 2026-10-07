@@ -1,5 +1,21 @@
 # llm-lab
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
+[![Docker Compose](https://img.shields.io/badge/Docker_Compose-v2-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![Self-hosted](https://img.shields.io/badge/Self--hosted-local--first-555555)](#why-llm-lab)
+[![Open Source](https://img.shields.io/badge/Open_Source-%E2%99%A5-brightgreen)](#contributing)
+
+[![Ollama](https://img.shields.io/badge/Ollama-000000?logo=ollama&logoColor=white)](modules/ollama)
+[![LocalAI](https://img.shields.io/badge/LocalAI-7C3AED)](modules/localai)
+[![Open WebUI](https://img.shields.io/badge/Open_WebUI-111827)](modules/openwebui)
+[![Langflow](https://img.shields.io/badge/Langflow-E11D48)](modules/langflow)
+[![Jupyter](https://img.shields.io/badge/Jupyter-F37626?logo=jupyter&logoColor=white)](modules/notebooks)
+[![LiteLLM](https://img.shields.io/badge/LiteLLM-2563EB)](modules/litellm)
+[![Langfuse](https://img.shields.io/badge/Langfuse-0F172A)](modules/langfuse)
+[![PostgreSQL + pgvector](https://img.shields.io/badge/Postgres_%2B_pgvector-4169E1?logo=postgresql&logoColor=white)](modules/common-services)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)](modules/common-services)
+[![MinIO](https://img.shields.io/badge/MinIO-C72E49?logo=minio&logoColor=white)](modules/common-services)
+
 A self-hosted, modular lab to try LLM models, tools and services on your own machine. It is infrastructure as Docker Compose: no app code, just modules you start when you need them.
 
 ## Documentation
