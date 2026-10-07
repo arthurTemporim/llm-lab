@@ -1,6 +1,9 @@
 -- Create a new database named langflow
 CREATE DATABASE langflow;
 
+-- Create the database used by the langfuse module
+CREATE DATABASE langfuse;
+
 -- Connect to the langflow database
 \c langflow;
 
