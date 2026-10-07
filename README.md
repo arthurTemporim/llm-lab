@@ -17,6 +17,8 @@ This repo is organized as follows:
 
 Move to each desired folder and follow each README.md about it to run and make tests.
 
+* `langfuse`: LLM observability, see [modules/langfuse/README.md](modules/langfuse/README.md) (`make langfuse`).
+
 ## Development
 
 * Simply run:

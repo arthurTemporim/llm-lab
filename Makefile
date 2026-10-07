@@ -3,6 +3,7 @@
         common-services langflow notebooks openwebui ollama litellm localai \
         ollama-down ollama-logs ollama-build \
         litellm-down litellm-logs litellm-build \
+        langfuse langfuse-db langfuse-logs langfuse-down \
         localai-down localai-logs localai-build
 
 # =================== Variables ===================
@@ -17,6 +18,7 @@ mod_langflow := $(modules_dir)langflow
 mod_notebooks := $(modules_dir)notebooks
 mod_litellm := $(modules_dir)litellm
 mod_localai := $(modules_dir)localai
+mod_langfuse := $(modules_dir)langfuse
 
 help:
 	@echo "Main targets:"
@@ -30,6 +32,10 @@ help:
 	@echo "  localai          -> starts the localai stack"
 	@echo "  localai-logs     -> localai logs"
 	@echo "  localai-down     -> stops localai"
+	@echo "  langfuse         -> creates the db and starts langfuse (needs common-services)"
+	@echo "  langfuse-db      -> creates the langfuse database in postgres if missing"
+	@echo "  langfuse-logs    -> langfuse logs"
+	@echo "  langfuse-down    -> stops langfuse"
 
 # =================== .env creation ===================
 create-envs:
@@ -38,6 +44,14 @@ create-envs:
 		if [ -f example.env ]; then cp example.env .env; else echo "OLLAMA_HOST=0.0.0.0" > .env; fi; \
 	fi
 	@$(scripts_dir)generate_localai_key.sh $(mod_localai)/.env
+	@if [ ! -f $(mod_common)/.env ]; then \
+		echo "[create-envs] creating .env for common-services"; \
+		if [ -f $(mod_common)/example.env ]; then cp $(mod_common)/example.env $(mod_common)/.env; fi; \
+	fi
+	@if [ ! -f $(mod_langfuse)/.env ]; then \
+		echo "[create-envs] creating .env for langfuse"; \
+		if [ -f $(mod_langfuse)/example.env ]; then cp $(mod_langfuse)/example.env $(mod_langfuse)/.env; fi; \
+	fi
 	@if [ ! -f $(mod_langflow)/.env ]; then \
 		echo "[create-envs] creating .env for langflow"; \
 		if [ -f $(mod_langflow)/example.env ]; then cp $(mod_langflow)/example.env $(mod_langflow)/.env; fi; \
@@ -80,6 +94,7 @@ down:
 	cd $(mod_common) && docker compose down
 	cd $(mod_notebooks) && docker compose down
 	cd $(mod_litellm) && docker compose down
+	cd $(mod_langfuse) && docker compose down
 	@echo "All services stopped"
 
 build:
@@ -128,6 +143,19 @@ litellm-logs:
 
 litellm-down:
 	cd $(mod_litellm) && docker compose down
+
+langfuse-db:
+	@$(scripts_dir)create_langfuse_db.sh
+
+langfuse: langfuse-db
+	cd $(mod_langfuse) && docker compose up -d
+	@echo "Langfuse is up: http://localhost:3000"
+
+langfuse-logs:
+	cd $(mod_langfuse) && docker compose logs -f
+
+langfuse-down:
+	cd $(mod_langfuse) && docker compose down
 
 # --- New LocalAI Services ---
 
