@@ -1,6 +1,6 @@
 #!/bin/bash
 # Ex:
-# ./ollama_send_pronpt.sh
+# ./ollama_send_prompt.sh
 
 
 model_name="gemma2"

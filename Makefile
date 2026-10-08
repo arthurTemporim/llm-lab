@@ -1,142 +1,90 @@
-.PHONY: help \
-        create-envs init start start-full logs down build \
-        common-services langflow notebooks openwebui ollama litellm localai \
-        ollama-down ollama-logs ollama-build \
-        litellm-down litellm-logs litellm-build \
-        localai-down localai-logs localai-build
+# llm-lab: single entry point. Run `make help`.
+MODULES := common-services ollama localai openwebui langflow notebooks litellm langfuse
+OTHERS  := $(filter-out common-services,$(MODULES))
 
-# =================== Variables ===================
-current_dir := $(shell pwd)/
-modules_dir := $(current_dir)modules/
-scripts_dir := $(current_dir)scripts/
+.PHONY: help init start build down create-envs check-env databases logs $(MODULES)
 
-mod_ollama := $(modules_dir)ollama
-mod_common := $(modules_dir)common-services
-mod_openwebui := $(modules_dir)openwebui
-mod_langflow := $(modules_dir)langflow
-mod_notebooks := $(modules_dir)notebooks
-mod_litellm := $(modules_dir)litellm
-mod_localai := $(modules_dir)localai
+modules_dir := $(CURDIR)/modules/
+scripts_dir := $(CURDIR)/scripts/
+
+# GPU=1 adds each module's docker-compose.gpu.yml (if it has one). Auto-detected from
+# the NVIDIA Container Toolkit; force it with `make GPU=1 ...` or `make GPU=0 ...`.
+GPU ?= $(if $(shell docker info --format '{{json .Runtimes}}' 2>/dev/null | grep -i nvidia),1,0)
+
+# $(call compose,<module>) -> docker compose command for that module
+compose = cd $(modules_dir)$(1) && docker compose $(if $(and $(filter 1,$(GPU)),$(wildcard $(modules_dir)$(1)/docker-compose.gpu.yml)),-f docker-compose.yml -f docker-compose.gpu.yml)
 
 help:
-	@echo "Main targets:"
-	@echo "  init             -> creates .envs and starts services"
-	@echo "  create-envs      -> creates ALL required .envs (including localai)"
-	@echo "  start            -> starts common + openwebui + ollama + localai"
-	@echo "  down             -> stops all modules"
-	@echo "  build            -> builds all modules"
-	@echo "  logs             -> openwebui logs"
-	@echo "  ollama           -> starts the ollama stack"
-	@echo "  localai          -> starts the localai stack"
-	@echo "  localai-logs     -> localai logs"
-	@echo "  localai-down     -> stops localai"
+	@echo "Modules: $(MODULES)"
+	@echo "  make <module>         start a module (starts common-services first)"
+	@echo "  make <module>-logs    follow a module's logs"
+	@echo "  make <module>-down    stop a module (data is kept)"
+	@echo ""
+	@echo "  make init             create-envs + build + start + pull ollama models"
+	@echo "  make start            common-services + ollama + localai + openwebui"
+	@echo "  make build            build every module that has a Dockerfile"
+	@echo "  make down             stop all modules (data is kept)"
+	@echo "  make logs             follow the logs of all running modules"
+	@echo "  make create-envs      example.env -> .env for every module (never overwrites)"
+	@echo "  make check-env        verify values that must match across modules"
+	@echo "  make databases        create the postgres databases (idempotent)"
+	@echo ""
+	@echo "GPU=$(GPU) (override with GPU=0 or GPU=1)"
 
-# =================== .env creation ===================
+# =================== Setup ===================
 create-envs:
-	@if [ ! -f .env ]; then \
-		echo "[create-envs] creating .env in project root"; \
-		if [ -f example.env ]; then cp example.env .env; else echo "OLLAMA_HOST=0.0.0.0" > .env; fi; \
-	fi
-	@$(scripts_dir)generate_localai_key.sh $(mod_localai)/.env
-	@if [ ! -f $(mod_langflow)/.env ]; then \
-		echo "[create-envs] creating .env for langflow"; \
-		if [ -f $(mod_langflow)/example.env ]; then cp $(mod_langflow)/example.env $(mod_langflow)/.env; fi; \
-	fi
-	@if [ ! -f $(mod_openwebui)/.env ]; then \
-		echo "[create-envs] creating .env for openwebui"; \
-		if [ -f $(mod_openwebui)/example.env ]; then cp $(mod_openwebui)/example.env $(mod_openwebui)/.env; fi; \
-	fi
-	@if [ ! -f $(mod_ollama)/.env ]; then \
-		echo "[create-envs] creating .env for ollama"; \
-		if [ -f $(mod_ollama)/example.env ]; then cp $(mod_ollama)/example.env $(mod_ollama)/.env; fi; \
-	fi
-	@if [ ! -f $(mod_litellm)/.env ]; then \
-		echo "[create-envs] creating .env for litellm"; \
-		if [ -f $(mod_litellm)/example.env ]; then cp $(mod_litellm)/example.env $(mod_litellm)/.env; fi; \
-	fi
+	@for m in $(MODULES); do \
+		d=$(modules_dir)$$m; \
+		if [ -f $$d/example.env ] && [ ! -f $$d/.env ]; then \
+			cp $$d/example.env $$d/.env; \
+			$(scripts_dir)generate_secrets.sh $$d/.env; \
+			echo "[create-envs] created $$m/.env"; \
+		fi; \
+	done
+
+check-env:
+	@$(scripts_dir)check_env.sh
+
+databases:
+	@$(scripts_dir)create_databases.sh
 
 # =================== Orchestration ===================
 init: create-envs
 	$(MAKE) build
 	$(MAKE) start
-	./scripts/ollama_pull_model.sh
+	$(scripts_dir)ollama_pull_model.sh
 	@echo "Init done."
 
-start:
-	$(MAKE) common-services
-	$(MAKE) ollama
-	$(MAKE) localai
-	$(MAKE) openwebui
+start: ollama localai openwebui
 	@echo "Finished full start"
 
-logs:
-	cd $(mod_openwebui) && docker compose logs -f
+build: create-envs
+	@for m in $(MODULES); do $(call compose,$$m) build || exit 1; done
 
 down:
-	cd $(mod_ollama) && docker compose down
-	cd $(mod_localai) && docker compose down
-	cd $(mod_openwebui) && docker compose down
-	cd $(mod_langflow) && docker compose down
-	cd $(mod_common) && docker compose down
-	cd $(mod_notebooks) && docker compose down
-	cd $(mod_litellm) && docker compose down
+	@for m in $$(printf '%s\n' $(MODULES) | tac); do $(call compose,$$m) down || exit 1; done
 	@echo "All services stopped"
 
-build:
-	cd $(mod_common) && docker compose build
-	cd $(mod_openwebui) && docker compose build
-	cd $(mod_ollama) && docker compose build
-	cd $(mod_localai) && docker compose build
-	@echo "Finished building all modules"
+# Follow every module at once (modules that are not running just print nothing and exit).
+logs:
+	@trap 'kill 0' INT TERM; \
+	$(foreach m,$(MODULES),$(call compose,$(m)) logs -f --tail=20 & ) \
+	wait
 
-# =================== Individual modules ===================
+# =================== Modules ===================
+# common-services creates the "lang" network, so every other module needs it first.
+common-services: create-envs
+	@$(call compose,$@) up -d --build
+	@$(MAKE) --no-print-directory databases
 
-# --- Services Restored Below ---
+$(OTHERS): common-services
+	@$(call compose,$@) up -d --build
+	@echo "$@ is up"
 
-common-services:
-	cd $(mod_common) && docker compose up -d
-	@echo "Common services are up"
+langfuse: check-env
 
-langflow:
-	cd $(mod_langflow) && docker compose up -d
-	@echo "Langflow is up and running"
+%-logs:
+	@$(call compose,$*) logs -f
 
-notebooks:
-	cd $(mod_notebooks) && docker compose up -d
-	@echo "Notebooks are up and running"
-
-openwebui:
-	cd $(mod_openwebui) && docker compose up -d
-	@echo "Open WebUI is up and running"
-
-ollama:
-	cd $(mod_ollama) && docker compose up -d
-	@echo "Ollama stack is up"
-
-ollama-logs:
-	cd $(mod_ollama) && docker compose logs -f
-
-ollama-down:
-	cd $(mod_ollama) && docker compose down
-
-litellm:
-	cd $(mod_litellm) && docker compose up -d
-	@echo "LiteLLM is up and running"
-
-litellm-logs:
-	cd $(mod_litellm) && docker compose logs -f
-
-litellm-down:
-	cd $(mod_litellm) && docker compose down
-
-# --- New LocalAI Services ---
-
-localai:
-	cd $(mod_localai) && docker compose up -d
-	@echo "LocalAI is up and running"
-
-localai-logs:
-	cd $(mod_localai) && docker compose logs -f
-
-localai-down:
-	cd $(mod_localai) && docker compose down
+%-down:
+	@$(call compose,$*) down

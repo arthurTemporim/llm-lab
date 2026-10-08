@@ -1,26 +1,27 @@
 services:
   jupyter:
-    build: 
+    build:
       context: .
-      dockerfile: ./Dockerfile
+      dockerfile: Dockerfile
     container_name: jupyter
     restart: unless-stopped
+    env_file: .env
     user: root
     environment:
       - NB_USER=jupyter
       - NB_UID=1000
       - NB_GID=100
       - CHOWN_HOME=yes
+    ports:
+      - "${NOTEBOOKS_PORT:-8888}:8888"
     volumes:
       - ./notebooks:/home/jupyter
     working_dir: /home/jupyter
+    # No token: keep this port local
+    command: "start-notebook.sh --NotebookApp.token="
     networks:
       - lang
-    ports:
-      - 8888:8888
-    command: "start-notebook.sh --NotebookApp.token="
 
 networks:
   lang:
     external: true
-

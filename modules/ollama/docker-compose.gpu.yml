@@ -1,0 +1,11 @@
+# NVIDIA GPU override, added automatically by the Makefile when a GPU runtime is found
+# (GPU=1 forces it, GPU=0 disables it).
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

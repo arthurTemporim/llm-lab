@@ -1,0 +1,12 @@
+# NVIDIA GPU override, added automatically by the Makefile when a GPU runtime is found
+# (GPU=1 forces it, GPU=0 disables it).
+services:
+  localai:
+    image: localai/localai:v3.12.1-aio-gpu-nvidia-cuda-13
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

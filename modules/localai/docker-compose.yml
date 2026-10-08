@@ -1,8 +1,7 @@
 services:
   localai:
-    #image: localai/localai:latest-aio-cpu
-    # For GPU support, use one of:
-    image: localai/localai:latest-aio-gpu-nvidia-cuda-13
+    # CPU image. docker-compose.gpu.yml swaps it for the NVIDIA one.
+    image: localai/localai:v3.12.1-aio-cpu
     container_name: localai
     restart: unless-stopped
     healthcheck:
@@ -11,26 +10,17 @@ services:
       timeout: 10m
       retries: 5
     ports:
-      - 8080:8080
-    env_file:
-      - .env
+      - "${LOCALAI_PORT:-8080}:8080"
+    env_file: .env
     environment:
       - DEBUG=true
       - LOCALAI_BACKEND_ASSETS_PATH=/backends
     volumes:
       - ./models:/models:cached
-      - ./backends:/backends 
+      - ./backends:/backends
     networks:
       - lang
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
 
 networks:
   lang:
     external: true
-
