@@ -56,7 +56,7 @@ Edit `modules/litellm/.env` (created by `make create-envs` from `example.env`), 
 | `LITELLM_SALT_KEY` | `sk-CHANGE_ME` | **Secret.** Encrypts stored provider keys. **Never change after first use** |
 | `UI_USERNAME` / `UI_PASSWORD` | `litellm` / `litellm123` | Admin UI login. Change the password |
 
-Models from a file: create `modules/litellm/config.yaml` and uncomment the `volumes` and `command` lines in `docker-compose.yml`. Prometheus scrape config is `prometheus.yml`.
+Models from a file: `modules/litellm/config.yaml` lists the Ollama models (chat, embeddings, decision models) with their tuned settings. It is not loaded by default: uncomment the `volumes` and `command` lines in `docker-compose.yml`, and remove the same models from the DB first. Prometheus scrape config is `prometheus.yml`.
 
 Langfuse tracing: add `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` and `LANGFUSE_HOST=http://langfuse-web:3000` to `.env`, and `litellm_settings: { success_callback: ["langfuse"] }` to `config.yaml`.
 
