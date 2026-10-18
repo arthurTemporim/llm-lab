@@ -1,0 +1,61 @@
+{
+  "description": "Chat scenarios. 'check' cases are scored without a judge; 'metrics' cases use DeepEval LLM metrics (judge = JUDGE_MODEL).",
+  "cases": [
+    {"id": "math-distance", "category": "reasoning",
+     "prompt": "A train travels at 60 km/h for 2.5 hours and then at 80 km/h for 1.5 hours. What is the total distance in km? Answer with only the number.",
+     "check": {"type": "number", "value": 270}},
+    {"id": "sequence", "category": "reasoning",
+     "prompt": "What is the next number in the sequence 2, 6, 12, 20, 30? Answer with only the number.",
+     "check": {"type": "number", "value": 42}},
+    {"id": "json-format", "category": "instruction-following",
+     "prompt": "Return ONLY a valid JSON object with the keys \"name\" (string) and \"age\" (integer) for this sentence: Maria is 34 years old. No explanation, no code fences.",
+     "check": {"type": "json", "value": {"name": "Maria", "age": 34}}},
+    {"id": "three-bullets", "category": "instruction-following",
+     "prompt": "Write exactly 3 bullet points about the benefits of regular exercise. Start every line with \"- \". Output nothing else.",
+     "check": {"type": "bullets", "count": 3}},
+    {"id": "pt-capital", "category": "portuguese",
+     "prompt": "Responda em português, em uma única frase: qual é a capital do Brasil?",
+     "check": {"type": "contains", "any": ["Brasília", "Brasilia"]}},
+    {"id": "vision-invoice", "category": "vision", "requires": "vision",
+     "image": "images/invoice.png",
+     "prompt": "What is the invoice number shown in the image? Answer with only the number.",
+     "check": {"type": "contains", "any": ["4821"]}},
+    {"id": "qa-dom-casmurro", "category": "knowledge",
+     "prompt": "Who wrote the novel \"Dom Casmurro\" and in what year was it published?",
+     "expected": "Machado de Assis wrote it, and it was published in 1899.",
+     "metrics": [
+       {"type": "geval", "name": "Correctness",
+        "criteria": "Decide whether the actual output gives the same author and publication year as the expected output. A wrong or missing author or year must score low.",
+        "params": ["input", "actual_output", "expected_output"]}
+     ]},
+    {"id": "explain-vector-db", "category": "explanation",
+     "prompt": "Explain in two sentences what a vector database is used for.",
+     "metrics": [{"type": "answer_relevancy"}]},
+    {"id": "rag-refund-answerable", "category": "rag",
+     "question": "Can I get a refund for a monthly plan 10 days after buying it?",
+     "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+     "expected": "No. Monthly plans are never refunded.",
+     "metrics": [
+       {"type": "faithfulness"},
+       {"type": "geval", "name": "Correctness",
+        "criteria": "Decide whether the actual output reaches the same conclusion as the expected output (no refund for monthly plans).",
+        "params": ["input", "actual_output", "expected_output"]}
+     ]},
+    {"id": "rag-student-discount-unanswerable", "category": "rag",
+     "question": "Does Acme Cloud offer a student discount?",
+     "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+     "expected": "The context does not say whether a student discount exists.",
+     "metrics": [
+       {"type": "geval", "name": "Abstention",
+        "criteria": "The context says nothing about discounts. A good answer states that the information is not in the context (or that it does not know) and does not invent a discount policy. Score low if the answer claims a discount exists or does not exist.",
+        "params": ["input", "actual_output", "retrieval_context"]}
+     ]},
+    {"id": "summary-one-sentence", "category": "summarization",
+     "prompt": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+     "metrics": [
+       {"type": "geval", "name": "Summary quality",
+        "criteria": "The output must be a single sentence that keeps the key facts (a 4 km bike lane on River Avenue, starting in March, about 2.3 million dollars) and invents nothing that is not in the text.",
+        "params": ["input", "actual_output"]}
+     ]}
+  ]
+}

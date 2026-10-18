@@ -1,0 +1,41 @@
+# Models under evaluation, grouped by type. `name` is the model name in LiteLLM.
+# Edit this file to add or remove models.
+
+chat:
+  - name: gemma4:12b
+    vision: true
+  - name: qwen3-vl:8b
+    vision: true
+  - name: lfm2.5:8b
+  - name: llama3.2:3b
+
+# Embedding variants. Prefixes are the ones documented by each model (see docs/MODELS.md).
+# The same model can appear twice to measure the effect of its prefixes.
+embeddings:
+  - label: qwen3-embedding:8b
+    name: qwen3-embedding:8b
+  - label: qwen3-embedding:8b (+instruct)
+    name: qwen3-embedding:8b
+    query_prefix: "Instruct: Given a search query, retrieve relevant passages that answer the query\nQuery: "
+  - label: nomic-embed-text-v2-moe
+    name: nomic-embed-text-v2-moe:latest
+  - label: nomic-embed-text-v2-moe (+prefixes)
+    name: nomic-embed-text-v2-moe:latest
+    query_prefix: "search_query: "
+    doc_prefix: "search_document: "
+  - label: embeddinggemma:300m
+    name: embeddinggemma:300m
+  - label: embeddinggemma:300m (+prompts)
+    name: embeddinggemma:300m
+    query_prefix: "task: search result | query: "
+    doc_prefix: "title: none | text: "
+
+# Decision models answer through /v1/systemone. `chat_baselines` solve the same task as
+# plain chat models (prompted to answer with a label), to show what a decision model adds.
+decisions:
+  models:
+    - name: tev1:4b
+    - name: nimble:9b
+  chat_baselines:
+    - name: gemma4:12b
+    - name: llama3.2:3b

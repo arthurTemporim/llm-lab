@@ -41,6 +41,7 @@ Other references: [LiteLLM decision API](https://docs.litellm.ai/docs/decisions)
 - Use them when the answer is a choice, a yes/no or a score and you want probabilities: ticket routing, intent detection, moderation, cheap gates in front of a larger LLM.
 - **`tev1:4b`** is the default (half the size, fast). Keep inputs under about 1,500 words. It scored 89% on 36 labelled tickets, and all of its errors had confidence below 0.8.
 - **`nimble:9b`** when inputs are longer (up to about 6,000 words) or accuracy matters most (94% on the same tickets, two more cases right).
+- They also work as fast judges for rubric checks ("does this answer match the reference?"): in the evals `nimble:9b` ruled correctly on 40 of 41 test answers in about 0.5 s each, but verify on your own data first.
 - Do not use them to generate text. Include a "none of the above" option and use `confidence` as a threshold to send doubtful cases to a chat model or a person.
 
 ## Configuration
