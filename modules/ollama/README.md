@@ -57,7 +57,7 @@ Edit `modules/ollama/.env` (created by `make create-envs` from `example.env`), t
 | `OLLAMA_HOST` | `0.0.0.0` | Bind address inside the container. Keep it so other modules can reach it |
 | `OLLAMA_ORIGINS` | `*` | Allowed CORS origins (e.g. `app://obsidian.md*`) |
 | `OLLAMA_KEEP_ALIVE` | `5m` | How long a model stays loaded between calls |
-| `OLLAMA_SCHED_SPREAD` | `1` | Spreads each model across all GPUs. No effect with one GPU; with mixed cards the slower one sets the pace. Remove it to keep each model on a single GPU when it fits |
+| `OLLAMA_SCHED_SPREAD` | commented out | Spreads each model across all GPUs. Leave it off with mixed cards: the slower one sets the pace (measured 2x slower on RTX 3060 + Tesla P4) |
 | `OLLAMA_NUM_PARALLEL`, `OLLAMA_NUM_THREADS`, `OLLAMA_FLASH_ATTENTION` | commented out | Optional performance tuning |
 | `OLLAMA_KV_CACHE_TYPE` | commented out | `q8_0` halves the context memory (needs `OLLAMA_FLASH_ATTENTION=1`) |
 | `OLLAMA_MAX_LOADED_MODELS` | commented out | Max models kept loaded at once (default 3 per GPU). Lower it when models spill to the CPU |
