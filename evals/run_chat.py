@@ -1,6 +1,9 @@
-"""Evaluate the chat models: deterministic checks plus DeepEval LLM metrics.
+"""Evaluate the chat models: deterministic checks plus yes/no checks ruled by a decision model.
 
     python run_chat.py [--models gemma4:12b,llama3.2:3b] [--cases math-distance,...] [--no-judge]
+
+The judge (JUDGE_MODEL, default tev1:4b) answers narrow yes/no questions through /v1/systemone; see
+lib/judge_metrics.py. Questions that code can verify (one sentence, a number) are checked by code.
 """
 import argparse
 import json
@@ -8,20 +11,12 @@ import statistics
 import time
 from datetime import date
 
-from deepeval.metrics import AnswerRelevancyMetric, FaithfulnessMetric, GEval
-from deepeval.test_case import LLMTestCase, SingleTurnParams
+from deepeval.test_case import LLMTestCase
 
 from lib import config
-from lib.judge import LiteLLMJudge
+from lib.judge_metrics import DecisionJudgeMetric
 from lib.llm import chat, image_part
 from lib.metrics import CheckMetric, run_metrics
-
-PARAMS = {
-    "input": SingleTurnParams.INPUT,
-    "actual_output": SingleTurnParams.ACTUAL_OUTPUT,
-    "expected_output": SingleTurnParams.EXPECTED_OUTPUT,
-    "retrieval_context": SingleTurnParams.RETRIEVAL_CONTEXT,
-}
 
 
 def build_messages(case: dict) -> list:
@@ -38,32 +33,18 @@ def build_messages(case: dict) -> list:
     return [{"role": "user", "content": text}]
 
 
-def build_metrics(case: dict, judge) -> list:
+def build_metrics(case: dict, judge: str) -> list:
     if "check" in case:
         return [CheckMetric(case["check"], name=f"Check: {case['check']['type']}")]
     metrics = []
     for spec in case["metrics"]:
-        common = {"model": judge, "async_mode": False, "include_reason": True}
-        if spec["type"] == "geval":
-            metrics.append(
-                GEval(
-                    name=spec["name"],
-                    criteria=spec["criteria"],
-                    evaluation_params=[PARAMS[p] for p in spec["params"]],
-                    model=judge,
-                    async_mode=False,
-                )
-            )
-        elif spec["type"] == "answer_relevancy":
-            metrics.append(AnswerRelevancyMetric(**common))
-        elif spec["type"] == "faithfulness":
-            metrics.append(FaithfulnessMetric(**common))
-        else:
+        if spec["type"] != "decision":
             raise ValueError(f"unknown metric {spec['type']}")
+        metrics.append(DecisionJudgeMetric(judge, kind=spec.get("kind"), checks=spec.get("checks"), local=spec.get("local"), name=spec["name"]))
     return metrics
 
 
-def evaluate_model(model: str, vision: bool, cases: list, judge) -> dict:
+def evaluate_model(model: str, vision: bool, cases: list, judge: str) -> dict:
     print(f"\n=== {model}")
     warm = chat(model, [{"role": "user", "content": "Say OK."}], max_tokens=512)
     print(f"  warm-up (includes model load): {warm['latency']:.1f}s")
@@ -149,8 +130,8 @@ def main() -> None:
     if args.no_judge:
         cases = [c for c in cases if "check" in c]
 
-    judge = LiteLLMJudge()
-    print(f"Judge: {judge.get_model_name()} | gateway: {config.BASE_URL}")
+    judge = config.JUDGE_MODEL
+    print(f"Judge: {judge} (decision model, yes/no checks) | gateway: {config.BASE_URL}")
     started = time.time()
     out = config.ROOT / args.out
     out.parent.mkdir(exist_ok=True)

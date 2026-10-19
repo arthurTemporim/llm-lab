@@ -35,7 +35,6 @@ embeddings:
 decisions:
   models:
     - name: tev1:4b
-    - name: nimble:9b
   chat_baselines:
     - name: gemma4:12b
     - name: llama3.2:3b

@@ -1,11 +1,17 @@
-"""Can a decision model (tev1, nimble) be the judge of other models' answers?
+"""Can a decision model (tev1, optionally nimble) be the judge of other models' answers?
 
-    python judge_experiment.py [--judges gemma4:12b,tev1:4b,nimble:9b]
+    python judge_experiment.py [--no-native] [--llm] [--judges tev1:4b,nimble:9b]
 
 datasets/judge_validation.json holds candidate answers with a known verdict (good = should pass,
 bad = should fail). Every judge rules on all of them and is scored against the known verdict:
-  - "LLM judge":        the DeepEval metrics used by run_chat.py, judged by gemma4:12b (thinking off)
-  - "decision judge":   one yes/no question per answer, answered by a decision model (/v1/systemone)
+  - "LLM judge":        (only with --llm) DeepEval's general metrics, judged by gemma4:12b. The judge
+                        run_chat.py used before tev1; a baseline, not used as a judge anywhere else.
+  - "single question":  one compound yes/no question per answer, answered by a decision model
+                        (/v1/systemone). The first version of the decision judge.
+  - "narrow checks":    a few small yes/no questions per kind of check that must all hold, plus code for
+                        the rules a program can verify (one sentence).
+  - "case checks":      the checks written for one case in datasets/chat.json, which is what
+                        run_chat.py uses. Only the answers to those questions can be ruled this way.
   - "DeepEval native":  DeepEval's own Answer Relevancy and Faithfulness metrics with
                         eval_mode="system_one", so the decision model runs the whole metric
 """
@@ -32,6 +38,23 @@ GEVAL = {
     "summary": ("Summary quality", "The output must be a single sentence that keeps the key facts (a 4 km bike lane on River Avenue, starting in March, about 2.3 million dollars) and invents nothing that is not in the text.", [P.INPUT, P.ACTUAL_OUTPUT]),
 }
 NATIVE_KINDS = {"relevancy", "faithfulness"}
+LLM_JUDGE = "gemma4:12b"  # the previous judge, kept as the baseline
+
+
+def case_metrics(model: str):
+    """Maps a question of datasets/chat.json to the judge metrics of that case."""
+    cases = {}
+    for case in config.dataset("chat")["cases"]:
+        specs = [s for s in case.get("metrics", []) if s["type"] == "decision"]
+        if specs:
+            cases[case.get("question") or case["prompt"]] = specs
+
+    def make(item):
+        if item["input"] not in cases:
+            return None
+        return [DecisionJudgeMetric(model, kind=s.get("kind"), checks=s.get("checks"), local=s.get("local"), name=s["name"]) for s in cases[item["input"]]]
+
+    return make
 
 
 def llm_metric(kind: str, judge):
@@ -42,17 +65,21 @@ def llm_metric(kind: str, judge):
     return AnswerRelevancyMetric(**common) if kind == "relevancy" else FaithfulnessMetric(**common)
 
 
-def native_metric(kind: str, decision_model: str):
+def native_metric(item: dict, decision_model: str):
+    kind = item["kind"]
     system_one = LiteLLMSystemOne(decision_model)
     cls = AnswerRelevancyMetric if kind == "relevancy" else FaithfulnessMetric
     return cls(eval_mode="system_one", system_one_model=system_one, async_mode=False, include_reason=True)
 
 
-def run_judge(name: str, items: list, make_metric) -> dict:
+def run_judge(name: str, items: list, make_metric, reuse: dict | None = None) -> dict:
+    """make_metric(item) returns the metrics to run on the item (a metric, a list, or None to skip it).
+    reuse maps item id -> a row of a previous run that is kept as is."""
     print(f"\n=== {name}")
     rows = []
     for item in items:
-        if make_metric is None:
+        if reuse and item["id"] in reuse:
+            rows.append(reuse[item["id"]])
             continue
         test_case = LLMTestCase(
             input=item["input"],
@@ -62,10 +89,14 @@ def run_judge(name: str, items: list, make_metric) -> dict:
         )
         started = time.perf_counter()
         try:
-            metric = make_metric(item["kind"])
-            if metric is None:
+            metrics = make_metric(item)
+            if metrics is None:
                 continue
-            outcome = run_metrics([test_case], [metric])[0]["metrics"][0]
+            metrics = metrics if isinstance(metrics, list) else [metrics]
+            outcomes = [run_metrics([test_case], [m])[0]["metrics"][0] for m in metrics]
+            failed = [o for o in outcomes if o.get("error") or o["score"] is None]
+            # a case passes when every one of its metrics passes; the score is the lowest one
+            outcome = failed[0] if failed else {"score": min(o["score"] for o in outcomes), "success": all(o["success"] for o in outcomes)}
         except Exception as error:  # a judge that cannot rule is a result, not a crash
             outcome = {"score": None, "success": None, "error": f"{type(error).__name__}: {error}"[:200]}
         seconds = time.perf_counter() - started
@@ -106,10 +137,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="results/judge_experiment.json")
     parser.add_argument("--no-native", action="store_true", help="skip DeepEval's native system_one metrics")
+    parser.add_argument("--judges", default="tev1:4b", help="comma-separated decision models to compare (default: tev1:4b)")
+    parser.add_argument("--llm", action="store_true", help="also run the gemma4:12b LLM judge as a baseline (slow, heavy on the server CPU)")
+    parser.add_argument("--reuse-llm", action="store_true", help="keep the gemma4:12b rows already in the output file and judge only the new items")
     args = parser.parse_args()
 
     items = config.dataset("judge_validation")["items"]
-    llm = LiteLLMJudge()
+    llm = LiteLLMJudge(LLM_JUDGE)
+    native_items = [i for i in items if i["kind"] in NATIVE_KINDS]
     print(f"{len(items)} candidate answers | LLM judge: {llm.get_model_name()} | gateway: {config.BASE_URL}")
 
     out = config.ROOT / args.out
@@ -119,24 +154,42 @@ def main() -> None:
     def save():
         out.write_text(json.dumps({"date": str(date.today()), "results": results}, indent=1, ensure_ascii=False))
 
-    results.append(run_judge(f"{config.JUDGE_MODEL} (LLM judge, DeepEval metrics)", items, lambda kind: llm_metric(kind, llm)))
-    save()
-    for model in ("tev1:4b", "nimble:9b"):
-        results.append(run_judge(f"{model} (decision judge)", items, lambda kind, m=model: DecisionJudgeMetric(m, kind)))
+    judges = args.judges.split(",")
+    llm_name = f"{LLM_JUDGE} (LLM judge, DeepEval metrics)"
+    if args.llm:
+        reuse = None
+        if args.reuse_llm and out.exists():
+            old = next((r for r in json.loads(out.read_text())["results"] if r["judge"] == llm_name), None)
+            reuse = {row["id"]: row for row in old["rows"]} if old else None
+        results.append(run_judge(llm_name, items, lambda item: llm_metric(item["kind"], llm), reuse))
+        save()
+    for model in judges:
+        results.append(run_judge(f"{model} (single question)", items, lambda item, m=model: DecisionJudgeMetric(m, item["kind"], variant="single")))
+        save()
+        results.append(run_judge(f"{model} (narrow checks)", items, lambda item, m=model: DecisionJudgeMetric(m, item["kind"])))
+        save()
+        results.append(run_judge(f"{model} (case checks)", items, case_metrics(model)))
         save()
     if not args.no_native:
-        for model in ("tev1:4b", "nimble:9b"):
-            results.append(
-                run_judge(f"{model} (DeepEval native system_one)", [i for i in items if i["kind"] in NATIVE_KINDS], lambda kind, m=model: native_metric(kind, m))
-            )
+        for model in judges:
+            results.append(run_judge(f"{model} (DeepEval native system_one)", native_items, lambda item, m=model: native_metric(item, m)))
             save()
 
-    print("\nSummary (all 41 items; native rows cover the 14 relevancy/faithfulness items)")
+    print(f"\nSummary (all {len(items)} items; native rows cover the {len(native_items)} relevancy/faithfulness items)")
     for r in results:
         print(summarize(r))
-    print("\nSame 14 relevancy/faithfulness items for every judge")
+    print(f"\nSame {len(native_items)} relevancy/faithfulness items for every judge")
     for r in results:
         print(summarize(r, NATIVE_KINDS))
+    groups = {
+        "the first 41 clear-cut items (comparable with the first report)": [i["id"] for i in items[:41]],
+        "the 27 harder items": [i["id"] for i in items[41:68]],
+        "the 16 held-out items (written after the rubrics, never used to tune them)": [i["id"] for i in items if i["id"].startswith("t-")],
+    }
+    for label, ids in groups.items():
+        print(f"\nOnly {label}")
+        for r in results:
+            print(summarize({"judge": r["judge"], "rows": [row for row in r["rows"] if row["id"] in set(ids)]}))
     print(f"Saved {out}")
 
 
