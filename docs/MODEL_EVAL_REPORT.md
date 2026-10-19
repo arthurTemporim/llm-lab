@@ -7,7 +7,7 @@ Comparison of the models served by the LiteLLM gateway, by type: chat, embedding
 - **Method:** every request goes through the gateway. Sampling uses a fixed seed (42) with each model's own default temperature, one run per case.
 - **Judge:** the judged chat cases are ruled by `tev1:4b`, a decision model, with narrow yes/no checks (section 4). It is not one of the chat models, so it cannot favour its own answers. The deterministic checks do not use a judge.
 - **Size:** 14 chat cases, 54 retrieval queries over 50 documents, 36 classification cases, 84 answers with a known verdict for testing the judge. These are small sets: **a difference of one or two cases is noise.** Use the results as a first comparison, not a ranking.
-- **Changes since the first run of this report:** the judge changed from `gemma4:12b` (DeepEval's general prompts) to `tev1:4b` (narrow yes/no checks), and the chat set grew from 11 to 14 cases, so **judged scores are not comparable with the first version.** Everything was rerun on the same day.
+- **Changes since the first run of this report:** the judge changed from `gemma4:12b` (DeepEval's general prompts) to `tev1:4b` (narrow yes/no checks), and the chat set grew from 11 to 14 cases, so **judged scores are not comparable with the first version.** Everything was run twice on the same day and every accuracy figure and pass/fail verdict was identical; only timings differ, and the tables show the second run.
 
 ## Summary
 
@@ -15,19 +15,19 @@ Comparison of the models served by the LiteLLM gateway, by type: chat, embedding
 |---|---|---|
 | Chat | `gemma4:12b` passed every case. `qwen3-vl:8b` is correct but 10× slower because it thinks. `lfm2.5:8b` gave a wrong publication year, `llama3.2:3b` missed the arithmetic, an independence date detail and the summary. | `gemma4:12b` by default; `llama3.2:3b` only for simple, fast tasks |
 | Embeddings | Effectively a tie: 96–100% Hit@1 for every model and variant. The cost differs a lot (0.6 GB to 4.7 GB). | `embeddinggemma:300m` by default; `qwen3-embedding:8b` when you need the best quality or long passages |
-| Decisions | `nimble:9b` 94% vs `tev1:4b` 89% on 36 tickets (2 vs 4 errors, all on ambiguous tickets). Both answer in 0.1–0.3 s with a useful confidence score. A chat model (`gemma4:12b`) scored 100% but takes 3.5 s per ticket and gives no probabilities. | `tev1:4b` by default, `nimble:9b` when mistakes cost more or inputs are longer |
-| `tev1:4b` as judge | With narrow yes/no checks it ruled correctly on 82 of 84 answers with a known verdict (98%) in about 0.5 s each, and 36 of 36 on the checks written for the chat cases. It caught the wrong year that the old `gemma4:12b` judge let pass. It is weak when an answer says "the context does not contain this". | `tev1:4b` as the judge, with narrow checks; read scores between 0.3 and 0.7 as unsure |
+| Decisions | `nimble:9b` 94% vs `tev1:4b` 89% on 36 tickets (2 vs 4 errors, all on ambiguous tickets). `tev1:4b` answers in 0.1 s and `nimble:9b` in 0.3 s, both with a useful confidence score. A chat model (`gemma4:12b`) scored 100% but takes 3.5 s per ticket and gives no probabilities. | `tev1:4b` by default, `nimble:9b` when mistakes cost more or inputs are longer |
+| `tev1:4b` as judge | With narrow yes/no checks it ruled correctly on 82 of 84 answers with a known verdict (98%) in 0.1–0.25 s each, and 36 of 36 on the checks written for the chat cases. It caught the wrong year that the old `gemma4:12b` judge let pass. It is weak when an answer says "the context does not contain this". | `tev1:4b` as the judge, with narrow checks; read scores between 0.3 and 0.7 as unsure |
 
 ## 1. Chat models
 
 | Model | Deterministic checks | Judged cases passed (mean score) | Median latency in the eval | Generation speed (burst) | Median tokens |
 |---|---|---|---|---|---|
-| `gemma4:12b` | 6/6 | 8/8 (0.85) | 3.7 s | 80 tok/s | 237 |
-| `qwen3-vl:8b` | 6/6 | 7/8 (0.84) | 40.4 s | 57 tok/s | 387 |
-| `lfm2.5:8b` | 5/5 | 6/8 (0.72) | 7.5 s | 66 tok/s | 207 |
-| `llama3.2:3b` | 4/5 | 5/8 (0.63) | 1.6 s | 45 tok/s | 22 |
+| `gemma4:12b` | 6/6 | 8/8 (0.85) | 3.8 s | 80 tok/s | 237 |
+| `qwen3-vl:8b` | 6/6 | 7/8 (0.84) | 41.3 s | 57 tok/s | 387 |
+| `lfm2.5:8b` | 5/5 | 6/8 (0.72) | 7.2 s | 66 tok/s | 207 |
+| `llama3.2:3b` | 4/5 | 5/8 (0.63) | 0.7 s | 45 tok/s | 22 |
 
-The vision case (reading an invoice number from an image) ran only on the two vision models, so `lfm2.5:8b` and `llama3.2:3b` have 5 deterministic cases. The judged score of a case is the lowest probability among its yes/no checks, and a case passes at 0.5. The generation speeds are short-burst measurements taken earlier on Ollama directly (80–150 tokens, thinking off) and were not repeated for this version. Latencies are higher than in the first run for `lfm2.5:8b` (3.3 to 7.5 s) and `llama3.2:3b` (0.6 to 1.6 s), probably because the judge model is loaded between cases and evicts the others.
+The vision case (reading an invoice number from an image) ran only on the two vision models, so `lfm2.5:8b` and `llama3.2:3b` have 5 deterministic cases. The judged score of a case is the lowest probability among its yes/no checks, and a case passes at 0.5. The generation speeds are short-burst measurements taken earlier on Ollama directly (80–150 tokens, thinking off) and were not repeated for this version. `lfm2.5:8b` is slower than in the first version of this report (3.3 to 7.2 s), probably because the judge model is loaded between cases and evicts the others; `llama3.2:3b` went from 0.6 to 1.6 s in one run and back to 0.7 s in the next, so latencies depend on what is loaded at that moment.
 
 | Case | `gemma4:12b` | `qwen3-vl:8b` | `lfm2.5:8b` | `llama3.2:3b` |
 |---|---|---|---|---|
@@ -53,7 +53,7 @@ The vision case (reading an invoice number from an image) ran only on the two vi
 - **The new judge catches the wrong fact the old one let through.** `lfm2.5:8b`'s 1886 now scores 0.04 and fails. With the `gemma4:12b` judge the same answer scored 0.50 and passed.
 - **The summary case now separates the models** (0.20 for `llama3.2:3b` against 0.89–0.95). With the old judge everyone got 0.60–0.70.
 - **The Canada case is a judge weakness, not a model failure.** The question asks for the express shipping cost to Canada, and the context says international shipping is not available. `qwen3-vl:8b`, `lfm2.5:8b` and `llama3.2:3b` all answered that the context has no such information, which is right, and all three passed the correctness check (0.95, 0.93, 0.69). Only the faithfulness check failed them: `tev1:4b` read "the context does not contain the answer" as contradicting the context ("Does the answer contradict the context?" answered yes with 0.73, 0.66 and 0.77). Even `gemma4:12b`'s correct one-line answer scored only 0.50 on faithfulness. Read this case as a pass for all four on correctness and ignore the faithfulness result until the check is reworded.
-- **`qwen3-vl:8b` is slow in practice because it thinks.** A median of 387 tokens per answer and 40 s per case in the eval. Its raw speed is fine (57 tok/s alone), see section 5.
+- **`qwen3-vl:8b` is slow in practice because it thinks.** A median of 387 tokens per answer and 41 s per case in the eval. Its raw speed is fine (57 tok/s alone), see section 5.
 - **Judged scores sit lower than before** (0.63–0.85 against 0.82–0.94) because the score is now the lowest of several checks, not an average of general ratings. They are not comparable with the first version of this report.
 
 ## 2. Embedding models
@@ -62,18 +62,18 @@ Retrieval task: 54 queries over 50 documents in English and Portuguese, includin
 
 | Variant | Dimensions | Hit@1 | Hit@3 | Reciprocal rank | One query | 50 documents |
 |---|---|---|---|---|---|---|
-| `embeddinggemma:300m` | 768 | **1.00** | 1.00 | 1.00 | 27 ms | 0.9 s |
-| `embeddinggemma:300m` + model-card prompts | 768 | 0.98 | 1.00 | 0.99 | 37 ms | 0.8 s |
-| `qwen3-embedding:8b` | 4096 | 0.98 | 1.00 | 0.99 | 75 ms | 2.8 s |
-| `qwen3-embedding:8b` + instruction | 4096 | **1.00** | 1.00 | 1.00 | 75 ms | 2.7 s |
-| `nomic-embed-text-v2-moe` | 768 | 0.96 | 1.00 | 0.98 | 40 ms | 1.7 s |
-| `nomic-embed-text-v2-moe` + `search_query:`/`search_document:` | 768 | 0.98 | 1.00 | 0.99 | 43 ms | 1.7 s |
+| `embeddinggemma:300m` | 768 | **1.00** | 1.00 | 1.00 | 30 ms | 0.9 s |
+| `embeddinggemma:300m` + model-card prompts | 768 | 0.98 | 1.00 | 0.99 | 32 ms | 0.8 s |
+| `qwen3-embedding:8b` | 4096 | 0.98 | 1.00 | 0.99 | 68 ms | 2.8 s |
+| `qwen3-embedding:8b` + instruction | 4096 | **1.00** | 1.00 | 1.00 | 70 ms | 2.7 s |
+| `nomic-embed-text-v2-moe` | 768 | 0.96 | 1.00 | 0.98 | 38 ms | 1.7 s |
+| `nomic-embed-text-v2-moe` + `search_query:`/`search_document:` | 768 | 0.98 | 1.00 | 0.99 | 44 ms | 1.6 s |
 
 **What this shows**
 - **All variants find the right document in the top 3 every time.** The only misses were at rank 2, always to the same-topic twin document (the `detail vs twin` query h01 for four of the six variants, and one paraphrase query for plain `nomic`).
-- **The differences are one or two queries out of 54.** Do not read a ranking into 0.96 vs 1.00. Plain `qwen3-embedding:8b` moved from 0.96 to 0.98 between two runs on the same day, which is the size of the noise.
+- **The differences are one or two queries out of 54.** Do not read a ranking into 0.96 vs 1.00. Plain `qwen3-embedding:8b` scored 0.96 in the first version of this report and 0.98 in both later runs, which is the size of the noise.
 - **Prefixes and instructions:** `qwen3-embedding:8b` improved from 0.98 to 1.00 with its instruction and `nomic` from 0.96 to 0.98 with its prefixes. For `embeddinggemma:300m` the model-card prompts did not help (1.00 to 0.98). All of these are single-query changes.
-- **Speed and size:** `embeddinggemma:300m` is 0.6 GB and `qwen3-embedding:8b` is 4.7 GB for the same score here, and it is the fastest per query (27 ms).
+- **Speed and size:** `embeddinggemma:300m` is 0.6 GB and `qwen3-embedding:8b` is 4.7 GB for the same score here, and it is the fastest per query (30 ms).
 - **What the test does not cover:** my passages are one or two sentences. It cannot show `qwen3-embedding:8b`'s advantage on long text (8K input), nor `nomic`'s 512-token limit. On large corpora the larger model may separate itself.
 
 ## 3. Decision models
@@ -88,6 +88,8 @@ Tasks on support tickets, with a chat model doing the same task as a baseline (p
 | `tev1:4b` | decision | 88% | 90% | 89% | 0.09 s | 0.94 / 0.57 |
 | `gemma4:12b` | chat | 100% | 100% | **100%** | 3.5 s | none |
 | `llama3.2:3b` | chat | 62% | 60% | 61% | 0.12 s | none |
+
+`nimble:9b` is no longer part of `run_decisions.py`; its row is from the earlier run on the same day (raw results in `evals/results/prev2/`). The two runs of `tev1:4b`, `gemma4:12b` and `llama3.2:3b` agree exactly.
 
 By category (right/total): the decision models and `gemma4:12b` got every clear ticket (17/17) and every Portuguese ticket (9/9). They differ on the 7 ambiguous ones: `gemma4:12b` 7/7, `nimble:9b` 5/7, `tev1:4b` 3/7, `llama3.2:3b` 4/7.
 
@@ -110,10 +112,10 @@ The judge answers yes/no questions through `/v1/systemone` and returns a probabi
 
 | `tev1:4b` judge | Right verdicts | Wrong answers accepted | Good answers rejected | Mean score good / bad | Median time per item |
 |---|---|---|---|---|---|
-| Single question (84 items) | 78/84 (93%) | 6/45 | 0/39 | 0.90 / 0.18 | 0.41 s |
-| **Narrow checks (84 items)** | **82/84 (98%)** | 2/45 | 0/39 | 0.83 / 0.13 | 0.54 s |
-| Case checks (36 items) | **36/36** | 0/20 | 0/16 | 0.82 / 0.12 | 0.75 s |
-| DeepEval native `system_one` (30 relevancy/faithfulness items) | 28/30 (93%) | 2/15 | 0/15 | 0.91 / 0.20 | 0.48 s |
+| Single question (84 items) | 78/84 (93%) | 6/45 | 0/39 | 0.91 / 0.18 | 0.11 s |
+| **Narrow checks (84 items)** | **82/84 (98%)** | 2/45 | 0/39 | 0.83 / 0.13 | 0.17 s |
+| Case checks (36 items) | **36/36** | 0/20 | 0/16 | 0.82 / 0.12 | 0.24 s |
+| DeepEval native `system_one` (30 relevancy/faithfulness items) | 28/30 (93%) | 2/15 | 0/15 | 0.91 / 0.20 | 0.23 s |
 
 By kind of check (right verdicts, `tev1:4b`):
 
@@ -127,7 +129,7 @@ By kind of check (right verdicts, `tev1:4b`):
 - **Case checks gave no error on the 36 answers they cover.** The questions of each case were written before the first run and not changed after it (the generic faithfulness, abstention and summary rubrics that some cases also use were), so this one is mostly not tuned to the data. It is still only 36 answers on 5 questions.
 - **The narrow checks were tuned on these same answers, so 98% is optimistic.** My first version of them (three or four checks per kind, including "does the answer leave out a fact?") was worse than the single question: 61/68 against 62/68. Each extra question that hovers near 0.5, such as "Eight bits." against the reference "8", lets one noisy check fail a good answer, because the lowest check wins. I diagnosed that on the first 68 answers, dropped or rewrote the noisy questions, and added 16 answers I had not looked at. **On those 16 held-out answers the single question and the narrow checks both got 16/16**, so the held-out set cannot tell them apart: it is too easy.
 - **Fewer, concrete questions work better than many.** A 4B classifier answers "does the answer say 1899?" reliably and hedges on "does the answer leave out a fact?".
-- **Compared with the old judge.** `gemma4:12b` with DeepEval's general prompts ruled correctly on 57 of the first 68 answers (84%), accepting 11 of 36 wrong ones, in about 4 s each. The same 41 answers that gave 37/41 in the first version of this report gave 36/41 this time, which is the noise level. It was not run on the 16 held-out answers. `nimble:9b` was tested too and is not the judge: with the same checks it got 79/84 on narrow checks (it rejected 4 good answers) and 35/36 on case checks.
+- **Compared with the old judge.** `gemma4:12b` with DeepEval's general prompts ruled correctly on 57 of the first 68 answers (84%), accepting 11 of 36 wrong ones, in about 4 s each. The same 41 answers that gave 37/41 in the first version of this report gave 36/41 in a later run, which is the noise level. It was not run on the 16 held-out answers. `nimble:9b` was tested too in the earlier run and is not the judge: with the same checks it got 79/84 on narrow checks (it rejected 4 good answers) and 35/36 on case checks. That run was not repeated.
 - **DeepEval's native mode still trails the task-specific questions** (93% on its 30 items).
 
 **Where `tev1:4b` is weak**
@@ -182,7 +184,7 @@ cd evals
 .venv/bin/python run_embeddings.py     # about 1 minute
 .venv/bin/python run_decisions.py      # about 4 minutes
 .venv/bin/python run_chat.py           # about 16 minutes (the thinking model is most of it)
-.venv/bin/python judge_experiment.py   # about 2 minutes: how far to trust the tev1 judge
+.venv/bin/python judge_experiment.py   # about 1 minute: how far to trust the tev1 judge
 ```
 
 Raw results are saved in `evals/results/*.json` (git-ignored).
