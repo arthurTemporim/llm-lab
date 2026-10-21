@@ -30,7 +30,7 @@ Each script prints a summary and saves its raw results in `results/*.json` (git-
 
 | Type | Scenario (dataset) | DeepEval metrics | Judge needed |
 |---|---|---|---|
-| Chat | 14 cases: arithmetic, sequence, JSON format, bullet count, Portuguese, image reading (vision models only), two factual QA, explanation, RAG answerable, RAG with a conflicting question, two RAG unanswerable, summary | Custom `CheckMetric` (number, JSON, contains, bullets) for 6 cases; `DecisionJudgeMetric` (narrow yes/no checks ruled by `tev1:4b`, plus a sentence-count rule) for 8 | Yes, for 8 cases |
+| Chat | 13 cases: arithmetic, sequence, JSON format, bullet count, Portuguese, two factual QA, explanation, RAG answerable, RAG with a conflicting question, two RAG unanswerable, summary | Custom `CheckMetric` (number, JSON, contains, bullets) for 5 cases; `DecisionJudgeMetric` (narrow yes/no checks ruled by `tev1:4b`, plus a sentence-count rule) for 8 | Yes, for 8 cases |
 | Embeddings | Retrieval: 54 queries over 50 documents (English and Portuguese, same-topic distractors, cross-lingual) | Custom `RankMetric`: Hit@1, Hit@3, Reciprocal rank | No |
 | Decisions | 26 ticket-routing cases (4 teams, Portuguese, ambiguous, prompt injection, two long inputs) and 10 refund yes/no cases | Custom `ExactMatchMetric`; confidence and latency recorded | No |
 
@@ -53,7 +53,7 @@ Generic rubrics (`correctness`, `faithfulness`, `abstention`, `relevancy`, `summ
 
 ```text
 models.yaml        models to evaluate, grouped by type, with embedding prefixes
-datasets/          chat.json, embeddings.json, decisions.json, images/
+datasets/          chat.json, embeddings.json, decisions.json
 lib/config.py      environment, registry and dataset loading
 lib/llm.py         gateway client (chat, embeddings, systemone)
 lib/judge.py       DeepEvalBaseLLM that judges through a chat model (only the gemma4:12b baseline of judge_experiment.py)
