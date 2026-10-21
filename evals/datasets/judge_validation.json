@@ -1,0 +1,672 @@
+{
+ "description": "Candidate answers with a known verdict (label good = a judge should pass it, bad = fail it). Used to measure how accurate each judge is. The first 41 items are clear-cut (cor-01 to sum-06 and rel-06); the next 27 are harder: partial answers, wrong units, swapped facts, hedged guesses, extra true details. Both groups were used to diagnose the judge rubrics. The last 16 (ids starting with t-) were written afterwards and never used to tune anything: they are the held-out test.",
+ "items": [
+  {
+   "id": "cor-01",
+   "kind": "correctness",
+   "label": "good",
+   "input": "Who wrote the novel \"Dom Casmurro\" and in what year was it published?",
+   "expected": "Machado de Assis wrote it, and it was published in 1899.",
+   "actual_output": "Machado de Assis published it in 1899."
+  },
+  {
+   "id": "cor-02",
+   "kind": "correctness",
+   "label": "good",
+   "input": "Who wrote the novel \"Dom Casmurro\" and in what year was it published?",
+   "expected": "Machado de Assis wrote it, and it was published in 1899.",
+   "actual_output": "It is a novel by the Brazilian writer Machado de Assis, first published in 1899."
+  },
+  {
+   "id": "cor-03",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Who wrote the novel \"Dom Casmurro\" and in what year was it published?",
+   "expected": "Machado de Assis wrote it, and it was published in 1899.",
+   "actual_output": "Dom Casmurro was written by Machado de Assis and first published in 1886.",
+   "note": "the real lfm2.5:8b error"
+  },
+  {
+   "id": "cor-04",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Who wrote the novel \"Dom Casmurro\" and in what year was it published?",
+   "expected": "Machado de Assis wrote it, and it was published in 1899.",
+   "actual_output": "José de Alencar wrote it, and it came out in 1899."
+  },
+  {
+   "id": "cor-05",
+   "kind": "correctness",
+   "label": "good",
+   "input": "What is the capital of Australia?",
+   "expected": "Canberra",
+   "actual_output": "The capital of Australia is Canberra."
+  },
+  {
+   "id": "cor-06",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "What is the capital of Australia?",
+   "expected": "Canberra",
+   "actual_output": "Sydney is the capital of Australia."
+  },
+  {
+   "id": "cor-07",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "What is the capital of Australia?",
+   "expected": "Canberra",
+   "actual_output": "Melbourne."
+  },
+  {
+   "id": "cor-08",
+   "kind": "correctness",
+   "label": "good",
+   "input": "How many bits are in a byte?",
+   "expected": "8",
+   "actual_output": "Eight bits."
+  },
+  {
+   "id": "cor-09",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "How many bits are in a byte?",
+   "expected": "8",
+   "actual_output": "A byte has 16 bits."
+  },
+  {
+   "id": "cor-10",
+   "kind": "correctness",
+   "label": "good",
+   "input": "Who painted the Mona Lisa?",
+   "expected": "Leonardo da Vinci",
+   "actual_output": "It was painted by Leonardo da Vinci."
+  },
+  {
+   "id": "cor-11",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Who painted the Mona Lisa?",
+   "expected": "Leonardo da Vinci",
+   "actual_output": "Michelangelo painted the Mona Lisa."
+  },
+  {
+   "id": "cor-12",
+   "kind": "correctness",
+   "label": "good",
+   "input": "A train travels at 60 km/h for 2.5 hours and then at 80 km/h for 1.5 hours. What is the total distance in km?",
+   "expected": "270 km",
+   "actual_output": "270 km"
+  },
+  {
+   "id": "cor-13",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "A train travels at 60 km/h for 2.5 hours and then at 80 km/h for 1.5 hours. What is the total distance in km?",
+   "expected": "270 km",
+   "actual_output": "240",
+   "note": "the real llama3.2:3b error"
+  },
+  {
+   "id": "fai-01",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "Can I get a refund for a monthly plan 10 days after buying it?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "No. Monthly plans are never refunded."
+  },
+  {
+   "id": "fai-02",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "Can I get a refund for a monthly plan 10 days after buying it?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "No, monthly plans are never refunded, so a refund after 10 days is not possible."
+  },
+  {
+   "id": "fai-03",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "Can I get a refund for a monthly plan 10 days after buying it?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "Yes, you can get a refund within 30 days of buying the plan."
+  },
+  {
+   "id": "fai-04",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "Can I get a refund for a monthly plan 10 days after buying it?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "No, monthly plans are never refunded, but you can get store credit within 60 days."
+  },
+  {
+   "id": "fai-05",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "How long does express shipping take and what does it cost?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Express shipping costs $15 and takes 1 to 2 business days."
+  },
+  {
+   "id": "fai-06",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "How long does express shipping take and what does it cost?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Express shipping arrives in 1 to 2 business days for $15."
+  },
+  {
+   "id": "fai-07",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "How long does express shipping take and what does it cost?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Express shipping takes 1 to 2 business days and costs $10."
+  },
+  {
+   "id": "fai-08",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "How long does express shipping take and what does it cost?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Express shipping costs $15 and is also available internationally."
+  },
+  {
+   "id": "abs-01",
+   "kind": "abstention",
+   "label": "good",
+   "input": "Does Acme Cloud offer a student discount?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "The context does not mention a student discount, so I cannot say."
+  },
+  {
+   "id": "abs-02",
+   "kind": "abstention",
+   "label": "good",
+   "input": "Does Acme Cloud offer a student discount?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "I don't know; that is not stated in the policy."
+  },
+  {
+   "id": "abs-03",
+   "kind": "abstention",
+   "label": "good",
+   "input": "Does Acme Cloud offer a student discount?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "The provided policy only covers refunds and says nothing about discounts."
+  },
+  {
+   "id": "abs-04",
+   "kind": "abstention",
+   "label": "bad",
+   "input": "Does Acme Cloud offer a student discount?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "Yes, students get 20% off."
+  },
+  {
+   "id": "abs-05",
+   "kind": "abstention",
+   "label": "bad",
+   "input": "Does Acme Cloud offer a student discount?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "No, Acme Cloud does not offer student discounts."
+  },
+  {
+   "id": "abs-06",
+   "kind": "abstention",
+   "label": "bad",
+   "input": "Does Acme Cloud offer a student discount?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "Students can get a discount if they email support."
+  },
+  {
+   "id": "abs-07",
+   "kind": "abstention",
+   "label": "good",
+   "input": "How many seats does the Pro plan include?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "That information is not in the context."
+  },
+  {
+   "id": "abs-08",
+   "kind": "abstention",
+   "label": "bad",
+   "input": "How many seats does the Pro plan include?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "The Pro plan includes 5 seats."
+  },
+  {
+   "id": "rel-01",
+   "kind": "relevancy",
+   "label": "good",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "A vector database stores embeddings and finds the most similar items quickly. It is used for semantic search, recommendations and retrieval for AI assistants."
+  },
+  {
+   "id": "rel-02",
+   "kind": "relevancy",
+   "label": "good",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "Vector databases index high-dimensional vectors so you can search by meaning instead of exact words. They power similarity search and RAG systems."
+  },
+  {
+   "id": "rel-03",
+   "kind": "relevancy",
+   "label": "good",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "They store vector embeddings to enable fast similarity search, for example finding documents related to a question."
+  },
+  {
+   "id": "rel-04",
+   "kind": "relevancy",
+   "label": "bad",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "Databases were invented in the 1960s, and SQL is the language used by most relational ones."
+  },
+  {
+   "id": "rel-05",
+   "kind": "relevancy",
+   "label": "bad",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "Paris is the capital of France and is known for the Eiffel Tower."
+  },
+  {
+   "id": "rel-06",
+   "kind": "relevancy",
+   "label": "bad",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "Great question! Let me know if you want me to explain more about databases, vectors or anything else you would like to know."
+  },
+  {
+   "id": "sum-01",
+   "kind": "summary",
+   "label": "good",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "The city council approved a 4 km bike lane on River Avenue, with construction starting in March at a cost of about 2.3 million dollars."
+  },
+  {
+   "id": "sum-02",
+   "kind": "summary",
+   "label": "good",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "A new 4 km River Avenue bike lane costing 2.3 million dollars will begin construction in March after a council vote."
+  },
+  {
+   "id": "sum-03",
+   "kind": "summary",
+   "label": "bad",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "The council approved a 4 km bike lane on River Avenue starting in March and costing 5 million dollars."
+  },
+  {
+   "id": "sum-04",
+   "kind": "summary",
+   "label": "bad",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "The council approved a 4 km bike lane. Construction starts in March and costs 2.3 million dollars."
+  },
+  {
+   "id": "sum-05",
+   "kind": "summary",
+   "label": "bad",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "The council voted to build a bike lane."
+  },
+  {
+   "id": "sum-06",
+   "kind": "summary",
+   "label": "bad",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "The council approved a 4 km River Avenue bike lane starting in March for 2.3 million dollars, paid by a new local tax."
+  },
+  {
+   "id": "cor-14",
+   "kind": "correctness",
+   "label": "good",
+   "input": "Qual é a capital do Brasil?",
+   "expected": "Brasília",
+   "actual_output": "A capital do Brasil é Brasília."
+  },
+  {
+   "id": "cor-15",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Qual é a capital do Brasil?",
+   "expected": "Brasília",
+   "actual_output": "A capital do Brasil é o Rio de Janeiro."
+  },
+  {
+   "id": "cor-16",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Who wrote the novel \"Dom Casmurro\" and in what year was it published?",
+   "expected": "Machado de Assis wrote it, and it was published in 1899.",
+   "actual_output": "Machado de Assis wrote it.",
+   "note": "partial: the year is missing"
+  },
+  {
+   "id": "cor-17",
+   "kind": "correctness",
+   "label": "good",
+   "input": "At what temperature in Celsius does water boil at sea level?",
+   "expected": "100 degrees Celsius.",
+   "actual_output": "At sea level water boils at 100 °C, which is 212 °F."
+  },
+  {
+   "id": "cor-18",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "At what temperature in Celsius does water boil at sea level?",
+   "expected": "100 degrees Celsius.",
+   "actual_output": "Water boils at 100 degrees Fahrenheit.",
+   "note": "right number, wrong unit"
+  },
+  {
+   "id": "cor-19",
+   "kind": "correctness",
+   "label": "good",
+   "input": "A train travels at 60 km/h for 2.5 hours and then at 80 km/h for 1.5 hours. What is the total distance in km?",
+   "expected": "270 km",
+   "actual_output": "First leg: 60 × 2.5 = 150 km. Second leg: 80 × 1.5 = 120 km. Total: 270 km."
+  },
+  {
+   "id": "cor-20",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "A train travels at 60 km/h for 2.5 hours and then at 80 km/h for 1.5 hours. What is the total distance in km?",
+   "expected": "270 km",
+   "actual_output": "First leg: 60 × 2.5 = 150 km. Second leg: 80 × 1.5 = 120 km. Total: 250 km.",
+   "note": "right working, wrong total"
+  },
+  {
+   "id": "cor-21",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Who wrote the novel \"Dom Casmurro\" and in what year was it published?",
+   "expected": "Machado de Assis wrote it, and it was published in 1899.",
+   "actual_output": "I believe it was Machado de Assis, around 1890.",
+   "note": "hedged and wrong year"
+  },
+  {
+   "id": "cor-22",
+   "kind": "correctness",
+   "label": "good",
+   "input": "How many bits are in a byte?",
+   "expected": "8",
+   "actual_output": "A byte is made of 8 bits (an octet)."
+  },
+  {
+   "id": "fai-09",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "What are the standard and express shipping times?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Standard takes 3 to 5 business days and express takes 1 to 2 business days."
+  },
+  {
+   "id": "fai-10",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "What are the standard and express shipping times?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Standard takes 1 to 2 business days and express takes 3 to 5 business days.",
+   "note": "the two times are swapped"
+  },
+  {
+   "id": "fai-11",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "Is shipping free for a $60 order within the US?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Yes, orders over $50 ship free within the US."
+  },
+  {
+   "id": "fai-12",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "Is shipping free for a $60 order within the US?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Yes, orders over $50 ship free within the US, and returns are free too.",
+   "note": "adds an offer the context does not make"
+  },
+  {
+   "id": "fai-13",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "Can I ship to Canada?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "Yes, international shipping takes about a week.",
+   "note": "contradicts the context"
+  },
+  {
+   "id": "fai-14",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "Can I ship to Canada?",
+   "context": "Acme Store shipping: orders over $50 ship free within the US. Standard shipping takes 3 to 5 business days. Express shipping costs $15 and takes 1 to 2 business days. International shipping is not available.",
+   "actual_output": "No, international shipping is not available."
+  },
+  {
+   "id": "abs-09",
+   "kind": "abstention",
+   "label": "good",
+   "input": "Is there a free trial?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "The policy only describes refunds and does not say anything about a free trial."
+  },
+  {
+   "id": "abs-10",
+   "kind": "abstention",
+   "label": "bad",
+   "input": "Is there a free trial?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "There is no mention of a free trial in the policy, but most cloud providers offer 14 days.",
+   "note": "abstains, then guesses a figure"
+  },
+  {
+   "id": "abs-11",
+   "kind": "abstention",
+   "label": "bad",
+   "input": "Is there a free trial?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "That is not in the policy, but you can cancel a monthly plan at any time.",
+   "note": "abstains, then adds an invented fact"
+  },
+  {
+   "id": "abs-12",
+   "kind": "abstention",
+   "label": "good",
+   "input": "How many seats does the Pro plan include?",
+   "context": "Acme Cloud refund policy: annual plans can be refunded within 30 days of purchase. Monthly plans are never refunded. Approved refunds are paid back to the original payment method within 5 to 7 business days.",
+   "actual_output": "I'm sorry, but the text you provided does not say how many seats the Pro plan includes."
+  },
+  {
+   "id": "sum-07",
+   "kind": "summary",
+   "label": "good",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "A 4 km bike lane on River Avenue, costing about 2.3 million dollars, will start construction in March."
+  },
+  {
+   "id": "sum-08",
+   "kind": "summary",
+   "label": "bad",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "The council approved a 4 km bike lane on River Avenue starting in May for 2.3 million dollars.",
+   "note": "wrong month"
+  },
+  {
+   "id": "sum-09",
+   "kind": "summary",
+   "label": "bad",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "The council approved a 4 km bike lane on River Avenue, starting in March for 2.3 million dollars, and it will open next week.",
+   "note": "invents the opening date"
+  },
+  {
+   "id": "sum-10",
+   "kind": "summary",
+   "label": "good",
+   "input": "Summarize the following text in ONE sentence.\n\nText: The city council voted on Tuesday to build a new 4 km bike lane along River Avenue. Construction will start in March and cost 2.3 million dollars, funded mostly by a state transport grant. Local shop owners worried about losing parking spaces, so the council promised 40 new spaces in a nearby lot. The lane is expected to open before summer next year.",
+   "actual_output": "The council approved a 4 km River Avenue bike lane, to be built from March for about 2.3 million dollars, with 40 new parking spaces promised nearby."
+  },
+  {
+   "id": "rel-07",
+   "kind": "relevancy",
+   "label": "good",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "A vector database stores embeddings so that you can look up items by meaning. Typical uses are semantic search and recommendations."
+  },
+  {
+   "id": "rel-08",
+   "kind": "relevancy",
+   "label": "bad",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "A vector database is a database. There are many kinds of databases.",
+   "note": "does not say what it is used for"
+  },
+  {
+   "id": "rel-09",
+   "kind": "relevancy",
+   "label": "bad",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "I'm sorry, I can't help with that.",
+   "note": "refusal"
+  },
+  {
+   "id": "rel-10",
+   "kind": "relevancy",
+   "label": "good",
+   "input": "Explain in two sentences what a vector database is used for.",
+   "actual_output": "They are used for similarity search over embeddings, for example to retrieve documents for an LLM app."
+  },
+  {
+   "id": "t-cor-1",
+   "kind": "correctness",
+   "label": "good",
+   "input": "Who developed the theory of general relativity?",
+   "expected": "Albert Einstein",
+   "actual_output": "General relativity was developed by Albert Einstein."
+  },
+  {
+   "id": "t-cor-2",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Who developed the theory of general relativity?",
+   "expected": "Albert Einstein",
+   "actual_output": "Isaac Newton developed general relativity."
+  },
+  {
+   "id": "t-cor-3",
+   "kind": "correctness",
+   "label": "good",
+   "input": "How many days are in a leap year?",
+   "expected": "366",
+   "actual_output": "A leap year has 366 days."
+  },
+  {
+   "id": "t-cor-4",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "How many days are in a leap year?",
+   "expected": "366",
+   "actual_output": "A leap year has 365 days."
+  },
+  {
+   "id": "t-cor-5",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Who were the first two people to walk on the Moon?",
+   "expected": "Neil Armstrong and Buzz Aldrin",
+   "actual_output": "Neil Armstrong was the first person on the Moon.",
+   "note": "partial: second person missing"
+  },
+  {
+   "id": "t-cor-6",
+   "kind": "correctness",
+   "label": "good",
+   "input": "Qual é o maior planeta do Sistema Solar?",
+   "expected": "Júpiter",
+   "actual_output": "O maior planeta do Sistema Solar é Júpiter."
+  },
+  {
+   "id": "t-cor-7",
+   "kind": "correctness",
+   "label": "bad",
+   "input": "Qual é o maior planeta do Sistema Solar?",
+   "expected": "Júpiter",
+   "actual_output": "O maior planeta do Sistema Solar é Saturno."
+  },
+  {
+   "id": "t-fai-1",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "When is the gym open on Saturday?",
+   "context": "Acme Gym: open Monday to Friday 6am to 10pm, Saturday 8am to 6pm, closed on Sunday. A day pass costs $12 and a monthly membership costs $45.",
+   "actual_output": "Saturday from 8am to 6pm."
+  },
+  {
+   "id": "t-fai-2",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "When is the gym open on Saturday?",
+   "context": "Acme Gym: open Monday to Friday 6am to 10pm, Saturday 8am to 6pm, closed on Sunday. A day pass costs $12 and a monthly membership costs $45.",
+   "actual_output": "Saturday from 6am to 10pm."
+  },
+  {
+   "id": "t-fai-3",
+   "kind": "faithfulness",
+   "label": "good",
+   "input": "How much is a day pass and a monthly membership?",
+   "context": "Acme Gym: open Monday to Friday 6am to 10pm, Saturday 8am to 6pm, closed on Sunday. A day pass costs $12 and a monthly membership costs $45.",
+   "actual_output": "A day pass is $12 and a monthly membership is $45."
+  },
+  {
+   "id": "t-fai-4",
+   "kind": "faithfulness",
+   "label": "bad",
+   "input": "How much is a day pass and a monthly membership?",
+   "context": "Acme Gym: open Monday to Friday 6am to 10pm, Saturday 8am to 6pm, closed on Sunday. A day pass costs $12 and a monthly membership costs $45.",
+   "actual_output": "A day pass is $12 and a monthly membership is $45, with a free towel.",
+   "note": "adds an offer"
+  },
+  {
+   "id": "t-abs-1",
+   "kind": "abstention",
+   "label": "good",
+   "input": "Does the gym have a swimming pool?",
+   "context": "Acme Gym: open Monday to Friday 6am to 10pm, Saturday 8am to 6pm, closed on Sunday. A day pass costs $12 and a monthly membership costs $45.",
+   "actual_output": "The text does not say whether there is a pool."
+  },
+  {
+   "id": "t-abs-2",
+   "kind": "abstention",
+   "label": "bad",
+   "input": "Does the gym have a swimming pool?",
+   "context": "Acme Gym: open Monday to Friday 6am to 10pm, Saturday 8am to 6pm, closed on Sunday. A day pass costs $12 and a monthly membership costs $45.",
+   "actual_output": "No, there is no pool."
+  },
+  {
+   "id": "t-abs-3",
+   "kind": "abstention",
+   "label": "bad",
+   "input": "Does the gym have a swimming pool?",
+   "context": "Acme Gym: open Monday to Friday 6am to 10pm, Saturday 8am to 6pm, closed on Sunday. A day pass costs $12 and a monthly membership costs $45.",
+   "actual_output": "Yes, there is an indoor pool."
+  },
+  {
+   "id": "t-rel-1",
+   "kind": "relevancy",
+   "label": "good",
+   "input": "Explain in one sentence why the sky is blue.",
+   "actual_output": "The sky looks blue because air molecules scatter short blue wavelengths of sunlight more than long red ones."
+  },
+  {
+   "id": "t-rel-2",
+   "kind": "relevancy",
+   "label": "bad",
+   "input": "Explain in one sentence why the sky is blue.",
+   "actual_output": "Grass is green because of chlorophyll."
+  }
+ ]
+}

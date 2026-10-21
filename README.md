@@ -25,6 +25,8 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | understand the network, dependencies, data flows, storage and design decisions |
 | [docs/MODULES.md](docs/MODULES.md) | see what each module does and the rules for new ones |
 | [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md) | learn how configuration, secrets, GPU/CPU and upgrades work |
+| [docs/MODELS.md](docs/MODELS.md) | see the models served through LiteLLM, their settings, links and when to use each |
+| [docs/MODEL_EVAL_REPORT.md](docs/MODEL_EVAL_REPORT.md) | compare the chat, embedding and decision models (results of [evals/](evals/README.md)) |
 | [CLAUDE.md](CLAUDE.md) | give AI coding agents the project's conventions and gotchas |
 
 ## Why llm-lab?
@@ -58,6 +60,7 @@ modules/
   common-services/   shared Postgres, Redis, MinIO + the network (start first)
   <module>/          docker-compose.yml, example.env, optional Dockerfile and README
 scripts/             helper shell scripts used by the Makefile
+evals/               DeepEval model evaluations (python, own virtualenv)
 docs/                architecture, modules, configuration
 Makefile             single entry point (run `make help`)
 ```

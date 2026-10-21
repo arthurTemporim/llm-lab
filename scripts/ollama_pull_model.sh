@@ -1,18 +1,19 @@
 #!/bin/bash
 # Ex:
-# ./ollama_pull_models.sh
+# ./ollama_pull_model.sh
 
+# Sizes in GB (disk), as reported by Ollama.
+# nimble and tev1 are decision models (use /v1/systemone, not chat).
 models=(
-"llama3.2:3b" # 2G
-"gemma4:12b" # 8G
-"llama3.2-vision:11b" # 8G
-"nomic-embed-text-v2-moe:latest" # 1G
-"tev1:4b" # 5G
-"lfm2.5:8b" # 5G
-"qwen3-embedding:8b" # 5G
-"embeddinggemma-2:740m" # 1G
-"qwen3-vl:8b" # 6G
-"nimble:9b" # 10G
+"llama3.2:3b" # 2.0 GB
+"gemma4:12b" # 8.0 GB
+"nomic-embed-text-v2-moe:latest" # 1.0 GB
+"tev1:4b" # 4.6 GB
+"lfm2.5:8b" # 5.2 GB
+"qwen3-embedding:8b" # 4.7 GB
+"embeddinggemma:300m" # 0.6 GB
+"qwen3-vl:8b" # 6.2 GB
+"nimble:9b" # 9.5 GB
 )
 stream=false
 url="http://localhost:11434"

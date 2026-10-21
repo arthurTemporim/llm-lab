@@ -1,0 +1,4 @@
+.venv/
+.deepeval/
+results/
+__pycache__/

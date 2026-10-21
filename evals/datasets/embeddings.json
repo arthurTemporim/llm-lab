@@ -1,0 +1,581 @@
+{
+ "description": "Retrieval: each query has one right document among 50. 'hard negative' and 'detail vs twin' queries have a same-topic wrong document; 'cross-lingual' mixes English and Portuguese.",
+ "documents": [
+  {
+   "id": "d01",
+   "lang": "en",
+   "text": "To make fluffy pancakes, whisk flour, baking powder, milk and eggs, rest the batter for ten minutes, then cook on a medium-hot greased pan until bubbles appear."
+  },
+  {
+   "id": "d02",
+   "lang": "pt",
+   "text": "Para fazer pão de queijo, misture polvilho, queijo minas ralado, ovos, leite e óleo, enrole bolinhas e asse em forno a 200 graus até dourar."
+  },
+  {
+   "id": "d03",
+   "lang": "en",
+   "text": "In Python, a list comprehension builds a new list from an iterable in a single expression, for example [x * 2 for x in range(5)]."
+  },
+  {
+   "id": "d04",
+   "lang": "en",
+   "text": "A Python virtual environment isolates project dependencies; create one with python -m venv .venv and activate it before installing packages with pip."
+  },
+  {
+   "id": "d05",
+   "lang": "en",
+   "text": "Docker volumes persist container data outside the container filesystem, so data survives when the container is removed or recreated."
+  },
+  {
+   "id": "d06",
+   "lang": "en",
+   "text": "A Docker network lets containers reach each other by name; containers on the same user-defined bridge network resolve each other's hostnames."
+  },
+  {
+   "id": "d07",
+   "lang": "en",
+   "text": "An index fund tracks a market index such as the S&P 500 and offers broad diversification at a low fee compared with actively managed funds."
+  },
+  {
+   "id": "d08",
+   "lang": "pt",
+   "text": "A reserva de emergência deve cobrir de três a seis meses das despesas mensais e ficar em uma aplicação com liquidez diária."
+  },
+  {
+   "id": "d09",
+   "lang": "en",
+   "text": "Adults are advised to get at least 150 minutes of moderate aerobic activity per week, such as brisk walking or cycling."
+  },
+  {
+   "id": "d10",
+   "lang": "pt",
+   "text": "Dormir entre sete e nove horas por noite ajuda na memória, no humor e na recuperação muscular."
+  },
+  {
+   "id": "d11",
+   "lang": "en",
+   "text": "Travelers to Japan can use the rail pass for unlimited rides on JR trains, which is cost-effective for long-distance routes between Tokyo and Kyoto."
+  },
+  {
+   "id": "d12",
+   "lang": "pt",
+   "text": "Para visitar Machu Picchu é preciso comprar o ingresso com antecedência e escolher um horário de entrada; o acesso é controlado para proteger o sítio."
+  },
+  {
+   "id": "d13",
+   "lang": "en",
+   "text": "The Berlin Wall fell on 9 November 1989, opening the border between East and West Germany and leading to reunification in 1990."
+  },
+  {
+   "id": "d14",
+   "lang": "pt",
+   "text": "A Proclamação da República no Brasil ocorreu em 15 de novembro de 1889, encerrando o período imperial."
+  },
+  {
+   "id": "d15",
+   "lang": "en",
+   "text": "A non-disclosure agreement (NDA) legally binds parties to keep specified information confidential and usually defines its duration and exceptions."
+  },
+  {
+   "id": "d16",
+   "lang": "en",
+   "text": "To reset your router, hold the reset button for ten seconds until the lights blink; this restores factory settings and erases your Wi-Fi password."
+  },
+  {
+   "id": "d17",
+   "lang": "en",
+   "text": "Overfitting happens when a model memorizes training data and performs poorly on new data; regularization and more data help reduce it."
+  },
+  {
+   "id": "d18",
+   "lang": "en",
+   "text": "Gradient descent updates model parameters in the direction that reduces the loss, with the learning rate controlling the step size."
+  },
+  {
+   "id": "d19",
+   "lang": "en",
+   "text": "A database index speeds up lookups by keeping a sorted structure of column values, at the cost of extra storage and slower writes."
+  },
+  {
+   "id": "d20",
+   "lang": "pt",
+   "text": "Uma transação de banco de dados agrupa operações que devem ser concluídas juntas; se uma falhar, todas são desfeitas (rollback)."
+  },
+  {
+   "id": "d21",
+   "lang": "en",
+   "text": "Jupiter is the largest planet in the Solar System, a gas giant with a Great Red Spot storm larger than Earth."
+  },
+  {
+   "id": "d22",
+   "lang": "en",
+   "text": "Photosynthesis lets plants convert sunlight, water and carbon dioxide into glucose and oxygen inside chloroplasts."
+  },
+  {
+   "id": "d23",
+   "lang": "pt",
+   "text": "O protocolo HTTPS criptografa a comunicação entre navegador e servidor usando TLS, protegendo senhas e dados pessoais."
+  },
+  {
+   "id": "d24",
+   "lang": "en",
+   "text": "git rebase rewrites commit history by replaying commits on top of another branch, while git merge preserves the original history with a merge commit."
+  },
+  {
+   "id": "d25",
+   "lang": "en",
+   "text": "To undo your last commit but keep the changes in your working directory, run git reset --soft HEAD~1."
+  },
+  {
+   "id": "d26",
+   "lang": "en",
+   "text": "A major scale follows the pattern whole, whole, half, whole, whole, whole, half steps; C major has no sharps or flats."
+  },
+  {
+   "id": "d27",
+   "lang": "en",
+   "text": "Checking tire pressure monthly improves fuel economy and safety; the recommended pressure is printed on a sticker inside the driver's door."
+  },
+  {
+   "id": "d28",
+   "lang": "pt",
+   "text": "Para cultivar manjericão, mantenha o vaso em local com sol, regue quando a terra estiver seca e pode as folhas para estimular o crescimento."
+  },
+  {
+   "id": "d29",
+   "lang": "en",
+   "text": "A Kubernetes Deployment manages a set of identical pods and performs rolling updates, replacing old pods gradually with new ones."
+  },
+  {
+   "id": "d30",
+   "lang": "en",
+   "text": "Phishing emails impersonate trusted senders to steal credentials; check the sender address and avoid clicking unexpected links."
+  },
+  {
+   "id": "t01",
+   "lang": "en",
+   "text": "Crepe batter should rest for at least one hour in the fridge; cook thin layers in a hot non-stick pan and flip when the edges lift."
+  },
+  {
+   "id": "t02",
+   "lang": "pt",
+   "text": "Para fazer brigadeiro, misture leite condensado, chocolate em pó e manteiga e cozinhe em fogo baixo até desgrudar do fundo da panela."
+  },
+  {
+   "id": "t03",
+   "lang": "en",
+   "text": "Poetry manages Python project dependencies with a pyproject.toml file and a lock file, and creates virtual environments automatically."
+  },
+  {
+   "id": "t04",
+   "lang": "en",
+   "text": "Docker bind mounts map a host directory into a container path, which is handy for live-editing source code during development."
+  },
+  {
+   "id": "t05",
+   "lang": "en",
+   "text": "A bond fund invests in government and corporate bonds, aiming for steady income with lower volatility than stock funds."
+  },
+  {
+   "id": "t06",
+   "lang": "en",
+   "text": "Strength training twice a week works all major muscle groups and helps preserve bone density and muscle mass in adults."
+  },
+  {
+   "id": "t07",
+   "lang": "en",
+   "text": "The Cuban Missile Crisis of October 1962 brought the United States and the Soviet Union close to nuclear war before a negotiated withdrawal."
+  },
+  {
+   "id": "t08",
+   "lang": "pt",
+   "text": "A Independência do Brasil foi proclamada por Dom Pedro I em 7 de setembro de 1822, às margens do rio Ipiranga."
+  },
+  {
+   "id": "t09",
+   "lang": "en",
+   "text": "To improve Wi-Fi coverage, place the router in a central, elevated spot away from microwaves and thick walls, and use the 5 GHz band for short distances."
+  },
+  {
+   "id": "t10",
+   "lang": "en",
+   "text": "Cross-validation splits data into folds, training on some and testing on others, to estimate how well a model generalizes."
+  },
+  {
+   "id": "t11",
+   "lang": "en",
+   "text": "A primary key uniquely identifies each row in a table and cannot contain null values."
+  },
+  {
+   "id": "t12",
+   "lang": "en",
+   "text": "Saturn is known for its bright rings made of ice and rock, and it is the second largest planet in the Solar System."
+  },
+  {
+   "id": "t13",
+   "lang": "en",
+   "text": "Cellular respiration releases energy from glucose in mitochondria, consuming oxygen and producing carbon dioxide and water."
+  },
+  {
+   "id": "t14",
+   "lang": "en",
+   "text": "To discard all local changes and return to the last commit, run git reset --hard HEAD; this cannot be undone."
+  },
+  {
+   "id": "t15",
+   "lang": "en",
+   "text": "The minor pentatonic scale uses five notes per octave and is common in blues and rock guitar solos."
+  },
+  {
+   "id": "t16",
+   "lang": "en",
+   "text": "Rotating tires every 10,000 km evens out wear and extends their lifespan, especially on front-wheel-drive cars."
+  },
+  {
+   "id": "t17",
+   "lang": "en",
+   "text": "A Kubernetes Service gives a stable IP and DNS name to a set of pods and load-balances traffic between them."
+  },
+  {
+   "id": "t18",
+   "lang": "en",
+   "text": "Two-factor authentication adds a second proof of identity, such as a code from an app, so a stolen password alone is not enough."
+  },
+  {
+   "id": "t19",
+   "lang": "pt",
+   "text": "Um índice em banco de dados acelera consultas, mas ocupa espaço extra e deixa as gravações mais lentas."
+  },
+  {
+   "id": "t20",
+   "lang": "pt",
+   "text": "Um firewall filtra o tráfego de rede segundo regras definidas, bloqueando conexões não autorizadas."
+  }
+ ],
+ "queries": [
+  {
+   "id": "q01",
+   "text": "how do I get light and airy flapjacks?",
+   "gold": "d01",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q02",
+   "text": "receita de pãozinho de queijo mineiro",
+   "gold": "d02",
+   "type": "same-language pt"
+  },
+  {
+   "id": "q03",
+   "text": "short way to create a list by transforming each item",
+   "gold": "d03",
+   "type": "hard negative"
+  },
+  {
+   "id": "q04",
+   "text": "how to keep project libraries separate from system packages in Python",
+   "gold": "d04",
+   "type": "hard negative"
+  },
+  {
+   "id": "q05",
+   "text": "how to keep database files after a container is deleted",
+   "gold": "d05",
+   "type": "hard negative"
+  },
+  {
+   "id": "q06",
+   "text": "how can one container call another by hostname",
+   "gold": "d06",
+   "type": "hard negative"
+  },
+  {
+   "id": "q07",
+   "text": "cheap diversified way to invest in the stock market",
+   "gold": "d07",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q08",
+   "text": "quanto dinheiro guardar para imprevistos?",
+   "gold": "d08",
+   "type": "same-language pt"
+  },
+  {
+   "id": "q09",
+   "text": "how much exercise per week is recommended for adults?",
+   "gold": "d09",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q10",
+   "text": "how many hours of sleep do I need?",
+   "gold": "d10",
+   "type": "cross-lingual"
+  },
+  {
+   "id": "q11",
+   "text": "como usar o passe de trem no Japão?",
+   "gold": "d11",
+   "type": "cross-lingual"
+  },
+  {
+   "id": "q12",
+   "text": "do I need to book in advance to see the Inca citadel?",
+   "gold": "d12",
+   "type": "cross-lingual"
+  },
+  {
+   "id": "q13",
+   "text": "when did the wall between East and West Germany come down?",
+   "gold": "d13",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q14",
+   "text": "quando o Brasil deixou de ser monarquia?",
+   "gold": "d14",
+   "type": "same-language pt"
+  },
+  {
+   "id": "q15",
+   "text": "contract that stops partners from sharing secrets",
+   "gold": "d15",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q16",
+   "text": "my wifi box is broken how do I factory reset it",
+   "gold": "d16",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q17",
+   "text": "model works great in training but fails on new data",
+   "gold": "d17",
+   "type": "hard negative"
+  },
+  {
+   "id": "q18",
+   "text": "what does the learning rate do?",
+   "gold": "d18",
+   "type": "hard negative"
+  },
+  {
+   "id": "q19",
+   "text": "why would adding an index make inserts slower",
+   "gold": "d19",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q20",
+   "text": "o que acontece se uma etapa de uma transação falhar?",
+   "gold": "d20",
+   "type": "same-language pt"
+  },
+  {
+   "id": "q21",
+   "text": "biggest planet with a giant storm",
+   "gold": "d21",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q22",
+   "text": "how do plants make food from light?",
+   "gold": "d22",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q23",
+   "text": "como saber se um site é seguro para digitar minha senha?",
+   "gold": "d23",
+   "type": "hard negative"
+  },
+  {
+   "id": "q24",
+   "text": "difference between rebasing and merging",
+   "gold": "d24",
+   "type": "hard negative"
+  },
+  {
+   "id": "q25",
+   "text": "I committed too early, how do I take the commit back but keep my edits?",
+   "gold": "d25",
+   "type": "hard negative"
+  },
+  {
+   "id": "q26",
+   "text": "notes in a scale with no sharps",
+   "gold": "d26",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q27",
+   "text": "how often should I check my car's air pressure?",
+   "gold": "d27",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q28",
+   "text": "como cuidar de uma plantinha de manjericão?",
+   "gold": "d28",
+   "type": "same-language pt"
+  },
+  {
+   "id": "q29",
+   "text": "how do pods get updated without downtime?",
+   "gold": "d29",
+   "type": "paraphrase"
+  },
+  {
+   "id": "q30",
+   "text": "email pretending to be my bank asking for my password",
+   "gold": "d30",
+   "type": "hard negative"
+  },
+  {
+   "id": "h01",
+   "text": "how many minutes should pancake batter rest?",
+   "gold": "d01",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h02",
+   "text": "em que temperatura assar pão de queijo?",
+   "gold": "d02",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h03",
+   "text": "what does python -m venv .venv do?",
+   "gold": "d04",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h04",
+   "text": "what happens to my data when a docker container is recreated and uses a volume",
+   "gold": "d05",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h05",
+   "text": "fund that follows the S&P 500 with a low fee",
+   "gold": "d07",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h06",
+   "text": "recommended weekly minutes of aerobic activity",
+   "gold": "d09",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h07",
+   "text": "what did the fall of the Berlin wall lead to",
+   "gold": "d13",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h08",
+   "text": "data da proclamação da república",
+   "gold": "d14",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h09",
+   "text": "factory reset a router erases the wifi password",
+   "gold": "d16",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h10",
+   "text": "regularization to prevent overfitting",
+   "gold": "d17",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h11",
+   "text": "index trade-off slower writes",
+   "gold": "d19",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h12",
+   "text": "which planet has the Great Red Spot",
+   "gold": "d21",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h13",
+   "text": "chloroplasts turn light into glucose and oxygen",
+   "gold": "d22",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h14",
+   "text": "undo last commit but keep my changes",
+   "gold": "d25",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h15",
+   "text": "which scale has no sharps or flats",
+   "gold": "d26",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h16",
+   "text": "where is the recommended tire pressure printed",
+   "gold": "d27",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h17",
+   "text": "rolling updates of pods in a Deployment",
+   "gold": "d29",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h18",
+   "text": "how to spot a phishing sender",
+   "gold": "d30",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h19",
+   "text": "o que é feito rollback quando uma transação falha",
+   "gold": "d20",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h20",
+   "text": "TLS protege senhas entre navegador e servidor",
+   "gold": "d23",
+   "type": "detail vs twin"
+  },
+  {
+   "id": "h21",
+   "text": "quantos minutos de atividade aeróbica por semana?",
+   "gold": "d09",
+   "type": "cross-lingual hard"
+  },
+  {
+   "id": "h22",
+   "text": "when did Brazil become a republic?",
+   "gold": "d14",
+   "type": "cross-lingual hard"
+  },
+  {
+   "id": "h23",
+   "text": "como restaurar o roteador para as configurações de fábrica?",
+   "gold": "d16",
+   "type": "cross-lingual hard"
+  },
+  {
+   "id": "h24",
+   "text": "at what temperature do I bake cheese bread?",
+   "gold": "d02",
+   "type": "cross-lingual hard"
+  }
+ ]
+}

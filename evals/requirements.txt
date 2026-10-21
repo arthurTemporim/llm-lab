@@ -1,0 +1,5 @@
+deepeval==4.3.1
+httpx
+numpy
+pillow
+pyyaml
