@@ -47,6 +47,7 @@ Most Open WebUI settings are stored in its database after the first start, and t
 - **Without make:** `docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d` in the module folder.
 - **Limit GPUs:** set `NVIDIA_VISIBLE_DEVICES` in `ollama/.env`, or use `device_ids` instead of `count: all` in the override.
 - **CPU:** prefer small models (a few billion parameters) with low parallelism.
+- **`vllm` is GPU only.** Its NVIDIA reservation is in the base `docker-compose.yml` (no override file), so `GPU=0` does not turn it off. It needs a card with compute capability 7.5+ (the Tesla P4 does not qualify): set `VLLM_GPU_ID` to the index shown by `nvidia-smi -L`.
 
 ## Changing ports
 

@@ -20,6 +20,7 @@ flowchart TB
     subgraph L2["Inference"]
         oll["ollama"]
         lai["localai"]
+        vl["vllm"]
     end
     subgraph L1["Foundation: common-services"]
         pg[("postgres + pgvector")]
@@ -36,7 +37,7 @@ flowchart TB
 | Layer | Modules | Responsibility |
 |---|---|---|
 | Foundation | `common-services` | Creates the network. Provides database, cache/queues and object storage. |
-| Inference | `ollama`, `localai` | Load models and serve completions and embeddings over HTTP. |
+| Inference | `ollama`, `localai`, `vllm` | Load models and serve completions and embeddings over HTTP. |
 | Gateway & observability | `litellm`, `langfuse` | One API in front of many backends; traces, prompts and evals. |
 | Interfaces | `openwebui`, `langflow`, `notebooks` | Chat, visual flows and code experiments. |
 
@@ -55,6 +56,7 @@ flowchart LR
     cs["common-services"]
     oll["ollama"] --> cs
     lai["localai"] --> cs
+    vl["vllm"] --> cs
     owui["openwebui"] --> cs
     owui -. runtime .-> oll
     lflow["langflow"] --> cs
@@ -62,7 +64,7 @@ flowchart LR
     nb["notebooks"] --> cs
     nb -. runtime .-> oll
     llm["litellm"] --> cs
-    llm -. optional .-> oll & lai
+    llm -. optional .-> oll & lai & vl
     lf["langfuse"] --> cs
     llm -. optional callback .-> lf
 ```
@@ -88,6 +90,7 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 | Postgres databases | `common-services` named volume, mounted at `PGDATA` |
 | Redis, MinIO objects | `common-services` named volumes |
 | Ollama models | `ollama` named volume |
+| vLLM models (Hugging Face cache) | `vllm_huggingface` named volume |
 | LocalAI models and backends | bind mounts in `modules/localai` (git-ignored) |
 | Open WebUI data | `openwebui` named volume |
 | Langflow flows | Postgres; extra state in a named volume |
@@ -105,7 +108,7 @@ Every host port is a `*_PORT` variable in the module's `.env`. Check what is alr
 
 ## GPU
 
-`ollama`, `localai` and `openwebui` run on CPU by default. Their `docker-compose.gpu.yml` override reserves NVIDIA GPUs, and the Makefile adds it when the NVIDIA runtime is detected. They share the GPU but compete for VRAM; on small GPUs run one inference server at a time. See [CONFIGURATIONS.md](CONFIGURATIONS.md).
+`vllm` is GPU only and always reserves one card (see [CONFIGURATIONS.md](CONFIGURATIONS.md)). `ollama`, `localai` and `openwebui` run on CPU by default. Their `docker-compose.gpu.yml` override reserves NVIDIA GPUs, and the Makefile adds it when the NVIDIA runtime is detected. They share the GPU but compete for VRAM; on small GPUs run one inference server at a time. See [CONFIGURATIONS.md](CONFIGURATIONS.md).
 
 ## Design decisions
 

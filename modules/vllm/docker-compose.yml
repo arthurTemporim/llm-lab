@@ -1,0 +1,39 @@
+# GPU only: vLLM has no CPU mode in this image, so the NVIDIA reservation lives in this file
+# and there is no docker-compose.gpu.yml. One process serves one model (see VLLM_MODEL).
+services:
+  vllm:
+    image: vllm/vllm-openai:v0.32.0-cu129
+    container_name: vllm
+    restart: unless-stopped
+    env_file: .env
+    # The image entrypoint is `vllm serve`; the first argument is the model.
+    command: ${VLLM_MODEL} --max-model-len ${VLLM_MAX_MODEL_LEN} --gpu-memory-utilization ${VLLM_GPU_MEMORY_UTILIZATION} ${VLLM_EXTRA_ARGS:-}
+    ipc: host
+    ports:
+      - "${VLLM_HOST_PORT:-8000}:8000"
+    volumes:
+      - huggingface:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      # The first start downloads the model and compiles kernels.
+      start_period: 600s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              # vLLM needs compute capability 7.5+. Pin the card it may use (see VLLM_GPU_ID).
+              device_ids: ["${VLLM_GPU_ID:-0}"]
+              capabilities: [gpu]
+    networks:
+      - lang
+
+volumes:
+  huggingface:
+
+networks:
+  lang:
+    external: true

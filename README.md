@@ -7,6 +7,7 @@
 
 [![Ollama](https://img.shields.io/badge/Ollama-000000?logo=ollama&logoColor=white)](modules/ollama)
 [![LocalAI](https://img.shields.io/badge/LocalAI-7C3AED)](modules/localai)
+[![vLLM](https://img.shields.io/badge/vLLM-30A2FF)](modules/vllm)
 [![Open WebUI](https://img.shields.io/badge/Open_WebUI-111827)](modules/openwebui)
 [![Langflow](https://img.shields.io/badge/Langflow-E11D48)](modules/langflow)
 [![Jupyter](https://img.shields.io/badge/Jupyter-F37626?logo=jupyter&logoColor=white)](modules/notebooks)
@@ -26,6 +27,7 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 | [docs/MODULES.md](docs/MODULES.md) | see what each module does and the rules for new ones |
 | [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md) | learn how configuration, secrets, GPU/CPU and upgrades work |
 | [docs/MODELS.md](docs/MODELS.md) | see the models served through LiteLLM, their settings, links and when to use each |
+| [docs/HUGGINGFACE_MODELS.md](docs/HUGGINGFACE_MODELS.md) | pick uncensored chat, vision, decision, speech and embedding models from Hugging Face for vLLM |
 | [docs/MODEL_EVAL_REPORT.md](docs/MODEL_EVAL_REPORT.md) | compare the chat, embedding and decision models (results of [evals/](evals/README.md)) |
 | [CLAUDE.md](CLAUDE.md) | give AI coding agents the project's conventions and gotchas |
 
@@ -43,6 +45,7 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 | `common-services` | Postgres + pgvector, Redis, MinIO. Creates the shared network. |
 | `ollama` | Run and serve open-weight models |
 | `localai` | OpenAI-compatible inference server |
+| `vllm` | High-throughput Hugging Face model server (NVIDIA GPU only) |
 | `openwebui` | Chat UI |
 | `langflow` | Visual builder for flows, agents and RAG |
 | `notebooks` | Jupyter with LangChain |
@@ -96,7 +99,7 @@ Published ports, URLs and default credentials live in each module's `docker-comp
 
 ### GPU or CPU
 
-The Makefile detects the NVIDIA Container Toolkit and adds each module's `docker-compose.gpu.yml` (`ollama`, `localai`, `openwebui`) when it is found. Force it with `make GPU=1 ...` or `make GPU=0 ...`. On CPU prefer small models. See [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md).
+The Makefile detects the NVIDIA Container Toolkit and adds each module's `docker-compose.gpu.yml` (`ollama`, `localai`, `openwebui`) when it is found. Force it with `make GPU=1 ...` or `make GPU=0 ...`. `vllm` is GPU only and always reserves a GPU. On CPU prefer small models. See [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md).
 
 ## Makefile
 
@@ -114,7 +117,7 @@ Run `make help` for the full list. Common targets:
 
 ## Helper scripts
 
-The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, creating the Postgres databases, generating random secrets for new `.env` files and checking values that must match.
+The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM, creating the Postgres databases, generating random secrets for new `.env` files and checking values that must match.
 
 ## Configuration
 

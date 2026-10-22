@@ -25,7 +25,7 @@ Follow the module pattern; look at an existing module before adding or editing o
 - Pinned image tags. The only exception is MinIO (`latest`); don't add more.
 - `env_file: .env` in every service. Use `${VAR:-default}` only for host ports and derived values.
 - Every host port is a `*_PORT` variable in `example.env`; check other modules for clashes. Admin-only ports bind to `127.0.0.1`.
-- The base compose file must run on CPU. GPU config goes in `docker-compose.gpu.yml`.
+- The base compose file must run on CPU. GPU config goes in `docker-compose.gpu.yml`. Exception: `vllm` is GPU only (reservation in its base file).
 - Every new env var goes in `example.env` with a safe default and a comment (`CHANGE_ME` for generated secrets). Never commit or print real secrets.
 - Use shared services (Postgres, Redis, MinIO, Ollama) by container name on `lang`. No module-local copies. New databases go in `POSTGRES_DATABASES` in `modules/common-services/example.env`.
 - Adding a module also means updating the `Makefile` `MODULES` list and the docs listed above.

@@ -1,5 +1,5 @@
 # llm-lab: single entry point. Run `make help`.
-MODULES := common-services ollama localai openwebui langflow notebooks litellm langfuse
+MODULES := common-services ollama localai vllm openwebui langflow notebooks litellm langfuse
 OTHERS  := $(filter-out common-services,$(MODULES))
 
 .PHONY: help init start build down create-envs check-env databases logs $(MODULES)
