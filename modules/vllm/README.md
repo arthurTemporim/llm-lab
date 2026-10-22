@@ -121,6 +121,7 @@ Upgrade: change the image tag, then `docker compose pull && docker compose up -d
 | Symptom | Cause / fix |
 |---|---|
 | `CUDA out of memory` or `No available memory for the cache blocks` | Lower `VLLM_MAX_MODEL_LEN`, use `--quantization fp8` or `bitsandbytes`, or stop Ollama/LocalAI: they share the card and vLLM reserves its share up front |
+| `max_num_seqs (256) exceeds available Mamba cache blocks (N)` | Hybrid Mamba models (Qwen 3.5) need one cache block per sequence. Add `--max-num-seqs <N or less>` to `VLLM_EXTRA_ARGS`, or raise `VLLM_GPU_MEMORY_UTILIZATION` |
 | Fails on the Tesla P4 | vLLM needs compute capability 7.5+; the P4 is 6.1. Set `VLLM_GPU_ID` to the RTX 3060 |
 | `could not select device driver "nvidia"` | Install the NVIDIA Container Toolkit. This module has no CPU fallback |
 | CUDA driver too old | The image targets CUDA 12.9. Update the driver, or pick an older image tag |
