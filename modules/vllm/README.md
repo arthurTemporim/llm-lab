@@ -69,7 +69,7 @@ Edit `modules/vllm/.env` (created by `make create-envs` from `example.env`), the
 | `VLLM_MODEL` | `huihui-ai/Huihui-Qwen3.5-4B-abliterated` | Hugging Face repo to serve. One model per process |
 | `VLLM_MAX_MODEL_LEN` | `8192` | Context window in tokens. Lower it when VRAM runs out |
 | `VLLM_GPU_MEMORY_UTILIZATION` | `0.90` | Share of the GPU's VRAM vLLM reserves up front |
-| `VLLM_EXTRA_ARGS` | `--quantization fp8` | Extra `vllm serve` flags (quantization, `--runner pooling` for embeddings, tool parsers) |
+| `VLLM_EXTRA_ARGS` | `--quantization fp8 --max-num-seqs 64 --enable-auto-tool-choice --tool-call-parser qwen3_coder` | Extra `vllm serve` flags (quantization, `--runner pooling` for embeddings, tool parsers) |
 | `VLLM_API_KEY` | `sk-CHANGE_ME` | **Secret.** Key clients must send. Replaced by a random value in `make create-envs` |
 | `HF_TOKEN` | empty | Hugging Face token, only for gated or private repos |
 | `VLLM_GPU_ID` | `0` | GPU index (`nvidia-smi -L`). Must be a card with compute capability 7.5 or newer |
