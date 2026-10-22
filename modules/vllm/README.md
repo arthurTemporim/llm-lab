@@ -7,7 +7,7 @@ High-throughput inference server for Hugging Face models, with an OpenAI-compati
 | | |
 |---|---|
 | Documentation | [vLLM](https://docs.vllm.ai/), [supported models](https://docs.vllm.ai/en/latest/models/supported_models/), [OpenAI-compatible server](https://docs.vllm.ai/en/latest/serving/openai_compatible_server/) |
-| Image | `vllm/vllm-openai:v0.32.0-cu129` (needs an NVIDIA driver for CUDA 12.9 or newer) |
+| Image | `vllm/vllm-openai:v0.32.0` (CUDA 13 build, needs NVIDIA driver 580 or newer; the `-cu129` tag ships a CUDA 13 `torchcodec` and fails to start) |
 | Container(s) | `vllm` |
 | GPU | Required (the reservation is in `docker-compose.yml`; there is no CPU mode and no `docker-compose.gpu.yml`) |
 | Make target | `make vllm` |
@@ -41,7 +41,14 @@ To download models ahead of time, edit the list in `scripts/vllm_pull_model.sh` 
 ./scripts/vllm_pull_model.sh
 ```
 
-Check that it works:
+Check that it works with the helper script (health, served model, one chat completion; needs `jq`):
+
+```sh
+./scripts/vllm_send_prompt.sh
+./scripts/vllm_send_prompt.sh "Why the sky is blue?"
+```
+
+Or by hand:
 
 ```sh
 curl http://localhost:8000/health
@@ -79,6 +86,19 @@ Sizing rule: weights take about 2 bytes per parameter in bf16, 1 in fp8 and 0.55
 | Used by | `litellm` | Add a model with provider `openai/<hugging-face-id>`, `api_base` `http://vllm:8000/v1` and `api_key` = `VLLM_API_KEY` |
 | Used by | `openwebui` | Admin settings, OpenAI connection with URL `http://vllm:8000/v1` and the key |
 | Used by | `langflow`, `notebooks` | OpenAI-compatible components, base URL `http://vllm:8000/v1` |
+
+### Open WebUI
+
+Open WebUI stores connections in its own database after the first start, so add vLLM in the UI (not in `.env`):
+
+1. Start both: `make vllm openwebui` (vLLM must be up, or the model list stays empty).
+2. Open http://localhost:3000, sign in as admin, go to **Admin Settings → Connections**.
+3. Next to **OpenAI API** press **+** and fill in:
+   * URL: `http://vllm:8000/v1` (the container name, not `localhost`)
+   * Key: the `VLLM_API_KEY` value from `modules/vllm/.env`
+4. Save. The model (`VLLM_MODEL`) now shows in the model picker of a new chat.
+
+After switching `VLLM_MODEL`, reload the page: the picker shows whatever vLLM serves now.
 
 ## Storage
 

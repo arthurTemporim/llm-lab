@@ -117,7 +117,7 @@ Run `make help` for the full list. Common targets:
 
 ## Helper scripts
 
-The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM, creating the Postgres databases, generating random secrets for new `.env` files and checking values that must match.
+The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, generating random secrets for new `.env` files and checking values that must match.
 
 ## Configuration
 

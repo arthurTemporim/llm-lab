@@ -21,7 +21,7 @@ set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
 volume=vllm_huggingface # <compose project>_<volume> of modules/vllm
-image=vllm/vllm-openai:v0.32.0-cu129 # same image as modules/vllm/docker-compose.yml
+image=vllm/vllm-openai:v0.32.0 # same image as modules/vllm/docker-compose.yml
 
 # HF_TOKEN is only needed for gated repos
 HF_TOKEN="$(grep -E '^HF_TOKEN=' "$root/modules/vllm/.env" 2>/dev/null | cut -d= -f2- || true)"

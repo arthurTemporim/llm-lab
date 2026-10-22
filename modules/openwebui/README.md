@@ -57,7 +57,7 @@ Edit `modules/openwebui/.env` (created by `make create-envs` from `example.env`)
 | `DATA_DIR` | `./data` | Data directory inside the container |
 | `WEBUI_URL`, `WEBUI_NAME`, `DEFAULT_PROMPT_SUGGESTIONS`, `CORS_ALLOW_ORIGIN`, `USE_CUDA_DOCKER`, `IMAGE_GENERATION_MODEL` | commented out | Optional, see `example.env` |
 
-To add LocalAI or LiteLLM: Admin Settings, Connections, add an OpenAI connection (`http://localai:8080/v1` or `http://litellm:4000/v1`) with its API key.
+To add LocalAI, LiteLLM or vLLM: Admin Settings, Connections, add an OpenAI connection (`http://localai:8080/v1`, `http://litellm:4000/v1` or `http://vllm:8000/v1`) with its API key.
 
 ## Connections
 

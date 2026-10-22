@@ -2,7 +2,7 @@
 # and there is no docker-compose.gpu.yml. One process serves one model (see VLLM_MODEL).
 services:
   vllm:
-    image: vllm/vllm-openai:v0.32.0-cu129
+    image: vllm/vllm-openai:v0.32.0
     container_name: vllm
     restart: unless-stopped
     env_file: .env
