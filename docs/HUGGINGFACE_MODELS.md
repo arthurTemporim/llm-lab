@@ -29,7 +29,7 @@ The KV cache grows with `VLLM_MAX_MODEL_LEN`. With `VLLM_GPU_MEMORY_UTILIZATION=
 |---|---|---|---|---|---|---|---|
 | 1 | [huihui-ai/Huihui-gemma-4-12B-it-abliterated](https://huggingface.co/huihui-ai/Huihui-gemma-4-12B-it-abliterated) | 11.96B | 23.9 GB bf16 | 131K | Apache 2.0 | 4-bit only (about 7 GB) | Abliterated Gemma 4, same base as the lab's `gemma4:12b`; also reads images. 226 likes. The architecture is named `Gemma4UnifiedForConditionalGeneration`, not the name on vLLM's list: test it. A ready 4-bit build exists ([nicklas373/...-AWQ](https://huggingface.co/nicklas373/Huihui-gemma-4-12B-it-abliterated-AWQ), 8.3 GB) but has no likes |
 | 2 | [huihui-ai/Huihui-Qwen3.5-9B-abliterated](https://huggingface.co/huihui-ai/Huihui-Qwen3.5-9B-abliterated) | 9.65B | 19.3 GB bf16 | 262K | Apache 2.0 | 4-bit (about 5.5 GB); fp8 is too tight | Abliterated Qwen 3.5 with vision, thinking model. 154 likes. Supported architecture |
-| 3 | [dphn/Dolphin3.0-Llama3.1-8B](https://huggingface.co/dphn/Dolphin3.0-Llama3.1-8B) | 8.03B | 16.1 GB bf16 | 131K | Llama 3.1 | fp8 (about 9 GB) | **Module default.** Uncensored by fine-tuning: it follows your system prompt. 407 likes, plain Llama architecture, safest first test |
+| 3 | [dphn/Dolphin3.0-Llama3.1-8B](https://huggingface.co/dphn/Dolphin3.0-Llama3.1-8B) | 8.03B | 16.1 GB bf16 | 131K | Llama 3.1 | fp8 (about 9 GB) | Uncensored by fine-tuning: it follows your system prompt. 407 likes, plain Llama architecture, the safest fallback if another model fails to load |
 | 4 | [NousResearch/Hermes-4-14B](https://huggingface.co/NousResearch/Hermes-4-14B) | about 14.8B (29.5 GB at 2 bytes) | 29.5 GB bf16 | 41K | Apache 2.0 | 4-bit (about 8 GB) | Few refusals by design, not abliterated. Qwen3 based, hybrid reasoning. 195 likes. The repo metadata has no parameter count; the figure is derived from the size |
 | 5 | [cognitivecomputations/Dolphin-Mistral-24B-Venice-Edition](https://huggingface.co/cognitivecomputations/Dolphin-Mistral-24B-Venice-Edition) | 24.01B | 48.0 GB bf16 | 131K | Apache 2.0 | **No** (4-bit is about 13 GB + cache; needs 24 GB at 4-bit, 32+ GB at fp8) | Best quality of the five, for a bigger GPU. 757 likes |
 
@@ -103,7 +103,7 @@ Download the models you want first with `scripts/vllm_pull_model.sh` (edit its l
 
 | Goal | `VLLM_MODEL` | `VLLM_EXTRA_ARGS` | Endpoint |
 |---|---|---|---|
-| Chat (default) | `dphn/Dolphin3.0-Llama3.1-8B` | `--quantization fp8` | `/v1/chat/completions` |
+| Chat (default) | `huihui-ai/Huihui-Qwen3.5-4B-abliterated` | `--quantization fp8` | `/v1/chat/completions` |
 | Bigger chat in 4-bit | `huihui-ai/Huihui-Qwen3.5-9B-abliterated` | `--quantization bitsandbytes` | `/v1/chat/completions` |
 | Vision | `huihui-ai/Huihui-Qwen3-VL-8B-Instruct-abliterated` | `--quantization fp8` (and `VLLM_MAX_MODEL_LEN=4096`) | `/v1/chat/completions` with an `image_url` part |
 | Speech-to-text | `openai/whisper-large-v3-turbo` | empty | `/v1/audio/transcriptions` |

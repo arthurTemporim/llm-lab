@@ -48,7 +48,7 @@ curl http://localhost:8000/health
 curl http://localhost:8000/v1/models -H "Authorization: Bearer $VLLM_API_KEY"
 curl http://localhost:8000/v1/chat/completions \
   -H "Authorization: Bearer $VLLM_API_KEY" -H "Content-Type: application/json" \
-  -d '{"model":"dphn/Dolphin3.0-Llama3.1-8B","messages":[{"role":"user","content":"Hello"}]}'
+  -d '{"model":"huihui-ai/Huihui-Qwen3.5-4B-abliterated","messages":[{"role":"user","content":"Hello"}]}'
 ```
 
 Switch model: edit `VLLM_MODEL` (and `VLLM_EXTRA_ARGS`) in `.env`, then `make vllm`. The model name clients send is the Hugging Face id, unless you set `--served-model-name`.
@@ -59,7 +59,7 @@ Edit `modules/vllm/.env` (created by `make create-envs` from `example.env`), the
 
 | Variable | Default | Description |
 |---|---|---|
-| `VLLM_MODEL` | `dphn/Dolphin3.0-Llama3.1-8B` | Hugging Face repo to serve. One model per process |
+| `VLLM_MODEL` | `huihui-ai/Huihui-Qwen3.5-4B-abliterated` | Hugging Face repo to serve. One model per process |
 | `VLLM_MAX_MODEL_LEN` | `8192` | Context window in tokens. Lower it when VRAM runs out |
 | `VLLM_GPU_MEMORY_UTILIZATION` | `0.90` | Share of the GPU's VRAM vLLM reserves up front |
 | `VLLM_EXTRA_ARGS` | `--quantization fp8` | Extra `vllm serve` flags (quantization, `--runner pooling` for embeddings, tool parsers) |
