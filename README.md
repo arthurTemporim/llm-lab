@@ -112,7 +112,7 @@ Run `make help` for the full list. Common targets:
 | `make start-all` / `make build-all` | Start or build every module |
 | `make create-envs` | Copy each `example.env` to `.env` (never overwrites) |
 | `make <module>` | Start a module (`common-services` is started first automatically) |
-| `make <module>-start` / `-build` | Start a module (same as `make <module>`) or only build its images |
+| `make start-<module>` / `build-<module>` | Start a module (same as `make <module>`) or only build its images |
 | `make <module>-logs` / `-down` | Follow logs or stop any module |
 | `make databases` | Create the Postgres databases if missing (idempotent) |
 | `make check-env` | Verify values that must match across modules |
