@@ -57,7 +57,7 @@ Edit `modules/langfuse/.env` (created by `make create-envs` from `example.env`),
 | `TELEMETRY_ENABLED` | `false` | Anonymous usage telemetry |
 | `LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES` | `false` | Experimental features |
 | `AUTH_DISABLE_SIGNUP` | `false` | Disable public sign-up once your user exists |
-| `DATABASE_URL` | `postgresql://lang:lang@postgres:5432/langfuse` | Shared Postgres |
+| `DATABASE_URL` | `postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@postgres:5432/langfuse` | Shared Postgres |
 | `REDIS_HOST` / `REDIS_PORT` | `redis` / `6379` | Shared Redis (no password) |
 | `CLICKHOUSE_USER` / `CLICKHOUSE_PASSWORD` | `clickhouse` / `clickhouse` | ClickHouse credentials |
 | `CLICKHOUSE_URL` / `CLICKHOUSE_MIGRATION_URL` | `http://clickhouse:8123` / `clickhouse://clickhouse:9000` | ClickHouse HTTP and native endpoints |

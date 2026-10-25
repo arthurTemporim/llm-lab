@@ -70,7 +70,7 @@ Edit `modules/litellm/.env` (created by `make create-envs` from `example.env`), 
 |---|---|---|
 | `LITELLM_PORT` | `4000` | Host port of the gateway |
 | `PROMETHEUS_PORT` | `9090` | Host port of Prometheus |
-| `DATABASE_URL` | `postgresql://lang:lang@postgres:5432/litellm` | Shared Postgres |
+| `DATABASE_URL` | `postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@postgres:5432/litellm` | Shared Postgres |
 | `STORE_MODEL_IN_DB` | `False` | `True` also loads models added in the UI; a model in both places gets two deployments |
 | `OLLAMA_API_BASE` | `http://ollama:11434` | Ollama used for discovery and as `api_base` of the generated models |
 | `OLLAMA_WAIT_SECONDS` | `60` | How long `litellm-init` waits for Ollama |

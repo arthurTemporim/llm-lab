@@ -5,7 +5,7 @@ OTHERS  := $(filter-out common-services,$(MODULES))
 CORE    := common-services ollama openwebui
 
 .PHONY: help init start start-all build build-all down create-envs check-env databases logs $(MODULES) \
-	$(addprefix start-,$(MODULES)) $(addprefix build-,$(MODULES))
+	$(addprefix start-,$(MODULES)) $(addprefix build-,$(MODULES)) $(addprefix logs-,$(MODULES))
 
 modules_dir := $(CURDIR)/modules/
 scripts_dir := $(CURDIR)/scripts/
@@ -23,6 +23,7 @@ help:
 	@echo "  make start-<module>   same as make <module>"
 	@echo "  make build-<module>   build a module's images without starting it"
 	@echo "  make <module>-logs    follow a module's logs"
+	@echo "  make logs-<module>    same as make <module>-logs"
 	@echo "  make <module>-down    stop a module (data is kept)"
 	@echo ""
 	@echo "  make init             create-envs + build + start + pull ollama models"
@@ -103,6 +104,8 @@ $(addprefix build-,$(MODULES)): build-%: create-envs
 
 %-logs:
 	@$(call compose,$*) logs -f
+
+$(addprefix logs-,$(MODULES)): logs-%: %-logs
 
 %-down:
 	@$(call compose,$*) down

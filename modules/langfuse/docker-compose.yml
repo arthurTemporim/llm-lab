@@ -5,7 +5,7 @@
 # .env is loaded as a whole (env_file); the block below only maps/derives values.
 x-langfuse-env: &langfuse-env
   NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:${LANGFUSE_PORT:-3001}}
-  DATABASE_URL: ${DATABASE_URL:-postgresql://lang:lang@postgres:5432/langfuse}
+  DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL in .env}
   SALT: ${SALT:?set SALT in .env}
   ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env}
   TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-false}
