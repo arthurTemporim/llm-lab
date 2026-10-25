@@ -1,0 +1,91 @@
+# Input of generate_config.py, which writes LiteLLM's config.yaml at every
+# `make litellm` (service `litellm-init`). Every model pulled in Ollama is added
+# automatically; this file only holds what differs from the detected values.
+#
+# How an Ollama model becomes a LiteLLM model:
+#   1. mode = model_info.mode from `models` below, else "embedding" when Ollama
+#      reports the embedding capability, else "chat".
+#   2. litellm_params.model = "<defaults.<mode>.provider>/<ollama name>",
+#      api_base = OLLAMA_API_BASE, plus defaults.<mode>.litellm_params.
+#   3. model_info is filled from /api/show: max_input_tokens (num_ctx for chat,
+#      capped to the model's context length), max_output_tokens, output_vector_size
+#      and supports_vision / supports_function_calling / supports_reasoning.
+#   4. The matching entry in `models` is deep-merged on top (it wins).
+#
+# Keys in `models` are Ollama names; a name without a tag means ":latest".
+# `enabled: false` leaves a pulled model out of LiteLLM.
+#
+# keep_alive overrides OLLAMA_KEEP_ALIVE for requests that come through the
+# gateway. Big or rarely used models get short values to free VRAM
+# (RTX 3060 12 GB + Tesla P4 8 GB).
+
+defaults:
+  # Reasoning models: keep max_tokens high, thinking counts against it
+  chat:
+    provider: ollama_chat
+    litellm_params:
+      num_ctx: 16384
+      max_tokens: 8192
+      keep_alive: 5m
+      timeout: 300
+      num_retries: 2
+  # Embeddings use the ollama/ prefix, not ollama_chat/
+  embedding:
+    provider: ollama
+    litellm_params:
+      keep_alive: 5m
+      timeout: 120
+      num_retries: 2
+  # Decision models (classifiers). Call POST /v1/systemone, not chat.
+  # Provider `typesafe/` speaks the same System One API that Ollama serves.
+  # The api_key is a dummy: Ollama needs none, LiteLLM requires a value.
+  # Ollama cannot tell them apart from chat models: set model_info.mode below.
+  decisions:
+    provider: typesafe
+    litellm_params:
+      api_key: ollama
+      keep_alive: 5m
+      timeout: 120
+      num_retries: 2
+
+models:
+  # ---- Chat
+  gemma4:12b:
+    litellm_params: { keep_alive: 15m }
+  qwen3-vl:8b:
+    litellm_params: { keep_alive: 3m }
+  llama3.2:3b:              # no thinking, short answers
+    litellm_params: { max_tokens: 4096 }
+
+  # ---- Embeddings
+  qwen3-embedding:8b:
+    model_info: { max_input_tokens: 8192 }
+  # Prefix the text with "search_query: " or "search_document: " (done by the client)
+  nomic-embed-text-v2-moe:latest:
+    litellm_params: { keep_alive: 10m }
+    model_info: { max_input_tokens: 512 }
+  embeddinggemma:300m:
+    litellm_params: { keep_alive: 10m }
+    model_info: { max_input_tokens: 2048 }
+
+  # ---- Decision models
+  tev1:4b:                  # ~2K token context, short inputs
+    litellm_params: { keep_alive: 15m }
+    model_info: { mode: decisions }
+  nimble:9b:                # 8K token context, rarely used: short keep_alive
+    litellm_params: { keep_alive: 2m }
+    model_info: { mode: decisions }
+
+# Non-Ollama models (LocalAI, vLLM, cloud), copied as-is into model_list.
+extra_models: []
+#  - model_name: qwen-vllm
+#    litellm_params:
+#      model: openai/Qwen/Qwen3-8B
+#      api_base: http://vllm:8000/v1
+#      api_key: os.environ/VLLM_API_KEY
+
+# Copied as-is into config.yaml (litellm_settings, general_settings,
+# router_settings, environment_variables).
+# Langfuse tracing: add the LANGFUSE_* keys to .env and uncomment.
+# litellm_settings:
+#   success_callback: ["langfuse"]
