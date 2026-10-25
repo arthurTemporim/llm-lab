@@ -1,24 +1,3 @@
-# Input of generate_config.py, which writes LiteLLM's config.yaml at every
-# `make litellm` (service `litellm-init`). Every model pulled in Ollama is added
-# automatically; this file only holds what differs from the detected values.
-#
-# How an Ollama model becomes a LiteLLM model:
-#   1. mode = model_info.mode from `models` below, else "embedding" when Ollama
-#      reports the embedding capability, else "chat".
-#   2. litellm_params.model = "<defaults.<mode>.provider>/<ollama name>",
-#      api_base = OLLAMA_API_BASE, plus defaults.<mode>.litellm_params.
-#   3. model_info is filled from /api/show: max_input_tokens (num_ctx for chat,
-#      capped to the model's context length), max_output_tokens, output_vector_size
-#      and supports_vision / supports_function_calling / supports_reasoning.
-#   4. The matching entry in `models` is deep-merged on top (it wins).
-#
-# Keys in `models` are Ollama names; a name without a tag means ":latest".
-# `enabled: false` leaves a pulled model out of LiteLLM.
-#
-# keep_alive overrides OLLAMA_KEEP_ALIVE for requests that come through the
-# gateway. Big or rarely used models get short values to free VRAM
-# (RTX 3060 12 GB + Tesla P4 8 GB).
-
 defaults:
   # Reasoning models: keep max_tokens high, thinking counts against it
   chat:
@@ -36,10 +15,6 @@ defaults:
       keep_alive: 5m
       timeout: 120
       num_retries: 2
-  # Decision models (classifiers). Call POST /v1/systemone, not chat.
-  # Provider `typesafe/` speaks the same System One API that Ollama serves.
-  # The api_key is a dummy: Ollama needs none, LiteLLM requires a value.
-  # Ollama cannot tell them apart from chat models: set model_info.mode below.
   decisions:
     provider: typesafe
     litellm_params:
