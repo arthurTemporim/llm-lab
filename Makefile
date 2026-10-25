@@ -1,8 +1,10 @@
 # llm-lab: single entry point. Run `make help`.
 MODULES := common-services ollama localai vllm openwebui langflow notebooks litellm langfuse
 OTHERS  := $(filter-out common-services,$(MODULES))
+# Default set for `make build` and `make start`; the *-all targets use every module.
+CORE    := common-services ollama openwebui
 
-.PHONY: help init start build down create-envs check-env databases logs $(MODULES)
+.PHONY: help init start start-all build build-all down create-envs check-env databases logs $(MODULES)
 
 modules_dir := $(CURDIR)/modules/
 scripts_dir := $(CURDIR)/scripts/
@@ -21,8 +23,10 @@ help:
 	@echo "  make <module>-down    stop a module (data is kept)"
 	@echo ""
 	@echo "  make init             create-envs + build + start + pull ollama models"
-	@echo "  make start            common-services + ollama + localai + openwebui"
-	@echo "  make build            build every module that has a Dockerfile"
+	@echo "  make start            start the core modules: $(CORE)"
+	@echo "  make start-all        start every module"
+	@echo "  make build            build the core modules: $(CORE)"
+	@echo "  make build-all        build every module that has a Dockerfile"
 	@echo "  make down             stop all modules (data is kept)"
 	@echo "  make logs             follow the logs of all running modules"
 	@echo "  make create-envs      example.env -> .env for every module (never overwrites)"
@@ -55,10 +59,16 @@ init: create-envs
 	$(scripts_dir)ollama_pull_model.sh
 	@echo "Init done."
 
-start: ollama localai openwebui
+start: $(CORE)
+	@echo "Finished core start"
+
+start-all: $(MODULES)
 	@echo "Finished full start"
 
 build: create-envs
+	@for m in $(CORE); do $(call compose,$$m) build || exit 1; done
+
+build-all: create-envs
 	@for m in $(MODULES); do $(call compose,$$m) build || exit 1; done
 
 down:

@@ -108,6 +108,8 @@ Run `make help` for the full list. Common targets:
 | Target | Description |
 |---|---|
 | `make init` | Create envs, build, start the core modules, pull models |
+| `make start` / `make build` | Start or build the core modules (`common-services`, `ollama`, `openwebui`) |
+| `make start-all` / `make build-all` | Start or build every module |
 | `make create-envs` | Copy each `example.env` to `.env` (never overwrites) |
 | `make <module>` | Start a module (`common-services` is started first automatically) |
 | `make <module>-logs` / `-down` | Follow logs or stop any module |
