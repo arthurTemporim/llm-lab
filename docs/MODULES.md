@@ -57,7 +57,7 @@ Jupyter playground with LangChain and the Ollama integration. Notebooks are bind
 
 ### litellm
 
-OpenAI-compatible gateway in front of Ollama, LocalAI and cloud providers, with keys, budgets, routing, an admin UI and Prometheus metrics. Uses the `litellm` database in Postgres. Models can be managed in the UI or through a mounted `config.yaml`. Can send traces to Langfuse.
+OpenAI-compatible gateway in front of Ollama, LocalAI and cloud providers, with keys, budgets, routing, an admin UI and Prometheus metrics. Uses the `litellm` database in Postgres. At every start a one-shot `litellm-init` service registers all models pulled in Ollama, with per-model settings from `models.yaml`. Can send traces to Langfuse.
 
 ### langfuse
 

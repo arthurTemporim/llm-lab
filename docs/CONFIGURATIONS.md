@@ -66,7 +66,7 @@ Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse
 
 ## Integrations
 
-- **LiteLLM → Ollama / LocalAI.** Add models in the LiteLLM UI, or mount a `config.yaml` by uncommenting the volume and command lines in its compose file. Use container names for `api_base`.
+- **LiteLLM → Ollama / LocalAI.** Ollama models are registered automatically at `make litellm` (`litellm-init` builds `config.yaml` from Ollama and `modules/litellm/models.yaml`). Add LocalAI and other backends under `extra_models` in `models.yaml`. Use container names for `api_base`.
 - **LiteLLM → Langfuse.** Add the Langfuse public key, secret key and host to `litellm/.env` and enable the Langfuse success callback.
 - **Open WebUI → LocalAI / LiteLLM.** Add an OpenAI-compatible connection in the admin settings, with the matching API key.
 - **Langflow / notebooks → pgvector.** Use the Postgres connection string for the `langflow` database, where `vector` is enabled.

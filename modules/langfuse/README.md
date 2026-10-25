@@ -126,7 +126,7 @@ LANGFUSE_SECRET_KEY=sk-lf-llm-lab-local
 LANGFUSE_HOST=http://langfuse-web:3000
 ```
 
-and set `litellm_settings: { success_callback: ["langfuse"] }` in its `config.yaml`.
+and set `litellm_settings: { success_callback: ["langfuse"] }` in its `models.yaml`.
 
 ## Operations
 

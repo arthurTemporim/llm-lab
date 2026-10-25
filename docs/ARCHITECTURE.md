@@ -77,7 +77,7 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 
 **Chat.** The browser talks to Open WebUI, which calls Ollama. Open WebUI keeps its own state in its own volume.
 
-**Gateway with tracing.** A client calls LiteLLM with an API key. LiteLLM checks keys and config in Postgres, forwards to Ollama, LocalAI or another provider, returns an OpenAI-format response, and optionally reports the trace to Langfuse. Prometheus scrapes LiteLLM metrics.
+**Gateway with tracing.** A client calls LiteLLM with an API key. LiteLLM checks keys in Postgres, forwards to Ollama, LocalAI or another provider, returns an OpenAI-format response, and optionally reports the trace to Langfuse. Prometheus scrapes LiteLLM metrics.
 
 **Langfuse ingestion.** SDKs or OTLP send events to `langfuse-web`, which stores raw events in MinIO and queues them in Redis. `langfuse-worker` processes them into ClickHouse. Users, projects and prompts live in Postgres.
 
@@ -95,7 +95,7 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 | Open WebUI data | `openwebui` named volume |
 | Langflow flows | Postgres; extra state in a named volume |
 | Notebooks | bind mount in `modules/notebooks` |
-| Prometheus data | `litellm` named volume |
+| Prometheus data, generated LiteLLM config | `litellm` named volumes |
 | ClickHouse data | `langfuse` named volumes |
 
 Named volumes are prefixed with the Compose project (folder) name. They survive `docker compose down`; only `down -v` removes them.

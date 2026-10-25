@@ -1,13 +1,30 @@
 services:
+  # One-shot: writes config.yaml from the Ollama models and models.yaml, then exits.
+  # Runs again at every `up` (`make litellm`), so newly pulled models are picked up.
+  litellm-init:
+    image: ghcr.io/berriai/litellm:v1.105.1
+    container_name: litellm-init
+    restart: "no"
+    env_file: .env
+    entrypoint: ["python3", "/opt/llm-lab/generate_config.py"]
+    volumes:
+      - ./generate_config.py:/opt/llm-lab/generate_config.py:ro
+      - ./models.yaml:/opt/llm-lab/models.yaml:ro
+      - litellm_config:/config
+    networks:
+      - lang
+
   litellm:
     image: ghcr.io/berriai/litellm:v1.105.1
     container_name: litellm
     restart: unless-stopped
     env_file: .env
-    # To start with a config file, create config.yaml and uncomment:
-    # volumes:
-    #   - ./config.yaml:/app/config.yaml
-    # command: ["--config=/app/config.yaml"]
+    depends_on:
+      litellm-init:
+        condition: service_completed_successfully
+    volumes:
+      - litellm_config:/config:ro
+    command: ["--port", "4000", "--config", "/config/config.yaml"]
     ports:
       - "${LITELLM_PORT:-4000}:4000"
     healthcheck:
@@ -36,6 +53,7 @@ services:
       - lang
 
 volumes:
+  litellm_config:
   prometheus_data:
 
 networks:
