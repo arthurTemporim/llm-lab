@@ -4,7 +4,8 @@ OTHERS  := $(filter-out common-services,$(MODULES))
 # Default set for `make build` and `make start`; the *-all targets use every module.
 CORE    := common-services ollama openwebui
 
-.PHONY: help init start start-all build build-all down create-envs check-env databases logs $(MODULES)
+.PHONY: help init start start-all build build-all down create-envs check-env databases logs $(MODULES) \
+	$(addsuffix -start,$(MODULES)) $(addsuffix -build,$(MODULES))
 
 modules_dir := $(CURDIR)/modules/
 scripts_dir := $(CURDIR)/scripts/
@@ -19,6 +20,8 @@ compose = cd $(modules_dir)$(1) && docker compose $(if $(and $(filter 1,$(GPU)),
 help:
 	@echo "Modules: $(MODULES)"
 	@echo "  make <module>         start a module (starts common-services first)"
+	@echo "  make <module>-start   same as make <module>"
+	@echo "  make <module>-build   build a module's images without starting it"
 	@echo "  make <module>-logs    follow a module's logs"
 	@echo "  make <module>-down    stop a module (data is kept)"
 	@echo ""
@@ -92,6 +95,11 @@ $(OTHERS): common-services
 	@echo "$@ is up"
 
 langfuse: check-env
+
+$(addsuffix -start,$(MODULES)): %-start: %
+
+$(addsuffix -build,$(MODULES)): %-build: create-envs
+	@$(call compose,$*) build
 
 %-logs:
 	@$(call compose,$*) logs -f
