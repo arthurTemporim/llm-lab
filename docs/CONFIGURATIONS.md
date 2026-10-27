@@ -41,13 +41,14 @@ Most Open WebUI settings are stored in its database after the first start, and t
 
 ## GPU and CPU
 
-`ollama`, `localai` and `openwebui` have a base `docker-compose.yml` that runs on CPU and a `docker-compose.gpu.yml` override that reserves NVIDIA GPUs (and, for LocalAI and Open WebUI, swaps in the CUDA image). The Makefile adds the override when it detects the NVIDIA Container Toolkit (`docker info`).
+`ollama`, `localai`, `docling` and `openwebui` have a base `docker-compose.yml` that runs on CPU and a `docker-compose.gpu.yml` override that reserves NVIDIA GPUs (and, for LocalAI, Docling and Open WebUI, swaps in the CUDA image). The Makefile adds the override when it detects the NVIDIA Container Toolkit (`docker info`).
 
 - **Force it:** `make GPU=1 <module>` or `make GPU=0 <module>`.
 - **Without make:** `docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d` in the module folder.
 - **Limit GPUs:** set `NVIDIA_VISIBLE_DEVICES` in `ollama/.env`, or use `device_ids` instead of `count: all` in the override.
 - **CPU:** prefer small models (a few billion parameters) with low parallelism.
 - **`vllm` is GPU only.** Its NVIDIA reservation is in the base `docker-compose.yml` (no override file), so `GPU=0` does not turn it off. It needs a card with compute capability 7.5+ (the Tesla P4 does not qualify): set `VLLM_GPU_ID` to the index shown by `nvidia-smi -L`.
+- **`docling` pins one card.** Its CUDA 12.8 image does not run on Pascal cards (Tesla P4), so the override reserves only `DOCLING_GPU_ID` (a Turing or newer index from `nvidia-smi -L`).
 
 ## Changing ports
 

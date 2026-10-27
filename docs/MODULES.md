@@ -43,6 +43,10 @@ OpenAI-compatible server for LLMs, embeddings, images and audio. The all-in-one 
 
 High-throughput server for Hugging Face safetensors models (chat, vision, embeddings, speech-to-text) with an OpenAI-compatible API. **GPU only**: it is the exception to the "base compose runs on CPU" rule, so the NVIDIA reservation is in its `docker-compose.yml` and there is no GPU override. Needs compute capability 7.5+ (not the Tesla P4), so `VLLM_GPU_ID` pins one card. Serves one model per process: set `VLLM_MODEL` and `VLLM_EXTRA_ARGS` in `.env`. Candidate models are in [HUGGINGFACE_MODELS.md](HUGGINGFACE_MODELS.md).
 
+### docling
+
+docling-serve: converts PDFs, Office files, HTML and images to Markdown, JSON or text over HTTP (`/v1/convert/file`, sync or async), with a web UI at `/ui`. Layout, table and OCR models are baked into the image, so clients only upload files and need no Docling or PyTorch. `DOCLING_SERVE_ENG_LOC_NUM_WORKERS` caps how many conversions run at once for all clients. The GPU override swaps in the CUDA 12.8 image and pins one Turing or newer card (`DOCLING_GPU_ID`, not the Tesla P4).
+
 ### openwebui
 
 ChatGPT-style web UI with RAG, web search, code execution and image generation. Preconfigured for Ollama; add other OpenAI-compatible connections (LocalAI, LiteLLM) in the admin settings. The first sign-up becomes admin. Uses the GPU for local embeddings when available.

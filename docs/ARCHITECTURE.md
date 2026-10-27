@@ -21,6 +21,7 @@ flowchart TB
         oll["ollama"]
         lai["localai"]
         vl["vllm"]
+        dl["docling"]
     end
     subgraph L1["Foundation: common-services"]
         pg[("postgres + pgvector")]
@@ -37,7 +38,7 @@ flowchart TB
 | Layer | Modules | Responsibility |
 |---|---|---|
 | Foundation | `common-services` | Creates the network. Provides database, cache/queues and object storage. |
-| Inference | `ollama`, `localai`, `vllm` | Load models and serve completions and embeddings over HTTP. |
+| Inference | `ollama`, `localai`, `vllm`, `docling` | Load models and serve completions, embeddings and document conversion over HTTP. |
 | Gateway & observability | `litellm`, `langfuse` | One API in front of many backends; traces, prompts and evals. |
 | Interfaces | `openwebui`, `langflow`, `notebooks` | Chat, visual flows and code experiments. |
 
@@ -57,6 +58,7 @@ flowchart LR
     oll["ollama"] --> cs
     lai["localai"] --> cs
     vl["vllm"] --> cs
+    dl["docling"] --> cs
     owui["openwebui"] --> cs
     owui -. runtime .-> oll
     lflow["langflow"] --> cs
@@ -81,6 +83,8 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 
 **Langfuse ingestion.** SDKs or OTLP send events to `langfuse-web`, which stores raw events in MinIO and queues them in Redis. `langfuse-worker` processes them into ClickHouse. Users, projects and prompts live in Postgres.
 
+**Document conversion.** A client uploads a file to `docling` (`/v1/convert/file`, or the async variant for long documents) and gets Markdown back. Conversions queue behind `DOCLING_SERVE_ENG_LOC_NUM_WORKERS`, so many clients share one capped converter.
+
 **RAG.** Documents are split, embedded with an Ollama embedding model and stored in a vector store (in-memory in the example notebook, or pgvector in Postgres). A query is embedded, matched, and the context plus question goes to the LLM.
 
 ## Storage
@@ -91,6 +95,7 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 | Redis, MinIO objects | `common-services` named volumes |
 | Ollama models | `ollama` named volume |
 | vLLM models (Hugging Face cache) | `vllm_huggingface` named volume |
+| Docling models | inside the image (no volume) |
 | LocalAI models and backends | bind mounts in `modules/localai` (git-ignored) |
 | Open WebUI data | `openwebui` named volume |
 | Langflow flows | Postgres; extra state in a named volume |
@@ -108,7 +113,7 @@ Every host port is a `*_PORT` variable in the module's `.env`. Check what is alr
 
 ## GPU
 
-`vllm` is GPU only and always reserves one card (see [CONFIGURATIONS.md](CONFIGURATIONS.md)). `ollama`, `localai` and `openwebui` run on CPU by default. Their `docker-compose.gpu.yml` override reserves NVIDIA GPUs, and the Makefile adds it when the NVIDIA runtime is detected. They share the GPU but compete for VRAM; on small GPUs run one inference server at a time. See [CONFIGURATIONS.md](CONFIGURATIONS.md).
+`vllm` is GPU only and always reserves one card (see [CONFIGURATIONS.md](CONFIGURATIONS.md)). `ollama`, `localai`, `docling` and `openwebui` run on CPU by default. Their `docker-compose.gpu.yml` override reserves NVIDIA GPUs, and the Makefile adds it when the NVIDIA runtime is detected. They share the GPU but compete for VRAM; on small GPUs run one inference server at a time. See [CONFIGURATIONS.md](CONFIGURATIONS.md).
 
 ## Design decisions
 
