@@ -61,6 +61,10 @@ extra_models: []
 
 # Copied as-is into config.yaml (litellm_settings, general_settings,
 # router_settings, environment_variables).
+# Request/response bodies in the UI Logs page (stored in Postgres, new requests only)
+general_settings:
+  store_prompts_in_spend_logs: true
+
 # Langfuse tracing: add the LANGFUSE_* keys to .env and uncomment.
 # litellm_settings:
 #   success_callback: ["langfuse"]

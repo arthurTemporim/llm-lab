@@ -80,6 +80,8 @@ Edit `modules/litellm/.env` (created by `make create-envs` from `example.env`), 
 
 Model settings are in `models.yaml` (see [Models](#models)). Prometheus scrape config is `prometheus.yml`.
 
+Request and response bodies are shown in the UI Logs page (`general_settings: { store_prompts_in_spend_logs: true }` in `models.yaml`). They are stored in the `litellm` database; set it to `false` to stop storing prompts.
+
 Langfuse tracing: add `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` and `LANGFUSE_HOST=http://langfuse-web:3000` to `.env`, and `litellm_settings: { success_callback: ["langfuse"] }` to `models.yaml`.
 
 ## Connections
