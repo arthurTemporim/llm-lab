@@ -15,7 +15,7 @@ defaults:
       keep_alive: 5m
       timeout: 120
       num_retries: 2
-  decisions:
+  evaluation:               # decision models (LiteLLM mode for /v1/decisions, /v1/systemone)
     provider: typesafe
     litellm_params:
       api_key: ollama
@@ -46,10 +46,10 @@ models:
   # ---- Decision models
   tev1:4b:                  # ~2K token context, short inputs
     litellm_params: { keep_alive: 15m }
-    model_info: { mode: decisions }
+    model_info: { mode: evaluation }
   nimble:9b:                # 8K token context, rarely used: short keep_alive
     litellm_params: { keep_alive: 2m }
-    model_info: { mode: decisions }
+    model_info: { mode: evaluation }
 
 # Non-Ollama models (LocalAI, vLLM, cloud), copied as-is into model_list.
 extra_models: []
