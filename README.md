@@ -124,6 +124,10 @@ Run `make help` for the full list. Common targets:
 
 The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, generating random secrets for new `.env` files and checking values that must match.
 
+## CI
+
+`.github/workflows/validate.yml` runs static checks on every PR into `devel` or `main`; it never pulls, builds or starts containers. It validates every compose file (with its GPU override), dry-runs the Makefile, runs `make check-env`, ShellCheck and yamllint, and runs `scripts/check_conventions.sh` (modules registered in `MODULES`, `${VAR}`s documented in `example.env`, pinned images, unique host ports). Run that script locally after `make create-envs`.
+
 ## Configuration
 
 - Each module reads `modules/<module>/.env`, created from `example.env`. Edit the `.env`, then restart the module.
