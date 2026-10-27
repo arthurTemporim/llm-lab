@@ -8,6 +8,7 @@
 [![Ollama](https://img.shields.io/badge/Ollama-000000?logo=ollama&logoColor=white)](modules/ollama)
 [![LocalAI](https://img.shields.io/badge/LocalAI-7C3AED)](modules/localai)
 [![vLLM](https://img.shields.io/badge/vLLM-30A2FF)](modules/vllm)
+[![Docling](https://img.shields.io/badge/Docling-0F62FE)](modules/docling)
 [![Open WebUI](https://img.shields.io/badge/Open_WebUI-111827)](modules/openwebui)
 [![Langflow](https://img.shields.io/badge/Langflow-E11D48)](modules/langflow)
 [![Jupyter](https://img.shields.io/badge/Jupyter-F37626?logo=jupyter&logoColor=white)](modules/notebooks)
@@ -46,6 +47,7 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 | `ollama` | Run and serve open-weight models |
 | `localai` | OpenAI-compatible inference server |
 | `vllm` | High-throughput Hugging Face model server (NVIDIA GPU only) |
+| `docling` | Document conversion (PDF, Office, images) to Markdown over HTTP |
 | `openwebui` | Chat UI |
 | `langflow` | Visual builder for flows, agents and RAG |
 | `notebooks` | Jupyter with LangChain |
@@ -99,7 +101,7 @@ Published ports, URLs and default credentials live in each module's `docker-comp
 
 ### GPU or CPU
 
-The Makefile detects the NVIDIA Container Toolkit and adds each module's `docker-compose.gpu.yml` (`ollama`, `localai`, `openwebui`) when it is found. Force it with `make GPU=1 ...` or `make GPU=0 ...`. `vllm` is GPU only and always reserves a GPU. On CPU prefer small models. See [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md).
+The Makefile detects the NVIDIA Container Toolkit and adds each module's `docker-compose.gpu.yml` (`ollama`, `localai`, `docling`, `openwebui`) when it is found. Force it with `make GPU=1 ...` or `make GPU=0 ...`. `vllm` is GPU only and always reserves a GPU. On CPU prefer small models. See [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md).
 
 ## Makefile
 

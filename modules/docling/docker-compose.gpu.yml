@@ -1,0 +1,14 @@
+# NVIDIA GPU override, added automatically by the Makefile when a GPU runtime is found
+# (GPU=1 forces it, GPU=0 disables it).
+services:
+  docling:
+    image: ghcr.io/docling-project/docling-serve-cu128:v1.38.2
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              # CUDA 12.8 PyTorch does not run on Pascal cards (Tesla P4). Pin a Turing or newer
+              # card (see DOCLING_GPU_ID).
+              device_ids: ["${DOCLING_GPU_ID:-0}"]
+              capabilities: [gpu]

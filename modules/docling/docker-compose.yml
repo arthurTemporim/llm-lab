@@ -1,0 +1,23 @@
+services:
+  docling:
+    # CPU image. docker-compose.gpu.yml swaps it for the CUDA one.
+    # Models are baked into the image (DOCLING_SERVE_ARTIFACTS_PATH), so there is no model volume.
+    image: ghcr.io/docling-project/docling-serve-cpu:v1.38.2
+    container_name: docling
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${DOCLING_PORT:-5001}:5001"
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:5001/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      # Models load at boot (DOCLING_SERVE_LOAD_MODELS_AT_BOOT).
+      start_period: 120s
+    networks:
+      - lang
+
+networks:
+  lang:
+    external: true
