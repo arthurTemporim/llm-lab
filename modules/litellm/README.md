@@ -31,7 +31,7 @@ Admin UI login: `litellm` / `litellm123` (`UI_USERNAME`, `UI_PASSWORD`). API cal
 
 ```sh
 make litellm
-make litellm-logs
+make logs-litellm
 ```
 
 Check that it works:
@@ -106,7 +106,7 @@ Langfuse tracing: add `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY` and `LANGFUSE
 ## Operations
 
 ```sh
-make litellm-down     # stop, keep data
+make down-litellm     # stop, keep data
 ```
 
 Upgrade: change the image tag, then `docker compose pull && docker compose up -d` in `modules/litellm/`.

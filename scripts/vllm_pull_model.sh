@@ -2,7 +2,7 @@
 # Downloads Hugging Face models into the vLLM cache volume, so `make vllm` starts without
 # waiting for the download. Needs Docker only (no GPU, vLLM does not have to be running).
 # Re-running skips files that are already complete. Remove a model you no longer want
-# from the list and free its space with `docker volume rm vllm_huggingface` (after `make vllm-down`).
+# from the list and free its space with `docker volume rm vllm_huggingface` (after `make down-vllm`).
 # Ex:
 # ./vllm_pull_model.sh
 

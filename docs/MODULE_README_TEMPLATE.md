@@ -61,7 +61,7 @@ Default login: `<user>` / `<password>` (change it in `.env`). <or "No login.">
 
 ```sh
 make <name>          # starts common-services first, then this module
-make <name>-logs
+make logs-<name>
 ```
 
 Check that it works:
@@ -97,7 +97,7 @@ Edit `modules/<name>/.env` (created by `make create-envs` from `example.env`), t
 ## Operations
 
 ```sh
-make <name>-down     # stop, keep data
+make down-<name>     # stop, keep data
 ```
 
 Upgrade: change the image tag, then `docker compose pull && docker compose up -d` in `modules/<name>/`.

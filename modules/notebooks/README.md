@@ -29,7 +29,7 @@ No token or password.
 
 ```sh
 make notebooks
-make notebooks-logs
+make logs-notebooks
 ```
 
 Open http://localhost:8888 and run `langchain.ipynb`.
@@ -63,7 +63,7 @@ In notebooks use the container name as base URL: `base_url="http://ollama:11434"
 ## Operations
 
 ```sh
-make notebooks-down    # stop, keep notebooks
+make down-notebooks    # stop, keep notebooks
 make build             # rebuild after changing requirements.txt
 ```
 

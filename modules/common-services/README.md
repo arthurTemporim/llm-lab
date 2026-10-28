@@ -34,7 +34,7 @@ Default logins: Postgres `lang` / `lang`, MinIO `minio` / `miniosecret`. Redis h
 
 ```sh
 make common-services
-make common-services-logs
+make logs-common-services
 ```
 
 Check that it works:
@@ -84,7 +84,7 @@ Only `docker compose down -v` removes them.
 ## Operations
 
 ```sh
-make common-services-down   # stop, keep data
+make down-common-services   # stop, keep data
 make databases              # create missing databases (idempotent)
 make check-env              # verify the MinIO credentials match
 ```

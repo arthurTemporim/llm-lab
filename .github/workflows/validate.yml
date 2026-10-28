@@ -55,10 +55,10 @@ jobs:
       - name: Dry-run the main targets
         run: |
           make help
-          make -n create-envs build build-all start start-all down
-          make -n GPU=1 build-all start-all
+          make -n create-envs build build-all up up-all down logs
+          make -n GPU=1 build-all up-all
           for m in $(make -s --eval 'print-modules: ; @echo $(MODULES)' print-modules); do
-            make -n "$m" "build-$m" "$m-down"
+            make -n "$m" "up-$m" "down-$m" "build-$m" "logs-$m"
           done
 
   shell:

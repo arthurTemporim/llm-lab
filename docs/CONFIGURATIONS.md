@@ -76,7 +76,7 @@ Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse
 
 | Goal | Command |
 |---|---|
-| Stop a module, keep data | `make <module>-down` or `docker compose down` |
+| Stop a module, keep data | `make down-<module>` or `docker compose down` |
 | Stop everything | `make down` |
 | Reset a module's `.env` | `rm modules/<name>/.env && make create-envs` |
 | Wipe a module's volumes | `docker compose down -v` in its folder |

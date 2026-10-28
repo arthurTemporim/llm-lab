@@ -73,6 +73,6 @@ LLM observability: traces, sessions, prompts, evals and datasets. Runs a web app
 2. Write `docker-compose.yml` with the external network and a pinned image.
 3. Write `example.env` with every variable commented.
    Write `README.md` from [MODULE_README_TEMPLATE.md](MODULE_README_TEMPLATE.md).
-4. Add the name to `MODULES` in the `Makefile`. Targets `<name>`, `start-<name>`, `build-<name>`, `<name>-logs`, `logs-<name>`, `<name>-down`, `build-all`, `start-all`, `down` and `create-envs` then work. New databases go in `POSTGRES_DATABASES` (`common-services/example.env`).
+4. Add the name to `MODULES` in the `Makefile`. Targets `up-<name>` (or `<name>`), `down-<name>`, `build-<name>`, `logs-<name>`, `up-all`, `build-all`, `down` and `create-envs` then work. New databases go in `POSTGRES_DATABASES` (`common-services/example.env`).
 5. Update the README module table and these docs (`MODULES`, `CONFIGURATIONS`, and `ARCHITECTURE` if it adds a dependency or flow).
 6. Validate with `docker compose -f modules/<name>/docker-compose.yml config -q`, then start it for real.

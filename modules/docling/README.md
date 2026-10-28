@@ -32,7 +32,7 @@ No login. If `DOCLING_SERVE_API_KEY` is set, every API call needs the `X-Api-Key
 
 ```sh
 make docling          # starts common-services first, then this module
-make docling-logs
+make logs-docling
 ```
 
 The models are in the image, so there is no download at first start, but the image is large (about 4.4 GB on CPU, 11.4 GB with CUDA).
@@ -99,7 +99,7 @@ None. The models are in the image and conversion results stay in a temporary fol
 ## Operations
 
 ```sh
-make docling-down     # stop
+make down-docling     # stop
 ```
 
 Upgrade: change the tag in both `docker-compose.yml` and `docker-compose.gpu.yml` (keep them equal), then `docker compose pull && docker compose up -d` in `modules/docling/` (add `-f docker-compose.yml -f docker-compose.gpu.yml` on GPU, or run `make docling`).
