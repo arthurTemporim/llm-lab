@@ -1,0 +1,38 @@
+# Hatchet Lite: engine, API and dashboard in one container, on the shared postgres
+# (database "hatchet", created by `make databases`). Start common-services first.
+# .env is loaded as a whole (env_file); the block below only derives the public URLs.
+services:
+  hatchet-lite:
+    image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:v0.110.8
+    container_name: hatchet-lite
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Must be the address browsers and remote workers use, or login and workers fail
+      SERVER_URL: http://${HATCHET_PUBLIC_HOST:-localhost}:${HATCHET_PORT:-8889}
+      SERVER_AUTH_COOKIE_DOMAIN: ${HATCHET_PUBLIC_HOST:-localhost}
+      SERVER_GRPC_BROADCAST_ADDRESS: ${HATCHET_PUBLIC_HOST:-localhost}:${HATCHET_GRPC_PORT:-7077}
+      SERVER_INTERNAL_CLIENT_INTERNAL_GRPC_BROADCAST_ADDRESS: ${HATCHET_PUBLIC_HOST:-localhost}:${HATCHET_GRPC_PORT:-7077}
+    ports:
+      # Dashboard + REST API, and gRPC for workers. Both are reached by clients on the LAN.
+      - "${HATCHET_PORT:-8889}:8888"
+      - "${HATCHET_GRPC_PORT:-7077}:7077"
+    volumes:
+      # Generated keys and cookie secrets. Losing it invalidates every API token.
+      - hatchet-config:/config
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8733/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      # Runs the database migrations before it is ready
+      start_period: 30s
+    networks:
+      - lang
+
+volumes:
+  hatchet-config:
+
+networks:
+  lang:
+    external: true

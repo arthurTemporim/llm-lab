@@ -29,7 +29,7 @@ Rules:
 
 ### common-services
 
-The foundation. Creates the shared network and runs Postgres (with pgvector), Redis and MinIO. Always start it first. `make common-services` creates the `langflow`, `langfuse` and `litellm` databases (with `vector`) on any volume. Redis runs with `noeviction` because Langfuse requires it.
+The foundation. Creates the shared network and runs Postgres (with pgvector), Redis and Garage (S3-compatible object storage). Always start it first. `make common-services` creates the `langflow`, `langfuse`, `litellm` and `hatchet` databases (with `vector`) on any volume. Redis runs with `noeviction` because Langfuse requires it.
 
 ### ollama
 
@@ -65,7 +65,11 @@ OpenAI-compatible gateway in front of Ollama, LocalAI and cloud providers, with 
 
 ### langfuse
 
-LLM observability: traces, sessions, prompts, evals and datasets. Runs a web app, a worker and ClickHouse, and uses Postgres, Redis and MinIO from `common-services`. Set its secrets in `.env` before starting. `make langfuse` also checks that the MinIO credentials match. See `modules/langfuse/README.md` for the full reference.
+LLM observability: traces, sessions, prompts, evals and datasets. Runs a web app, a worker and ClickHouse, and uses Postgres, Redis and Garage from `common-services`. Set its secrets in `.env` before starting. `make langfuse` also checks that the Garage credentials match. See `modules/langfuse/README.md` for the full reference.
+
+### hatchet
+
+Hatchet Lite: durable task queue and workflow engine (engine, REST API and dashboard in one container). Workers connect over gRPC, register tasks and workflows, and Hatchet schedules, retries and records every run. Uses the `hatchet` database in Postgres. Set `HATCHET_PUBLIC_HOST` to the server's LAN IP when the dashboard or workers run on another machine. Create worker tokens with `scripts/hatchet_token.sh`.
 
 ## Adding a module
 

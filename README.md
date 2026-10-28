@@ -14,9 +14,10 @@
 [![Jupyter](https://img.shields.io/badge/Jupyter-F37626?logo=jupyter&logoColor=white)](modules/notebooks)
 [![LiteLLM](https://img.shields.io/badge/LiteLLM-2563EB)](modules/litellm)
 [![Langfuse](https://img.shields.io/badge/Langfuse-0F172A)](modules/langfuse)
+[![Hatchet](https://img.shields.io/badge/Hatchet-6366F1)](modules/hatchet)
 [![PostgreSQL + pgvector](https://img.shields.io/badge/Postgres_%2B_pgvector-4169E1?logo=postgresql&logoColor=white)](modules/common-services)
 [![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)](modules/common-services)
-[![MinIO](https://img.shields.io/badge/MinIO-C72E49?logo=minio&logoColor=white)](modules/common-services)
+[![Garage](https://img.shields.io/badge/Garage-FF9329?logoColor=white)](modules/common-services)
 
 A self-hosted, modular lab to try LLM models, tools and services on your own machine. It is infrastructure as Docker Compose: no app code, just modules you start when you need them.
 
@@ -35,7 +36,7 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 ## Why llm-lab?
 
 - **Modular.** Each technology is a folder with its own `docker-compose.yml` and `example.env`. Start only what you need.
-- **Shared infrastructure.** Postgres (with pgvector), Redis and MinIO run once and every module reuses them over one Docker network.
+- **Shared infrastructure.** Postgres (with pgvector), Redis and Garage (S3) run once and every module reuses them over one Docker network.
 - **Local first.** Models run on your hardware (CPU or NVIDIA GPU). No cloud API key required.
 - **Reproducible.** Pinned images, env templates and one `Makefile`.
 
@@ -43,7 +44,7 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 
 | Module | Purpose |
 |---|---|
-| `common-services` | Postgres + pgvector, Redis, MinIO. Creates the shared network. |
+| `common-services` | Postgres + pgvector, Redis, Garage (S3). Creates the shared network. |
 | `ollama` | Run and serve open-weight models |
 | `localai` | OpenAI-compatible inference server |
 | `vllm` | High-throughput Hugging Face model server (NVIDIA GPU only) |
@@ -53,6 +54,7 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 | `notebooks` | Jupyter with LangChain |
 | `litellm` | Unified LLM gateway with metrics |
 | `langfuse` | LLM observability: traces, prompts, evals |
+| `hatchet` | Durable task queue and workflow engine with a dashboard |
 
 Details are in [docs/MODULES.md](docs/MODULES.md).
 
@@ -62,7 +64,7 @@ All containers join one external Docker network called `lang`, created by `commo
 
 ```text
 modules/
-  common-services/   shared Postgres, Redis, MinIO + the network (start first)
+  common-services/   shared Postgres, Redis, Garage + the network (start first)
   <module>/          docker-compose.yml, example.env, optional Dockerfile and README
 scripts/             helper shell scripts used by the Makefile
 evals/               DeepEval model evaluations (python, own virtualenv)
@@ -121,7 +123,7 @@ Run `make help` for the full list. Common targets:
 
 ## Helper scripts
 
-The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, generating random secrets for new `.env` files and checking values that must match.
+The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, creating Hatchet API tokens, generating random secrets for new `.env` files and checking values that must match.
 
 ## CI
 
@@ -132,7 +134,7 @@ The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama
 - Each module reads `modules/<module>/.env`, created from `example.env`. Edit the `.env`, then restart the module.
 - `make create-envs` never overwrites an existing `.env`; `CHANGE_ME` placeholders become random secrets.
 - Every host port is a variable in the module's `.env`.
-- Some values must match across modules (MinIO credentials); `make check-env` verifies them. See [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md).
+- Some values must match across modules (Garage S3 credentials); `make check-env` verifies them. See [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md).
 
 ## Troubleshooting
 

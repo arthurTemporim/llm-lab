@@ -75,7 +75,7 @@ Edit `modules/docling/.env` (created by `make create-envs` from `example.env`), 
 | `DOCLING_SERVE_MAX_NUM_PAGES`, `DOCLING_SERVE_MAX_FILE_SIZE` | commented out | Per-document limits |
 | `DOCLING_DEVICE` | commented out (auto) | `cpu`, `cuda` or `cuda:<n>` |
 | `DOCLING_NUM_THREADS` | commented out (`4`) | Torch threads on CPU |
-| `DOCLING_SERVE_API_KEY` | empty | Secret. When set, clients must send it as `X-Api-Key` |
+| `DOCLING_SERVE_API_KEY` | unset | Secret. When set, clients must send it as `X-Api-Key` |
 | `DOCLING_SERVE_LOG_LEVEL` | `WARNING` | `WARNING`, `INFO` or `DEBUG` |
 | `DOCLING_GPU_ID` | `0` | GPU index from `nvidia-smi -L`. Must be Turing or newer (not the Tesla P4) |
 | `NVIDIA_DRIVER_CAPABILITIES` | `compute,utility` | NVIDIA runtime; ignored on CPU-only hosts |

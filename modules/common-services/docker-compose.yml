@@ -1,4 +1,4 @@
-# Shared services: Postgres (pgvector), Redis and MinIO. Creates the "lang" network.
+# Shared services: Postgres (pgvector), Redis and Garage (S3). Creates the "lang" network.
 services:
   postgres:
     image: pgvector/pgvector:pg17
@@ -36,25 +36,21 @@ services:
     networks:
       - lang
 
-  minio:
-    # MinIO no longer publishes images on Docker Hub. Chainguard only publishes
-    # "latest" for the free tier, so this is the one unpinned image.
-    image: cgr.dev/chainguard/minio:latest
-    container_name: minio
+  garage:
+    image: dxflrs/garage:v2.5.0
+    container_name: garage
     restart: unless-stopped
     env_file: .env
-    entrypoint: sh
-    # Buckets are plain directories under /data, so creating them is enough.
-    command:
-      - -c
-      - 'for b in $${MINIO_BUCKETS}; do mkdir -p "/data/$$b"; done && minio server --address ":9000" --console-address ":9001" /data'
+    # Single node, no replication. Creates the GARAGE_DEFAULT_* key and bucket if missing.
+    command: ["/garage", "server", "--single-node", "--default-bucket"]
     ports:
-      - "${MINIO_API_PORT:-9100}:9000"
-      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9101}:9001"
+      - "${GARAGE_S3_PORT:-9100}:3900"
     volumes:
-      - minio-data:/data
+      - ./garage.toml:/etc/garage.toml:ro
+      - garage-data:/var/lib/garage
+    # The image has no shell, so the garage CLI is the check
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "/garage", "status"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -64,7 +60,7 @@ services:
 
 volumes:
   redis-data:
-  minio-data:
+  garage-data:
   postgres:
 
 networks:

@@ -9,16 +9,13 @@ root="$(cd "$(dirname "$0")/.." && pwd)"
 status=0
 fail() { echo "[conventions] $*"; status=1; }
 
-# The one image allowed to float (see modules/common-services/docker-compose.yml)
-unpinned_ok="cgr.dev/chainguard/minio:latest"
-
 pinned() { # <image>: true when it has a digest or a tag other than latest
   local name="${1##*/}" # drop the registry, whose port would look like a tag
   [[ "$1" == *@sha256:* ]] || { [[ "$name" == *:* ]] && [ "${name##*:}" != latest ]; }
 }
 
 check_image() { # <module> <where> <image>
-  [ "$3" = "$unpinned_ok" ] || pinned "$3" || fail "$1: $2 uses unpinned image $3"
+  pinned "$3" || fail "$1: $2 uses unpinned image $3"
 }
 
 # shellcheck disable=SC2016 # $(MODULES) is expanded by make, not bash
