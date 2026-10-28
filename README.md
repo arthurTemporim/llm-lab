@@ -14,6 +14,7 @@
 [![Jupyter](https://img.shields.io/badge/Jupyter-F37626?logo=jupyter&logoColor=white)](modules/notebooks)
 [![LiteLLM](https://img.shields.io/badge/LiteLLM-2563EB)](modules/litellm)
 [![Langfuse](https://img.shields.io/badge/Langfuse-0F172A)](modules/langfuse)
+[![Hatchet](https://img.shields.io/badge/Hatchet-6366F1)](modules/hatchet)
 [![PostgreSQL + pgvector](https://img.shields.io/badge/Postgres_%2B_pgvector-4169E1?logo=postgresql&logoColor=white)](modules/common-services)
 [![Redis](https://img.shields.io/badge/Redis-DC382D?logo=redis&logoColor=white)](modules/common-services)
 [![Garage](https://img.shields.io/badge/Garage-FF9329?logoColor=white)](modules/common-services)
@@ -53,6 +54,7 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 | `notebooks` | Jupyter with LangChain |
 | `litellm` | Unified LLM gateway with metrics |
 | `langfuse` | LLM observability: traces, prompts, evals |
+| `hatchet` | Durable task queue and workflow engine with a dashboard |
 
 Details are in [docs/MODULES.md](docs/MODULES.md).
 
@@ -121,7 +123,7 @@ Run `make help` for the full list. Common targets:
 
 ## Helper scripts
 
-The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, generating random secrets for new `.env` files and checking values that must match.
+The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, creating Hatchet API tokens, generating random secrets for new `.env` files and checking values that must match.
 
 ## CI
 

@@ -16,6 +16,7 @@ flowchart TB
     subgraph L3["Gateway & observability"]
         llm["litellm"]
         lf["langfuse"]
+        ht["hatchet"]
     end
     subgraph L2["Inference"]
         oll["ollama"]
@@ -39,7 +40,7 @@ flowchart TB
 |---|---|---|
 | Foundation | `common-services` | Creates the network. Provides database, cache/queues and object storage. |
 | Inference | `ollama`, `localai`, `vllm`, `docling` | Load models and serve completions, embeddings and document conversion over HTTP. |
-| Gateway & observability | `litellm`, `langfuse` | One API in front of many backends; traces, prompts and evals. |
+| Gateway & observability | `litellm`, `langfuse`, `hatchet` | One API in front of many backends; traces, prompts and evals; durable workflows that call the backends. |
 | Interfaces | `openwebui`, `langflow`, `notebooks` | Chat, visual flows and code experiments. |
 
 Lower layers never depend on higher ones. A module may skip layers.
@@ -69,6 +70,7 @@ flowchart LR
     llm -. optional .-> oll & lai & vl
     lf["langfuse"] --> cs
     llm -. optional callback .-> lf
+    ht["hatchet"] --> cs
 ```
 
 Solid arrows are hard dependencies (the module fails to start without them). Dotted arrows are runtime: the module starts, but features fail until the target is up.
@@ -84,6 +86,8 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 **Langfuse ingestion.** SDKs or OTLP send events to `langfuse-web`, which stores raw events in Garage (S3) and queues them in Redis. `langfuse-worker` processes them into ClickHouse. Users, projects and prompts live in Postgres.
 
 **Document conversion.** A client uploads a file to `docling` (`/v1/convert/file`, or the async variant for long documents) and gets Markdown back. Conversions queue behind `DOCLING_SERVE_ENG_LOC_NUM_WORKERS`, so many clients share one capped converter.
+
+**Workflow execution.** A client triggers a workflow through `hatchet-lite` (REST or gRPC). Hatchet stores the run in Postgres and dispatches its tasks over gRPC to workers registered with a token, retrying failed tasks. Workers run outside the lab or on the `lang` network and call `litellm`, `docling` or `ollama` from their tasks.
 
 **RAG.** Documents are split, embedded with an Ollama embedding model and stored in a vector store (in-memory in the example notebook, or pgvector in Postgres). A query is embedded, matched, and the context plus question goes to the LLM.
 
@@ -102,10 +106,11 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 | Notebooks | bind mount in `modules/notebooks` |
 | Prometheus data, generated LiteLLM config | `litellm` named volumes |
 | ClickHouse data | `langfuse` named volumes |
+| Hatchet keys and client config (runs are in Postgres) | `hatchet` named volume |
 
 Named volumes are prefixed with the Compose project (folder) name. They survive `docker compose down`; only `down -v` removes them.
 
-**Databases:** `langflow`, `langfuse` and `litellm` (listed in `POSTGRES_DATABASES`) are created, with `vector`, by `scripts/create_databases.sh` whenever `make common-services` runs. It is idempotent.
+**Databases:** `langflow`, `langfuse`, `litellm` and `hatchet` (listed in `POSTGRES_DATABASES`) are created, with `vector`, by `scripts/create_databases.sh` whenever `make common-services` runs. It is idempotent.
 
 ## Ports
 

@@ -13,10 +13,11 @@ How configuration works in llm-lab: env files, values that must match, secrets, 
 
 | Value | Keep in sync between |
 |---|---|
-| Postgres user, password and database names | `common-services` and the connection strings in `langflow`, `litellm`, `langfuse` |
+| Postgres user, password and database names | `common-services` and the connection strings in `langflow`, `litellm`, `langfuse`, `hatchet` |
 | Garage key and secret (`GARAGE_DEFAULT_*`) | `common-services/.env` and `langfuse/.env` (verified by `make check-env`, which `make langfuse` runs) |
 | Garage bucket, endpoint and region | `common-services/.env` and `garage.toml` (`s3_region`), and the S3 settings in `langfuse/.env` |
 | Langfuse port and public URL | both in `langfuse/.env` |
+| Hatchet public host and ports | `HATCHET_PUBLIC_HOST`, `HATCHET_PORT`, `HATCHET_GRPC_PORT` in `hatchet/.env` and the URL clients use; tokens created before a change keep the old gRPC address |
 | Langfuse API keys | `langfuse/.env` and any client, such as `litellm/.env` |
 | LocalAI API key | `localai/.env` and its clients (LiteLLM, Open WebUI) |
 
@@ -26,7 +27,8 @@ All defaults are for local use. Change them before exposing anything beyond your
 
 - **Passwords and keys:** Postgres, Garage, ClickHouse, Langflow, LiteLLM, Langfuse and LocalAI all ship with simple defaults.
 - **Never change after first use:** the LiteLLM salt key (encrypts stored provider keys) and the Langfuse `ENCRYPTION_KEY`.
-- **Langfuse seed values** (`LANGFUSE_INIT_*`) apply only on the first start.
+- **Langfuse seed values** (`LANGFUSE_INIT_*`) and the **Hatchet admin user** (`ADMIN_*`) apply only on the first start.
+- **Hatchet keys** live in the `hatchet-config` volume; removing it invalidates every Hatchet API token.
 - **Jupyter** runs without a token. Add one in its compose command to enable auth.
 - Never commit or print real secrets. `.env` files are git-ignored.
 
@@ -63,6 +65,7 @@ Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse
 | Image in compose | Edit the tag, then `docker compose pull && docker compose up -d` |
 | Image in a Dockerfile (langflow, notebooks) | Edit, then `docker compose up -d --build` |
 | Langfuse | Change the version, pull and restart; migrations run automatically. Check the ClickHouse version it supports first. |
+| Hatchet | Change the tag, pull and restart; migrations run at start. Keep worker SDK versions compatible. |
 | Postgres major version | Needs `pg_dumpall` and a restore |
 
 ## Integrations

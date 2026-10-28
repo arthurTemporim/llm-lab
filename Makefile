@@ -1,5 +1,5 @@
 # llm-lab: single entry point. Run `make help`.
-MODULES := common-services ollama localai vllm docling openwebui langflow notebooks litellm langfuse
+MODULES := common-services ollama localai vllm docling openwebui langflow notebooks litellm langfuse hatchet
 OTHERS  := $(filter-out common-services,$(MODULES))
 # Default set for `make build` and `make up`; the *-all targets use every module.
 CORE    := common-services ollama openwebui
