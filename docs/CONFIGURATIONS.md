@@ -50,7 +50,7 @@ Most Open WebUI settings are stored in its database after the first start, and t
 - **Limit GPUs:** set `NVIDIA_VISIBLE_DEVICES` in `ollama/.env`, or use `device_ids` instead of `count: all` in the override.
 - **CPU:** prefer small models (a few billion parameters) with low parallelism.
 - **`vllm` is GPU only.** Its NVIDIA reservation is in the base `docker-compose.yml` (no override file), so `GPU=0` does not turn it off. It needs a card with compute capability 7.5+ (the Tesla P4 does not qualify): set `VLLM_GPU_ID` to the index shown by `nvidia-smi -L`.
-- **`docling` pins one card.** Its CUDA 12.8 image does not run on Pascal cards (Tesla P4), so the override reserves only `DOCLING_GPU_ID` (a Turing or newer index from `nvidia-smi -L`).
+- **`docling` pins one card.** Its CUDA 12.8 image does not run on Pascal cards (Tesla P4), so the override reserves only `DOCLING_GPU_ID` (a Turing or newer index from `nvidia-smi -L`) for `docling-worker`. The worker holds that VRAM only while it has work: the `docling` manager stops it after `DOCLING_MANAGER_IDLE_TIMEOUT` seconds idle.
 
 ## Changing ports
 
@@ -63,7 +63,7 @@ Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse
 | Case | Upgrade |
 |---|---|
 | Image in compose | Edit the tag, then `docker compose pull && docker compose up -d` |
-| Image in a Dockerfile (langflow, notebooks) | Edit, then `docker compose up -d --build` |
+| Image in a Dockerfile (langflow, notebooks, the docling manager) | Edit, then `docker compose up -d --build` |
 | Langfuse | Change the version, pull and restart; migrations run automatically. Check the ClickHouse version it supports first. |
 | Hatchet | Change the tag, pull and restart; migrations run at start. Keep worker SDK versions compatible. |
 | Postgres major version | Needs `pg_dumpall` and a restore |

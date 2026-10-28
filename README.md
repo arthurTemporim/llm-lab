@@ -48,7 +48,7 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 | `ollama` | Run and serve open-weight models |
 | `localai` | OpenAI-compatible inference server |
 | `vllm` | High-throughput Hugging Face model server (NVIDIA GPU only) |
-| `docling` | Document conversion (PDF, Office, images) to Markdown over HTTP |
+| `docling` | Document conversion (PDF, Office, images) to Markdown over HTTP; started on demand, so it frees VRAM when idle |
 | `openwebui` | Chat UI |
 | `langflow` | Visual builder for flows, agents and RAG |
 | `notebooks` | Jupyter with LangChain |
