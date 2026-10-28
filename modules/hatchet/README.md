@@ -27,7 +27,7 @@ Durable task queue and workflow engine: workers register tasks and workflows ove
 
 Both ports listen on all interfaces. From another machine use `HATCHET_PUBLIC_HOST` instead of `localhost`.
 
-Default login: `admin@example.com` / `Admin123!!` (change it in `.env` before the first start, or in the dashboard). New users can sign up in the dashboard.
+Login: `admin@example.com` / the generated `ADMIN_PASSWORD` in `.env` (change it before the first start, or in the dashboard). New users can sign up in the dashboard.
 
 ## Quick start
 
@@ -60,13 +60,13 @@ Edit `modules/hatchet/.env` (created by `make create-envs` from `example.env`), 
 |---|---|---|
 | `HATCHET_PORT` | `8889` | Host port of the dashboard and REST API (8888 is taken by `notebooks`) |
 | `HATCHET_GRPC_PORT` | `7077` | Host port of gRPC for workers |
-| `HATCHET_PUBLIC_HOST` | `localhost` | Host name or IP clients use to reach this machine. Builds `SERVER_URL`, the cookie domain and the gRPC broadcast address. Set it to the LAN IP for remote access |
-| `DATABASE_URL` | `postgresql://lang:lang@postgres:5432/hatchet?sslmode=disable` | Must match the Postgres user/password in `common-services` |
+| `HATCHET_PUBLIC_HOST` | `${LAB_PUBLIC_HOST}` (global, `localhost`) | Host name or IP clients use to reach this machine. Builds `SERVER_URL`, the cookie domain and the gRPC broadcast address. Set it to the LAN IP for remote access |
+| `DATABASE_URL` | `${POSTGRES_URL}/hatchet?sslmode=disable` | `POSTGRES_URL` comes from the global `common-services/.env`. `sslmode=disable` because the shared Postgres has no TLS |
 | `DATABASE_MAX_CONNS` | `20` | Connection pool cap (Hatchet default 50); Postgres is shared |
 | `SERVER_AUTH_COOKIE_INSECURE`, `SERVER_GRPC_INSECURE` | `t` | Plain HTTP and gRPC (no TLS) |
 | `SERVER_GRPC_BIND_ADDRESS`, `SERVER_GRPC_PORT` | `0.0.0.0`, `7077` | gRPC listener inside the container |
 | `SERVER_AUTH_SET_EMAIL_VERIFIED` | `t` | New users need no email verification |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `admin@example.com`, `Admin123!!` | Admin user, created on the first start only |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `admin@example.com`, generated | Admin user, created on the first start only |
 
 `SERVER_URL`, `SERVER_AUTH_COOKIE_DOMAIN` and the gRPC broadcast addresses are derived in `docker-compose.yml`; don't set them in `.env`. Every other Hatchet variable is in the [configuration options](https://docs.hatchet.run/self-hosting/configuration-options); add it to `.env` and restart.
 
@@ -92,7 +92,7 @@ make down-hatchet     # stop, keep data
 
 Upgrade: change the image tag, then `docker compose pull && docker compose up -d` in `modules/hatchet/`. Migrations run at every start. Check the [release notes](https://github.com/hatchet-dev/hatchet/releases) and keep the SDK version of your workers compatible.
 
-Reset: `docker compose down -v` in `modules/hatchet/` and drop the `hatchet` database (`docker exec postgres psql -U lang -d postgres -c 'DROP DATABASE hatchet'`), then `make hatchet`. Every existing token stops working; create new ones with `scripts/hatchet_token.sh`.
+Reset: `docker compose down -v` in `modules/hatchet/` and drop the `hatchet` database (`docker exec postgres sh -c 'psql -U "$POSTGRES_USER" -d postgres -c "DROP DATABASE hatchet"'`), then `make hatchet`. Every existing token stops working; create new ones with `scripts/hatchet_token.sh`.
 
 ## Troubleshooting
 

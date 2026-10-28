@@ -2,8 +2,8 @@
 
 The models served through the LiteLLM gateway (backed by Ollama): what each one is for, how it is configured, and how to call it. Measured comparisons are in [MODEL_EVAL_REPORT.md](MODEL_EVAL_REPORT.md) (run by [evals/](../evals/README.md)). Pull them with `scripts/ollama_pull_model.sh`; the LiteLLM settings are in `modules/litellm/models.yaml`.
 
-- **Gateway:** LiteLLM v1.105.1 at `http://<host>:4000`. Models are registered from Ollama at startup (`litellm-init`).
-- **Backend:** Ollama v0.40.5 on a server with an RTX 3060 (12 GB) + Tesla P4 (8 GB) = about 20 GB of VRAM, 48 GB RAM.
+- **Gateway:** LiteLLM ([version](../modules/litellm/README.md#overview)) at `http://<host>:4000`. Models are registered from Ollama at startup (`litellm-init`).
+- **Backend:** Ollama ([version](../modules/ollama/README.md#overview)) on a server with an RTX 3060 (12 GB) + Tesla P4 (8 GB) = about 20 GB of VRAM, 48 GB RAM.
 - **Keys:** examples use `$LITELLM_KEY`. Never commit a real key.
 
 ## Models at a glance

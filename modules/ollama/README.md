@@ -79,7 +79,7 @@ GPU: auto-detected by the Makefile. Force with `GPU=1 make ollama` or disable wi
 
 | Data | Where | Survives `down` |
 |---|---|---|
-| Models | `ollama` named volume (`/root/.ollama`) | yes |
+| Models | `ollama-models` named volume (`/root/.ollama`) | yes |
 
 ## Operations
 

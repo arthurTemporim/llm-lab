@@ -42,7 +42,7 @@ Edit `modules/openwebui/.env` (created by `make create-envs` from `example.env`)
 | Variable | Default | Description |
 |---|---|---|
 | `OPENWEBUI_PORT` | `3000` | Host port |
-| `OLLAMA_BASE_URL` | `http://ollama:11434` | Ollama address |
+| `OLLAMA_BASE_URL` | `${OLLAMA_URL}` (global, `http://ollama:11434`) | Ollama address |
 | `ENABLE_OLLAMA_API` / `ENABLE_OPENAI_API` | `true` / `true` | Enable each connection type |
 | `ENABLE_SIGNUP` | `true` | Allow new sign-ups. Set `false` after creating your users |
 | `ENABLE_SIGNUP_PASSWORD_CONFIRMATION` | `false` | Ask to confirm the password on sign-up |
@@ -71,7 +71,7 @@ To add LocalAI, LiteLLM or vLLM: Admin Settings, Connections, add an OpenAI conn
 
 | Data | Where | Survives `down` |
 |---|---|---|
-| Users, chats, uploads, vector data | `open-webui` named volume (`/app/backend/data`) | yes |
+| Users, chats, uploads, vector data | `openwebui-data` named volume (`/app/backend/data`) | yes |
 
 ## Operations
 

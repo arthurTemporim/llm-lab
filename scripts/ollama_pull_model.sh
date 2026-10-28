@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ex:
 # ./ollama_pull_model.sh
 

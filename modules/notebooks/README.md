@@ -8,7 +8,7 @@ Jupyter playground with LangChain and the Ollama integration.
 |---|---|
 | Documentation | [LangChain](https://python.langchain.com/docs/introduction/), [Jupyter](https://jupyter-docker-stacks.readthedocs.io/) |
 | Image | built from `modules/notebooks/Dockerfile` (base `jupyter/minimal-notebook:python-3.11`) |
-| Container(s) | `jupyter` |
+| Container(s) | `notebooks` |
 | GPU | Not used |
 | Make target | `make notebooks` (rebuild with `make build`) |
 
@@ -21,7 +21,7 @@ Jupyter playground with LangChain and the Ollama integration.
 
 | What | Host (browser, CLI) | Inside the `lang` network |
 |---|---|---|
-| JupyterLab | http://localhost:8888 | http://jupyter:8888 |
+| JupyterLab | http://localhost:8888 | http://notebooks:8888 |
 
 No token or password.
 

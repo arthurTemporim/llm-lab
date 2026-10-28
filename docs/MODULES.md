@@ -15,21 +15,13 @@ modules/<name>/
 └── <assets>             # optional: configs, flows, notebooks
 ```
 
-Rules:
-
-1. Use a `container_name` equal to the service's DNS name on the network.
-2. Reuse `common-services`; don't bundle your own Postgres, Redis or S3.
-3. Add a `healthcheck` when the image provides one.
-4. Publish ports as `"${NAME_PORT:-default}:container"` with the variable in `example.env`. Pick a free host port and bind admin-only ones to `127.0.0.1`.
-5. Load the config with `env_file: .env`; use `${VAR}` interpolation only for ports and derived values.
-6. Use `restart: unless-stopped` and pin image tags.
-7. Register the module in the `Makefile` (`MODULES` list, nothing else).
+Naming, Compose, env and integration rules are in [CONVENTIONS.md](CONVENTIONS.md). `scripts/check_conventions.sh` enforces most of them.
 
 ## Modules
 
 ### common-services
 
-The foundation. Creates the shared network and runs Postgres (with pgvector), Redis and Garage (S3-compatible object storage). Always start it first. `make common-services` creates the `langflow`, `langfuse`, `litellm` and `hatchet` databases (with `vector`) on any volume. Redis runs with `noeviction` because Langfuse requires it.
+The foundation. Creates the shared network and runs Postgres (with pgvector), Redis and Garage (S3-compatible object storage). Its `.env` is the global env file that every module loads first. Always start it first. `make common-services` creates the `langflow`, `langfuse`, `litellm` and `hatchet` databases (with `vector`) on any volume. Redis runs with `noeviction` because Langfuse requires it.
 
 ### ollama
 
@@ -41,7 +33,7 @@ OpenAI-compatible server for LLMs, embeddings, images and audio. The all-in-one 
 
 ### vllm
 
-High-throughput server for Hugging Face safetensors models (chat, vision, embeddings, speech-to-text) with an OpenAI-compatible API. **GPU only**: it is the exception to the "base compose runs on CPU" rule, so the NVIDIA reservation is in its `docker-compose.yml` and there is no GPU override. Needs compute capability 7.5+ (not the Tesla P4), so `VLLM_GPU_ID` pins one card. Serves one model per process: set `VLLM_MODEL` and `VLLM_EXTRA_ARGS` in `.env`. Candidate models are in [HUGGINGFACE_MODELS.md](HUGGINGFACE_MODELS.md).
+High-throughput server for Hugging Face safetensors models (chat, vision, embeddings, speech-to-text) with an OpenAI-compatible API. **GPU only**: it is the exception to the "base compose runs on CPU" rule, so the NVIDIA reservation is in its `docker-compose.yml` and there is no GPU override. Needs compute capability 7.5+ (not the Tesla P4), so `VLLM_GPU_ID` pins one card. Serves one model per process: set `VLLM_MODEL` and `VLLM_EXTRA_ARGS` in `.env`.
 
 ### docling
 
@@ -49,7 +41,7 @@ docling-serve: converts PDFs, Office files, HTML and images to Markdown, JSON or
 
 Two containers:
 - **`docling`** is a small manager (built from `manager/`), and clients use it with the docling-serve API unchanged. It queues jobs (`DOCLING_MANAGER_CONCURRENCY` caps how many run at once for all clients), starts **`docling-worker`** (docling-serve) on demand through the mounted Docker socket, restarts it and retries on crashes, task failures or stuck conversions, and stops it after `DOCLING_MANAGER_IDLE_TIMEOUT` seconds idle to free VRAM.
-- **`docling-worker`** uses `restart: "no"` so only the manager starts it. This is the one exception to rule 6.
+- **`docling-worker`** uses `restart: "no"` so only the manager starts it. Like `litellm-init`, it is an exception to `restart: unless-stopped`.
 
 The GPU override applies to the worker: it swaps in the CUDA 12.8 image and pins one Turing or newer card (`DOCLING_GPU_ID`, not the Tesla P4).
 
@@ -79,10 +71,10 @@ Hatchet Lite: durable task queue and workflow engine (engine, REST API and dashb
 
 ## Adding a module
 
-1. Create `modules/<name>/` following the contract above.
+1. Create `modules/<name>/` following the contract above and [CONVENTIONS.md](CONVENTIONS.md).
 2. Write `docker-compose.yml` with the external network and a pinned image.
 3. Write `example.env` with every variable commented.
    Write `README.md` from [MODULE_README_TEMPLATE.md](MODULE_README_TEMPLATE.md).
 4. Add the name to `MODULES` in the `Makefile`. Targets `up-<name>` (or `<name>`), `down-<name>`, `build-<name>`, `logs-<name>`, `up-all`, `build-all`, `down` and `create-envs` then work. New databases go in `POSTGRES_DATABASES` (`common-services/example.env`).
 5. Update the README module table and these docs (`MODULES`, `CONFIGURATIONS`, and `ARCHITECTURE` if it adds a dependency or flow).
-6. Validate with `docker compose -f modules/<name>/docker-compose.yml config -q`, then start it for real.
+6. Validate with `bash .claude/skills/validate/validate.sh <name>`, then start it for real.

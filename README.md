@@ -27,11 +27,11 @@ A self-hosted, modular lab to try LLM models, tools and services on your own mac
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | understand the network, dependencies, data flows, storage and design decisions |
 | [docs/MODULES.md](docs/MODULES.md) | see what each module does and the rules for new ones |
+| [docs/CONVENTIONS.md](docs/CONVENTIONS.md) | follow the naming, Compose, env, integration and docs rules |
 | [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md) | learn how configuration, secrets, GPU/CPU and upgrades work |
 | [docs/MODELS.md](docs/MODELS.md) | see the models served through LiteLLM, their settings, links and when to use each |
-| [docs/HUGGINGFACE_MODELS.md](docs/HUGGINGFACE_MODELS.md) | pick uncensored chat, vision, decision, speech and embedding models from Hugging Face for vLLM |
 | [docs/MODEL_EVAL_REPORT.md](docs/MODEL_EVAL_REPORT.md) | compare the chat, embedding and decision models (results of [evals/](evals/README.md)) |
-| [CLAUDE.md](CLAUDE.md) | give AI coding agents the project's conventions and gotchas |
+| [CLAUDE.md](CLAUDE.md) | give AI coding agents the project's conventions, gotchas, sub-agents and skills |
 
 ## Why llm-lab?
 
@@ -118,12 +118,12 @@ Run `make help` for the full list. Common targets:
 | `make up-<module>` (or `make <module>`) | Start a module (`common-services` is started first automatically) |
 | `make down-<module>` / `build-<module>` / `logs-<module>` | Stop a module (data is kept), only build its images, or follow its logs |
 | `make databases` | Create the Postgres databases if missing (idempotent) |
-| `make check-env` | Verify values that must match across modules |
+| `make check-env` | Verify the global `common-services/.env` and that no module redefines its values (runs before every start) |
 | `make down` | Stop all modules, keep volumes |
 
 ## Helper scripts
 
-The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, creating Hatchet API tokens, generating random secrets for new `.env` files and checking values that must match.
+The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, creating Hatchet API tokens, generating random passwords and secrets for new `.env` files and checking the global env file.
 
 ## CI
 
@@ -131,10 +131,11 @@ The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama
 
 ## Configuration
 
+- `modules/common-services/.env` is the global file: Postgres user, password and URL, Redis, Garage keys, public host, Ollama URL and Langfuse keys. Every module loads it before its own `.env` and references its values as `${VAR}`, so you change a shared value in one place.
 - Each module reads `modules/<module>/.env`, created from `example.env`. Edit the `.env`, then restart the module.
-- `make create-envs` never overwrites an existing `.env`; `CHANGE_ME` placeholders become random secrets.
+- `make create-envs` never overwrites an existing `.env`. It fills the `CHANGE_ME*` placeholders with random passwords, keys and secrets.
 - Every host port is a variable in the module's `.env`.
-- Some values must match across modules (Garage S3 credentials); `make check-env` verifies them. See [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md).
+- See [docs/CONFIGURATIONS.md](docs/CONFIGURATIONS.md).
 
 ## Troubleshooting
 

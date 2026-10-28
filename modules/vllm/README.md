@@ -15,7 +15,7 @@ High-throughput inference server for Hugging Face models, with an OpenAI-compati
 ## What it is used for
 
 * Serve Hugging Face safetensors models (chat, vision, embeddings, speech-to-text) with continuous batching, which is faster than Ollama under concurrent load.
-* Run uncensored or abliterated models that are not published for Ollama. Candidates are in [docs/HUGGINGFACE_MODELS.md](../../docs/HUGGINGFACE_MODELS.md).
+* Run uncensored or abliterated models that are not published for Ollama.
 * Backend for LiteLLM, Open WebUI, Langflow and the notebooks through the OpenAI API.
 
 ## Access
@@ -76,7 +76,7 @@ Edit `modules/vllm/.env` (created by `make create-envs` from `example.env`), the
 | `VLLM_HOST_PORT` | `8000` | Host port |
 | `NVIDIA_DRIVER_CAPABILITIES` | `compute,utility` | NVIDIA runtime |
 
-Sizing rule: weights take about 2 bytes per parameter in bf16, 1 in fp8 and 0.55 in 4-bit, plus 1-3 GB for the KV cache and CUDA overhead. See [docs/HUGGINGFACE_MODELS.md](../../docs/HUGGINGFACE_MODELS.md) for models that fit a 12 GB card.
+Sizing rule: weights take about 2 bytes per parameter in bf16, 1 in fp8 and 0.55 in 4-bit, plus 1-3 GB for the KV cache and CUDA overhead.
 
 ## Connections
 
@@ -104,7 +104,7 @@ After switching `VLLM_MODEL`, reload the page: the picker shows whatever vLLM se
 
 | Data | Where | Survives `down` |
 |---|---|---|
-| Downloaded models (Hugging Face cache) | `vllm_huggingface` named volume (`/root/.cache/huggingface`) | yes |
+| Downloaded models (Hugging Face cache) | `vllm-huggingface` named volume (`/root/.cache/huggingface`) | yes |
 
 ## Operations
 

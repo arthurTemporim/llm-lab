@@ -24,7 +24,7 @@ Low-code visual builder for LLM chains, agents and RAG flows.
 |---|---|---|
 | Web UI / API | http://localhost:7860 | http://langflow:7860 |
 
-Default login: `lang` / `lang` (`LANGFLOW_SUPERUSER`, `LANGFLOW_SUPERUSER_PASSWORD`).
+Login: `lang` / the generated `LANGFLOW_SUPERUSER_PASSWORD` in `.env`.
 
 ## Quick start
 
@@ -43,7 +43,7 @@ Edit `modules/langflow/.env` (created by `make create-envs` from `example.env`),
 |---|---|---|
 | `LANGFLOW_PORT` | `7860` | Host port |
 | `LANGFLOW_DATABASE_URL` | `postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@postgres:5432/langflow` | Shared Postgres. Credentials must match `common-services` |
-| `LANGFLOW_SUPERUSER` / `LANGFLOW_SUPERUSER_PASSWORD` | `lang` / `lang` | Admin account. Change the password |
+| `LANGFLOW_SUPERUSER` / `LANGFLOW_SUPERUSER_PASSWORD` | `lang` / generated | Admin account |
 | `LANGFLOW_AUTO_LOGIN` | `false` | Skip the login page when `true` |
 | `LANGFLOW_NEW_USER_IS_ACTIVE` | `false` | New users need an admin to activate them |
 | `LANGFLOW_LOG_LEVEL` | `debug` | Log verbosity |

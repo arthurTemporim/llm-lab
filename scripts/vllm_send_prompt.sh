@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Checks a running vLLM server: health, the served model and one chat completion.
 # Reads the port and API key from modules/vllm/.env. Override with VLLM_URL and VLLM_API_KEY.
 # Ex:
