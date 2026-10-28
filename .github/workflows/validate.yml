@@ -74,6 +74,10 @@ jobs:
         run: |
           shellcheck --version
           shellcheck scripts/*.sh
+      - name: Python scripts
+        run: |
+          python3 -c 'import ast, sys; [ast.parse(open(f).read(), f) for f in sys.argv[1:]]' scripts/*.py
+          python3 scripts/lab.py --help
 
   conventions:
     name: Conventions

@@ -2,9 +2,9 @@
 MODULES := common-services ollama localai vllm docling openwebui langflow notebooks litellm langfuse hatchet
 OTHERS  := $(filter-out common-services,$(MODULES))
 # Default set for `make build` and `make up`; the *-all targets use every module.
-CORE    := common-services ollama openwebui
+CORE    := common-services ollama
 
-.PHONY: help init up up-all build build-all down create-envs check-env databases logs $(MODULES) \
+.PHONY: help init configure gpu hatchet-token up up-all build build-all down create-envs check-env databases logs $(MODULES) \
 	$(addprefix up-,$(MODULES)) $(addprefix down-,$(MODULES)) $(addprefix build-,$(MODULES)) $(addprefix logs-,$(MODULES))
 
 modules_dir := $(CURDIR)/modules/
@@ -27,7 +27,11 @@ help:
 	@echo "  make build-<module>   build a module's images without starting it"
 	@echo "  make logs-<module>    follow a module's logs"
 	@echo ""
-	@echo "  make init             create-envs + build + up + pull ollama models"
+	@echo "  make init             configure + start $(CORE) + pull ollama models + hatchet token"
+	@echo "                        (ARGS=\"--modules all\" or ARGS=\"--modules litellm,hatchet --host <ip>\")"
+	@echo "  make configure        env files, LAB_PUBLIC_HOST, GPU ids, evals/.env (starts nothing)"
+	@echo "  make gpu              pick the GPU for vllm/docling and write their GPU ids"
+	@echo "  make hatchet-token    create the Hatchet worker token (ARGS=--force to replace it)"
 	@echo "  make up               start the core modules: $(CORE)"
 	@echo "  make up-all           start every module"
 	@echo "  make build            build the core modules: $(CORE)"
@@ -58,11 +62,18 @@ databases:
 	@$(scripts_dir)create_databases.sh
 
 # =================== Orchestration ===================
-init: create-envs
-	$(MAKE) build
-	$(MAKE) up
-	$(scripts_dir)ollama_pull_model.sh
-	@echo "Init done."
+# The setup steps live in scripts/lab.py (./scripts/lab.py --help); ARGS is passed through.
+init:
+	@$(scripts_dir)lab.py init $(ARGS)
+
+configure:
+	@$(scripts_dir)lab.py configure $(ARGS)
+
+gpu:
+	@$(scripts_dir)lab.py gpu $(ARGS)
+
+hatchet-token:
+	@$(scripts_dir)lab.py hatchet-token $(ARGS)
 
 up: $(addprefix up-,$(CORE))
 	@echo "Finished core start"

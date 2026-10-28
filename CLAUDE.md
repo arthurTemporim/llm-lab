@@ -49,6 +49,7 @@ Follow the module pattern; look at an existing module before adding or editing o
 - Every host port is a `*_PORT` variable in `example.env`; check other modules for clashes. Admin-only ports bind to `127.0.0.1`.
 - The base compose file must run on CPU. GPU config goes in `docker-compose.gpu.yml`. Exception: `vllm` is GPU only (reservation in its base file).
 - Every new env var goes in `example.env` with a safe default and a comment (`CHANGE_ME` for generated secrets). Never commit or print real secrets.
+- Admin logins use the global `${LAB_USER}` / `${LAB_EMAIL}` (user name, email); passwords stay per module (`CHANGE_ME_PASSWORD`).
 - Use shared services (Postgres, Redis, Garage, Ollama) by container name on `lang`. No module-local copies. New databases go in `POSTGRES_DATABASES` in `modules/common-services/example.env`.
 - `modules/common-services/.env` is the global env file: the Makefile loads it before every module's `.env`. Reference shared values as `${VAR}` (e.g. `DATABASE_URL=${POSTGRES_URL}/<db>`), never copy them. Passwords use `CHANGE_ME_PASSWORD`, secrets `CHANGE_ME` (`scripts/generate_secrets.sh`).
 - Adding a module also means updating the `Makefile` `MODULES` list and the docs listed above (doc map in `docs/CONVENTIONS.md`).

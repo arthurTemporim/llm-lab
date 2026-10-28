@@ -2,7 +2,7 @@ services:
   # One-shot: writes config.yaml from the Ollama models and models.yaml, then exits.
   # Runs again at every `up` (`make litellm`), so newly pulled models are picked up.
   litellm-init:
-    image: ghcr.io/berriai/litellm:v1.106.4
+    image: ghcr.io/berriai/litellm:v1.106.5
     container_name: litellm-init
     restart: "no"
     env_file: .env
@@ -15,7 +15,7 @@ services:
       - lang
 
   litellm:
-    image: ghcr.io/berriai/litellm:v1.106.4
+    image: ghcr.io/berriai/litellm:v1.106.5
     container_name: litellm
     restart: unless-stopped
     env_file: .env
@@ -37,7 +37,7 @@ services:
       - lang
 
   litellm-prometheus:
-    image: prom/prometheus:v3.15.0
+    image: prom/prometheus:v3.15.1
     container_name: litellm-prometheus
     restart: unless-stopped
     command:

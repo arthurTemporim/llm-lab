@@ -135,5 +135,4 @@ Every host port is a `*_PORT` variable in the module's `.env`. Check what is alr
 
 | Issue | Impact | Fix |
 |---|---|---|
-| Jupyter base image uses a floating `python-3.11` tag | Rebuilds can change packages | Pin a dated tag |
 | Postgres volume changed from an anonymous volume to the `postgres` named volume | A lab created before this change starts with empty databases | `pg_dumpall` from the old container before recreating it |

@@ -7,7 +7,7 @@ Converts PDFs, Office files, HTML and images to Markdown, JSON or text over HTTP
 | | |
 |---|---|
 | Documentation | [docling-serve](https://github.com/docling-project/docling-serve), [configuration](https://github.com/docling-project/docling-serve/blob/main/docs/configuration.md), [API usage](https://github.com/docling-project/docling-serve/blob/main/docs/usage.md) |
-| Image | Worker: `ghcr.io/docling-project/docling-serve-cpu:v1.38.2` (GPU: `ghcr.io/docling-project/docling-serve-cu128:v1.38.2`). Manager: built from `manager/Dockerfile` (`python:3.13.9-slim`) |
+| Image | Worker: `ghcr.io/docling-project/docling-serve-cpu:v1.38.2` (GPU: `ghcr.io/docling-project/docling-serve-cu128:v1.38.2`). Manager: built from `manager/Dockerfile` (`python:3.13.18-slim`) |
 | Container(s) | `docling` (manager, the API clients use), `docling-worker` (docling-serve, started on demand) |
 | GPU | Optional, worker only (`docker-compose.gpu.yml` swaps in the CUDA image and reserves one card, added automatically) |
 | Make target | `make docling` |

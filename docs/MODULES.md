@@ -29,11 +29,11 @@ Pulls, runs and serves open-weight LLMs and embedding models, with its own API a
 
 ### localai
 
-OpenAI-compatible server for LLMs, embeddings, images and audio. The all-in-one image ships preconfigured models and downloads them on first start. Requires an API key, generated into its `.env`. Uses the GPU when available, the CPU image otherwise.
+OpenAI-compatible server for LLMs, embeddings, images and audio. Starts with no models: install them from its gallery (web UI or `POST /models/apply`). Requires an API key, generated into its `.env`. Uses the GPU when available, the CPU image otherwise.
 
 ### vllm
 
-High-throughput server for Hugging Face safetensors models (chat, vision, embeddings, speech-to-text) with an OpenAI-compatible API. **GPU only**: it is the exception to the "base compose runs on CPU" rule, so the NVIDIA reservation is in its `docker-compose.yml` and there is no GPU override. Needs compute capability 7.5+ (not the Tesla P4), so `VLLM_GPU_ID` pins one card. Serves one model per process: set `VLLM_MODEL` and `VLLM_EXTRA_ARGS` in `.env`.
+High-throughput server for Hugging Face safetensors models (chat, vision, embeddings, speech-to-text) with an OpenAI-compatible API. **GPU only**: it is the exception to the "base compose runs on CPU" rule, so the NVIDIA reservation is in its `docker-compose.yml` and there is no GPU override. Needs compute capability 7.5+ (not the Tesla P4), so `VLLM_GPU_ID` pins one card (set by `make gpu`). Serves one model per process: set `VLLM_MODEL` and `VLLM_EXTRA_ARGS` in `.env`.
 
 ### docling
 
@@ -47,7 +47,7 @@ The GPU override applies to the worker: it swaps in the CUDA 12.8 image and pins
 
 ### openwebui
 
-ChatGPT-style web UI with RAG, web search, code execution and image generation. Preconfigured for Ollama; add other OpenAI-compatible connections (LocalAI, LiteLLM) in the admin settings. The first sign-up becomes admin. Uses the GPU for local embeddings when available.
+ChatGPT-style web UI with RAG, web search, code execution and image generation. Preconfigured for Ollama; add other OpenAI-compatible connections (LocalAI, LiteLLM) in the admin settings. The admin is created on the first start (`LAB_EMAIL` and the generated `WEBUI_ADMIN_PASSWORD`). Uses the GPU for local embeddings when available.
 
 ### langflow
 
@@ -67,7 +67,7 @@ LLM observability: traces, sessions, prompts, evals and datasets. Runs a web app
 
 ### hatchet
 
-Hatchet Lite: durable task queue and workflow engine (engine, REST API and dashboard in one container). Workers connect over gRPC, register tasks and workflows, and Hatchet schedules, retries and records every run. Uses the `hatchet` database in Postgres. Set `HATCHET_PUBLIC_HOST` to the server's LAN IP when the dashboard or workers run on another machine. Create worker tokens with `scripts/hatchet_token.sh`.
+Hatchet Lite: durable task queue and workflow engine (engine, REST API and dashboard in one container). Workers connect over gRPC, register tasks and workflows, and Hatchet schedules, retries and records every run. Uses the `hatchet` database in Postgres. Set `HATCHET_PUBLIC_HOST` to the server's LAN IP when the dashboard or workers run on another machine. Worker tokens are created by `make hatchet-token` (also part of `make init` when hatchet is selected).
 
 ## Adding a module
 

@@ -1,7 +1,7 @@
 services:
   openwebui:
     # CPU image. docker-compose.gpu.yml swaps it for the CUDA one.
-    image: ghcr.io/open-webui/open-webui:v0.11.4
+    image: ghcr.io/open-webui/open-webui:v0.12.4
     container_name: openwebui
     restart: unless-stopped
     env_file: .env

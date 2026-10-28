@@ -7,7 +7,7 @@ Shared Postgres (pgvector), Redis and Garage (S3) used by the other modules. It 
 | | |
 |---|---|
 | Documentation | [pgvector](https://github.com/pgvector/pgvector), [Redis](https://redis.io/docs/), [Garage](https://garagehq.deuxfleurs.fr/documentation/) |
-| Image | `pgvector/pgvector:pg17`, `redis:8.6.7-alpine`, `dxflrs/garage:v2.5.0` |
+| Image | `pgvector/pgvector:0.8.7-pg17`, `redis:8.10.3-alpine`, `dxflrs/garage:v2.5.0` |
 | Container(s) | `postgres`, `redis`, `garage` |
 | GPU | Not used |
 | Make target | `make common-services` (also started by every other module target) |

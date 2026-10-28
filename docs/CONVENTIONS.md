@@ -50,6 +50,7 @@ Exceptions:
 
 - **Shared address or credential** (used by two or more modules): add it to the global env (`<SERVICE>_URL`, keys) and reference it, e.g. `DATABASE_URL=${POSTGRES_URL}/litellm` or `OLLAMA_API_BASE=${OLLAMA_URL}`.
 - **One-off link:** container name + container port, e.g. `http://docling:5001`. Inside a container, never use `localhost`, a host IP or the host port.
+- **Admin logins** use the global `${LAB_USER}` / `${LAB_EMAIL}` for user name and email; passwords stay per module (`CHANGE_ME_PASSWORD`). DB service accounts are not logins.
 - **Browser-facing URLs** use `${LAB_PUBLIC_HOST}` and the host port, e.g. `GARAGE_S3_EXTERNAL_ENDPOINT`.
 - **Shared services:** use Postgres, Redis, Garage and Ollama; never bundle a module-local copy. A new database goes in `POSTGRES_DATABASES`, and a new bucket follows the Garage setup in `common-services`.
 - **Document both ends:** the `Connections` table in each module's README, the global-values or "Values that must match" table in [CONFIGURATIONS.md](CONFIGURATIONS.md), and [ARCHITECTURE.md](ARCHITECTURE.md) when the change adds a dependency or a data flow.
@@ -60,8 +61,8 @@ All docs are in English and short: lead with what the reader needs, skip the obv
 
 | When you change… | Update |
 |---|---|
-| A module's compose or `example.env` | its `README.md` (Overview, Access, Configuration, Storage) |
-| Add or remove a module | `README.md` module table, [MODULES.md](MODULES.md), [CONFIGURATIONS.md](CONFIGURATIONS.md), [ARCHITECTURE.md](ARCHITECTURE.md) if it adds a dependency, `CLAUDE.md` if a rule changes |
+| A module's compose or `example.env` | its `README.md` (Overview, Access, Configuration, Storage); `README.md` Services table for images and host ports |
+| Add or remove a module | `README.md` module and Services tables, [MODULES.md](MODULES.md), [CONFIGURATIONS.md](CONFIGURATIONS.md), [ARCHITECTURE.md](ARCHITECTURE.md) if it adds a dependency, `CLAUDE.md` if a rule changes |
 | A link between modules or a global value | both modules' `Connections`, [CONFIGURATIONS.md](CONFIGURATIONS.md), [ARCHITECTURE.md](ARCHITECTURE.md) |
 | Models served (Ollama, LiteLLM, vLLM) | [MODELS.md](MODELS.md) |
 | Eval code or results | `evals/README.md`, [MODEL_EVAL_REPORT.md](MODEL_EVAL_REPORT.md) |
@@ -69,7 +70,7 @@ All docs are in English and short: lead with what the reader needs, skip the obv
 | A rule in this file | this file, `CLAUDE.md` and `.claude/agents` if they repeat it |
 
 - Module READMEs follow [MODULE_README_TEMPLATE.md](MODULE_README_TEMPLATE.md): the ten sections in order ✔. Extra module-specific sections go between `Access` and `Operations`.
-- Image versions appear only in compose and in the README `Overview` table. Elsewhere, link to the README. Reports keep the versions they ran with.
+- Image versions appear only in compose, the module README `Overview` table and the root `README.md` Services table. Elsewhere, link to the README. Reports keep the versions they ran with.
 - Inside the network, write container names; from the host, write `localhost` (or `<host>`) and the host port.
 - Relative links must resolve ✔. Diagrams are Mermaid, each with a one-line explanation, and kept small (about 12 nodes at most).
 

@@ -7,7 +7,7 @@ Open source LLM observability platform: traces, sessions, prompts, evals and dat
 | | |
 |---|---|
 | Documentation | [Langfuse docs](https://langfuse.com/docs), [self-hosting](https://langfuse.com/self-hosting) |
-| Image | `langfuse/langfuse:4.54`, `langfuse/langfuse-worker:4.54`, `clickhouse/clickhouse-server:25.12` |
+| Image | `langfuse/langfuse:4.71`, `langfuse/langfuse-worker:4.71`, `clickhouse/clickhouse-server:25.12` |
 | Container(s) | `langfuse-web`, `langfuse-worker`, `langfuse-clickhouse` |
 | GPU | Not used |
 | Make target | `make langfuse` |
@@ -26,7 +26,7 @@ Open source LLM observability platform: traces, sessions, prompts, evals and dat
 | Worker health | http://localhost:3030/api/health (localhost only) | http://langfuse-worker:3030 |
 | ClickHouse | none on purpose | `langfuse-clickhouse:8123` / `:9000` |
 
-Login (seeded on first start): `admin@example.com` / the generated `LANGFUSE_INIT_USER_PASSWORD` in `.env`. Project API keys: `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` in the global `common-services/.env`. Change them before the first start.
+Login (seeded on first start): `LAB_EMAIL` (default `llmlabuser@example.com`) / the generated `LANGFUSE_INIT_USER_PASSWORD` in `.env`. Project API keys: `LANGFUSE_PUBLIC_KEY` / `LANGFUSE_SECRET_KEY` in the global `common-services/.env`. Change them before the first start.
 
 ## Quick start
 
@@ -39,7 +39,7 @@ make logs-langfuse
 Wait 30-60 s on the first start (migrations), then check:
 
 ```sh
-curl localhost:3001/api/public/health   # {"status":"OK","version":"4.54.0"}
+curl localhost:3001/api/public/health   # {"status":"OK","version":"4.71.0"}
 ```
 
 ## Configuration
@@ -48,7 +48,7 @@ Edit `modules/langfuse/.env` (created by `make create-envs` from `example.env`),
 
 | Variable | Default | Description |
 |---|---|---|
-| `LANGFUSE_VERSION` | `4.54` | Tag for the web and worker images |
+| `LANGFUSE_VERSION` | `4.71` | Tag for the web and worker images |
 | `LANGFUSE_PORT` | `3001` | Host port of the web UI |
 | `LANGFUSE_WORKER_PORT` | `3030` | Host port of the worker, bound to `127.0.0.1` |
 | `NEXTAUTH_URL` | `http://$LAB_PUBLIC_HOST:$LANGFUSE_PORT` | Public URL for auth callbacks; set only behind a proxy and keep it consistent with the port |
@@ -64,7 +64,7 @@ Edit `modules/langfuse/.env` (created by `make create-envs` from `example.env`),
 | `LANGFUSE_S3_ENDPOINT` | `${GARAGE_S3_ENDPOINT}` | S3 endpoint inside the `lang` network |
 | `LANGFUSE_S3_EXTERNAL_ENDPOINT` | `${GARAGE_S3_EXTERNAL_ENDPOINT}` | S3 endpoint reachable from your browser (presigned URLs) |
 | `LANGFUSE_S3_REGION`, `LANGFUSE_S3_BATCH_EXPORT_ENABLED` | `${GARAGE_S3_REGION}`, `false` | S3 region and batch exports |
-| `LANGFUSE_INIT_*` | see `example.env` | Headless org, project, keys (`${LANGFUSE_PUBLIC_KEY}` / `${LANGFUSE_SECRET_KEY}`) and admin user, applied on first start only. Leave empty to sign up in the UI |
+| `LANGFUSE_INIT_*` | see `example.env` | Headless org, project, keys (`${LANGFUSE_PUBLIC_KEY}` / `${LANGFUSE_SECRET_KEY}`) and admin user (`${LAB_EMAIL}`, `${LAB_USER}`), applied on first start only. Leave empty to sign up in the UI |
 
 The S3 key and secret (`GARAGE_DEFAULT_*`) and Redis (`REDIS_HOST`, container port 6379) come from the global `common-services/.env` and are mapped in `docker-compose.yml`.
 

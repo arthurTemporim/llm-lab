@@ -14,9 +14,9 @@ Read `docs/CONVENTIONS.md` first. Names below use module `x`.
    - ports `"${X_PORT:-<free port>}:<container port>"`; check the other modules for clashes; admin-only ports on `127.0.0.1`
    - volumes `x-<data>`; the external `lang` network
    - runs on CPU; NVIDIA settings go in `docker-compose.gpu.yml`
-3. **Env** (`modules/x/example.env`): every variable commented, `X_*` names (upstream names kept), `CHANGE_ME`/`CHANGE_ME_PASSWORD` for secrets. Shared values are references: `DATABASE_URL=${POSTGRES_URL}/x`, `${REDIS_URL}`, `${OLLAMA_URL}`, `${LAB_PUBLIC_HOST}`. Never copy a global value.
+3. **Env** (`modules/x/example.env`): every variable commented, `X_*` names (upstream names kept), `CHANGE_ME`/`CHANGE_ME_PASSWORD` for secrets. Shared values are references: `DATABASE_URL=${POSTGRES_URL}/x`, `${REDIS_URL}`, `${OLLAMA_URL}`, `${LAB_PUBLIC_HOST}`; an admin login's user name and email are `${LAB_USER}` / `${LAB_EMAIL}`. Never copy a global value.
 4. **Shared services.** Need a database: add `x` to `POSTGRES_DATABASES` in `modules/common-services/example.env`. Need S3: follow the Garage bucket setup in `common-services`. Never bundle Postgres, Redis or S3.
 5. **Register.** Add `x` to `MODULES` in the `Makefile` (nothing else is needed).
 6. **README.** Copy `docs/MODULE_README_TEMPLATE.md` to `modules/x/README.md` and fill all ten sections from the files you just wrote.
-7. **Docs.** `README.md` module table and badges, `docs/MODULES.md` section, `docs/CONFIGURATIONS.md` (shared values, GPU), `docs/ARCHITECTURE.md` (layer, dependencies, flows). Delegate to `documenter-agent` when available.
+7. **Docs.** `README.md` module table, Services table (URL, version, README link) and badges, `docs/MODULES.md` section, `docs/CONFIGURATIONS.md` (shared values, GPU), `docs/ARCHITECTURE.md` (layer, dependencies, flows). Delegate to `documenter-agent` when available.
 8. **Validate.** `cp modules/x/example.env modules/x/.env` (or `make create-envs`), then `bash .claude/skills/validate/validate.sh x make`. Start it (`make x`) only if asked.

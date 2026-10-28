@@ -3,7 +3,7 @@
 # .env is loaded as a whole (env_file); the block below only derives the public URLs.
 services:
   hatchet-lite:
-    image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:v0.110.8
+    image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:v0.114.2
     container_name: hatchet-lite
     restart: unless-stopped
     env_file: .env

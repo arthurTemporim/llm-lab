@@ -46,7 +46,7 @@ x-langfuse-env: &langfuse-env
 
 services:
   langfuse-worker:
-    image: langfuse/langfuse-worker:${LANGFUSE_VERSION:-4.54}
+    image: langfuse/langfuse-worker:${LANGFUSE_VERSION:-4.71}
     container_name: langfuse-worker
     restart: unless-stopped
     env_file: .env
@@ -62,7 +62,7 @@ services:
       - lang
 
   langfuse-web:
-    image: langfuse/langfuse:${LANGFUSE_VERSION:-4.54}
+    image: langfuse/langfuse:${LANGFUSE_VERSION:-4.71}
     container_name: langfuse-web
     restart: unless-stopped
     env_file: .env

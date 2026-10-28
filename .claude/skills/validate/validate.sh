@@ -87,6 +87,12 @@ shell() {
   elif has uvx; then step "shellcheck (uvx)" uvx --from shellcheck-py==0.10.0.1 shellcheck scripts/*.sh .claude/skills/*/*.sh
   else skip "shellcheck (install shellcheck or uv)"
   fi
+  if has python3; then
+    # Parse only: py_compile would write __pycache__ into scripts/
+    step "python syntax scripts/*.py" python3 -I -c 'import ast, sys; [ast.parse(open(f).read(), f) for f in sys.argv[1:]]' scripts/*.py
+    step "lab.py --help" python3 -I scripts/lab.py --help
+  else skip "python scripts (python3 not installed)"
+  fi
 }
 
 conventions() {

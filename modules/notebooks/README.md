@@ -7,7 +7,7 @@ Jupyter playground with LangChain and the Ollama integration.
 | | |
 |---|---|
 | Documentation | [LangChain](https://python.langchain.com/docs/introduction/), [Jupyter](https://jupyter-docker-stacks.readthedocs.io/) |
-| Image | built from `modules/notebooks/Dockerfile` (base `jupyter/minimal-notebook:python-3.11`) |
+| Image | built from `modules/notebooks/Dockerfile` (base `quay.io/jupyter/minimal-notebook:2026-10-28`, Python 3.13.18) |
 | Container(s) | `notebooks` |
 | GPU | Not used |
 | Make target | `make notebooks` (rebuild with `make build`) |
@@ -72,10 +72,10 @@ make build             # rebuild after changing requirements.txt
 | Symptom | Cause / fix |
 |---|---|
 | Connection refused to Ollama | Use `http://ollama:11434`, not `localhost`, and pull the model first |
-| Missing Python package | Add it to `requirements.txt`, then `make build` |
+| Missing Python package | Add it to `requirements.txt`, then `make build-notebooks` |
 | Port already in use | Change `NOTEBOOKS_PORT` |
 
 ## Notes
 
 * Runs **without a token**, so keep the port on your machine only.
-* The base image uses a floating `python-3.11` tag; rebuilds can change packages.
+* The base image is pinned to a dated tag, so rebuilds are reproducible. To upgrade, pick a newer dated tag on quay.io.
