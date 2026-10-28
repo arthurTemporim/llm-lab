@@ -16,27 +16,27 @@ Read the relevant file before changing a module. Don't guess commands, ports or 
 ## Layout
 
 - `modules/<name>/`: one self-contained Compose project per technology (`docker-compose.yml`, `example.env`, optional `Dockerfile`, `README.md`)
-- `modules/common-services/`: Postgres+pgvector, Redis, MinIO. Creates the `lang` network, which every other module uses as `external: true`
+- `modules/common-services/`: Postgres+pgvector, Redis, Garage (S3). Creates the `lang` network, which every other module uses as `external: true`
 
 ## Conventions
 
 Follow the module pattern; look at an existing module before adding or editing one (see `docs/MODULES.md`).
 
-- Pinned image tags. The only exception is MinIO (`latest`); don't add more.
+- Pinned image tags, no `latest`.
 - `env_file: .env` in every service. Use `${VAR:-default}` only for host ports and derived values.
 - Every host port is a `*_PORT` variable in `example.env`; check other modules for clashes. Admin-only ports bind to `127.0.0.1`.
 - The base compose file must run on CPU. GPU config goes in `docker-compose.gpu.yml`. Exception: `vllm` is GPU only (reservation in its base file).
 - Every new env var goes in `example.env` with a safe default and a comment (`CHANGE_ME` for generated secrets). Never commit or print real secrets.
-- Use shared services (Postgres, Redis, MinIO, Ollama) by container name on `lang`. No module-local copies. New databases go in `POSTGRES_DATABASES` in `modules/common-services/example.env`.
+- Use shared services (Postgres, Redis, Garage, Ollama) by container name on `lang`. No module-local copies. New databases go in `POSTGRES_DATABASES` in `modules/common-services/example.env`.
 - Adding a module also means updating the `Makefile` `MODULES` list and the docs listed above.
 - Docs and comments are in English.
 
 ## Constraints
 
-- `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD` must match between `common-services` and `langfuse` (checked by the Makefile).
+- `GARAGE_DEFAULT_ACCESS_KEY`/`GARAGE_DEFAULT_SECRET_KEY` must match between `common-services` and `langfuse` (checked by the Makefile). `LANGFUSE_S3_REGION` must equal `s3_region` in `modules/common-services/garage.toml`.
 - Redis keeps `--maxmemory-policy noeviction` (Langfuse/BullMQ).
 - Postgres data stays mounted at `PGDATA` (`/var/lib/postgresql/data`).
-- Keep MinIO's non-standard host API port and ClickHouse's lack of host ports.
+- Keep Garage's S3 host port (9100) and ClickHouse's lack of host ports.
 - Never change Langfuse `ENCRYPTION_KEY`/`SALT` or the LiteLLM salt key after first use.
 
 ## Validating changes

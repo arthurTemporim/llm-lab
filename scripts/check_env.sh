@@ -14,7 +14,7 @@ check() { # <var> <module-a> <module-b>
   fi
 }
 
-check MINIO_ROOT_USER common-services langfuse
-check MINIO_ROOT_PASSWORD common-services langfuse
+check GARAGE_DEFAULT_ACCESS_KEY common-services langfuse
+check GARAGE_DEFAULT_SECRET_KEY common-services langfuse
 [ "$status" -eq 0 ] && echo "[check-env] ok"
 exit "$status"

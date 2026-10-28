@@ -26,7 +26,7 @@ flowchart TB
     subgraph L1["Foundation: common-services"]
         pg[("postgres + pgvector")]
         rd[("redis")]
-        mn[("minio")]
+        mn[("garage")]
     end
     L4 --> L3
     L4 --> L2
@@ -47,7 +47,7 @@ Lower layers never depend on higher ones. A module may skip layers.
 ## Network
 
 - The network is named `lang`. It is **created** by `common-services` and **referenced as external** by every other module.
-- Docker DNS resolves container names, so containers talk by name (`ollama`, `postgres`, `redis`, `minio`, `litellm`, `langfuse-web`, …) on the container's own port.
+- Docker DNS resolves container names, so containers talk by name (`ollama`, `postgres`, `redis`, `garage`, `litellm`, `langfuse-web`, …) on the container's own port.
 - From the host, use `localhost` and the published port. Inside a container, `localhost` means that container itself, a common mistake in Langflow and notebook configs.
 
 ## Dependencies and start order
@@ -81,7 +81,7 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 
 **Gateway with tracing.** A client calls LiteLLM with an API key. LiteLLM checks keys in Postgres, forwards to Ollama, LocalAI or another provider, returns an OpenAI-format response, and optionally reports the trace to Langfuse. Prometheus scrapes LiteLLM metrics.
 
-**Langfuse ingestion.** SDKs or OTLP send events to `langfuse-web`, which stores raw events in MinIO and queues them in Redis. `langfuse-worker` processes them into ClickHouse. Users, projects and prompts live in Postgres.
+**Langfuse ingestion.** SDKs or OTLP send events to `langfuse-web`, which stores raw events in Garage (S3) and queues them in Redis. `langfuse-worker` processes them into ClickHouse. Users, projects and prompts live in Postgres.
 
 **Document conversion.** A client uploads a file to `docling` (`/v1/convert/file`, or the async variant for long documents) and gets Markdown back. Conversions queue behind `DOCLING_SERVE_ENG_LOC_NUM_WORKERS`, so many clients share one capped converter.
 
@@ -92,7 +92,7 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 | Data | Where |
 |---|---|
 | Postgres databases | `common-services` named volume, mounted at `PGDATA` |
-| Redis, MinIO objects | `common-services` named volumes |
+| Redis, Garage objects | `common-services` named volumes |
 | Ollama models | `ollama` named volume |
 | vLLM models (Hugging Face cache) | `vllm_huggingface` named volume |
 | Docling models | inside the image (no volume) |
@@ -121,7 +121,7 @@ Every host port is a `*_PORT` variable in the module's `.env`. Check what is alr
 |---|---|---|
 | One Compose project per module | Start, upgrade or delete a technology independently | Cross-module order is handled by the Makefile |
 | One external network | Every module reaches every other by name | No isolation; fine for a lab |
-| Shared Postgres, Redis, MinIO | Less RAM, one place to back up | Shared credentials; modules can collide (database names, Redis keys) |
+| Shared Postgres, Redis, Garage | Less RAM, one place to back up | Shared credentials; modules can collide (database names, Redis keys) |
 | pgvector Postgres image | Vector search for RAG without another service | Pinned to one major version |
 | `example.env` + generated `.env` | Secrets stay out of git; `make create-envs` is idempotent | Keep templates in sync when adding variables |
 | Custom images only where needed | Add packages without forking upstream | Rebuild is manual (`--build`) |
@@ -130,6 +130,5 @@ Every host port is a `*_PORT` variable in the module's `.env`. Check what is alr
 
 | Issue | Impact | Fix |
 |---|---|---|
-| MinIO uses the `latest` tag | Rebuilds can bring breaking changes | Chainguard publishes no other tag for the free tier; pin a digest if needed |
 | Jupyter base image uses a floating `python-3.11` tag | Rebuilds can change packages | Pin a dated tag |
 | Postgres volume changed from an anonymous volume to the `postgres` named volume | A lab created before this change starts with empty databases | `pg_dumpall` from the old container before recreating it |

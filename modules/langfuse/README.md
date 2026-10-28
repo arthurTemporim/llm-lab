@@ -61,18 +61,18 @@ Edit `modules/langfuse/.env` (created by `make create-envs` from `example.env`),
 | `REDIS_HOST` / `REDIS_PORT` | `redis` / `6379` | Shared Redis (no password) |
 | `CLICKHOUSE_USER` / `CLICKHOUSE_PASSWORD` | `clickhouse` / `clickhouse` | ClickHouse credentials |
 | `CLICKHOUSE_URL` / `CLICKHOUSE_MIGRATION_URL` | `http://clickhouse:8123` / `clickhouse://clickhouse:9000` | ClickHouse HTTP and native endpoints |
-| `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` | `minio` / `miniosecret` | S3 credentials. **Must match** `common-services/.env` (`make check-env`) |
-| `LANGFUSE_S3_BUCKET` | `langfuse` | Bucket; must be listed in `MINIO_BUCKETS` of common-services |
-| `LANGFUSE_S3_ENDPOINT` | `http://minio:9000` | S3 endpoint inside the `lang` network |
+| `GARAGE_DEFAULT_ACCESS_KEY` / `GARAGE_DEFAULT_SECRET_KEY` | fixed local defaults | S3 credentials. **Must match** `common-services/.env` (`make check-env`) |
+| `LANGFUSE_S3_BUCKET` | `langfuse` | Bucket; must be `GARAGE_DEFAULT_BUCKET` of common-services |
+| `LANGFUSE_S3_ENDPOINT` | `http://garage:3900` | S3 endpoint inside the `lang` network |
 | `LANGFUSE_S3_EXTERNAL_ENDPOINT` | `http://localhost:9100` | S3 endpoint reachable from your browser (presigned URLs) |
-| `LANGFUSE_S3_REGION`, `LANGFUSE_S3_BATCH_EXPORT_ENABLED` | `auto`, `false` | S3 region and batch exports |
+| `LANGFUSE_S3_REGION`, `LANGFUSE_S3_BATCH_EXPORT_ENABLED` | `garage`, `false` | S3 region (must be `s3_region` in `common-services/garage.toml`) and batch exports |
 | `LANGFUSE_INIT_*` | see `example.env` | Headless org, project, keys and admin user, applied on first start only. Leave empty to sign up in the UI |
 
 ## Connections
 
 | Direction | Module | How |
 |---|---|---|
-| Depends on | `common-services` | Postgres database `langfuse`, Redis (queues, `noeviction`), MinIO bucket `langfuse` |
+| Depends on | `common-services` | Postgres database `langfuse`, Redis (queues, `noeviction`), Garage bucket `langfuse` |
 | Depends on | `langfuse-clickhouse` | Same module: analytics store, internal only |
 | Used by | `litellm` | Optional trace callback to `http://langfuse-web:3000` |
 | Used by | your code | SDK or OTLP to `http://localhost:3001` (from containers: `http://langfuse-web:3000`) |
@@ -82,7 +82,7 @@ Edit `modules/langfuse/.env` (created by `make create-envs` from `example.env`),
 | Data | Where | Survives `down` |
 |---|---|---|
 | Users, projects, prompts | Postgres database `langfuse` | yes |
-| Raw events, media, exports | MinIO bucket `langfuse` | yes |
+| Raw events, media, exports | Garage bucket `langfuse` | yes |
 | Traces and scores | ClickHouse named volumes | yes |
 
 ## Sending traces
@@ -141,7 +141,8 @@ Full reset (**deletes all Langfuse data**):
 ```sh
 cd modules/langfuse && docker compose down -v
 docker exec postgres psql -U lang -d postgres -c 'DROP DATABASE langfuse' && make databases
-docker exec minio sh -c 'rm -rf /data/langfuse/*'
+# Garage only holds the langfuse bucket, so drop its volume; the bucket and key are recreated on start
+cd ../common-services && docker compose rm -sf garage && docker volume rm common-services_garage-data && docker compose up -d garage
 ```
 
 Upgrade: change `LANGFUSE_VERSION`, then `docker compose pull && docker compose up -d`.
@@ -154,14 +155,15 @@ Upgrade: change `LANGFUSE_VERSION`, then `docker compose pull && docker compose 
 | `network lang declared as external, but could not be found` | Start common-services first (`make common-services`) |
 | `database "langfuse" does not exist` | `make databases` |
 | Web restarts with ClickHouse errors | `docker compose logs clickhouse`; check `CLICKHOUSE_PASSWORD` |
-| S3 / `NoSuchBucket` in the worker | Add the bucket to `MINIO_BUCKETS` (common-services `.env`), then `docker compose up -d minio` there |
-| S3 `SignatureDoesNotMatch` / `InvalidAccessKeyId` | `MINIO_ROOT_*` differ between the two `.env` files |
+| S3 / `NoSuchBucket` in the worker | Set `GARAGE_DEFAULT_BUCKET` (common-services `.env`) to `LANGFUSE_S3_BUCKET`, then `docker compose up -d garage` there |
+| S3 `SignatureDoesNotMatch` / `InvalidAccessKeyId` | `GARAGE_DEFAULT_*` differ between the two `.env` files |
+| S3 `AuthorizationHeaderMalformed` (region) | `LANGFUSE_S3_REGION` must be `s3_region` in `common-services/garage.toml` |
 | Images or media do not load | `LANGFUSE_S3_EXTERNAL_ENDPOINT` must be reachable from the browser |
 | `Event type "trace-create" is not accepted` | v4 expects OTLP or a v4 SDK (see Sending traces) |
-| Port already in use | Change `LANGFUSE_PORT`, or `MINIO_API_PORT` / `MINIO_CONSOLE_PORT` in common-services |
+| Port already in use | Change `LANGFUSE_PORT`, or `GARAGE_S3_PORT` in common-services (and `LANGFUSE_S3_EXTERNAL_ENDPOINT`) |
 
 ## Notes
 
 * ClickHouse has no host ports on purpose (9000 is commonly taken); it is reachable only inside the `lang` network.
-* The MinIO image comes from Chainguard (`cgr.dev/chainguard/minio`), the same one the official Langfuse compose uses.
+* Object storage is Garage, not the MinIO of the official Langfuse compose. Langfuse supports it as a generic S3-compatible store.
 * Defaults are for local development only. Do not expose this setup as is.

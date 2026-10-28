@@ -14,8 +14,8 @@ How configuration works in llm-lab: env files, values that must match, secrets, 
 | Value | Keep in sync between |
 |---|---|
 | Postgres user, password and database names | `common-services` and the connection strings in `langflow`, `litellm`, `langfuse` |
-| MinIO user and password | `common-services/.env` and `langfuse/.env` (verified by `make check-env`, which `make langfuse` runs) |
-| MinIO bucket and endpoint | `common-services/.env` and the S3 settings in `langfuse/.env` |
+| Garage key and secret (`GARAGE_DEFAULT_*`) | `common-services/.env` and `langfuse/.env` (verified by `make check-env`, which `make langfuse` runs) |
+| Garage bucket, endpoint and region | `common-services/.env` and `garage.toml` (`s3_region`), and the S3 settings in `langfuse/.env` |
 | Langfuse port and public URL | both in `langfuse/.env` |
 | Langfuse API keys | `langfuse/.env` and any client, such as `litellm/.env` |
 | LocalAI API key | `localai/.env` and its clients (LiteLLM, Open WebUI) |
@@ -24,7 +24,7 @@ How configuration works in llm-lab: env files, values that must match, secrets, 
 
 All defaults are for local use. Change them before exposing anything beyond your machine, and generate values with `openssl rand -hex 32`.
 
-- **Passwords and keys:** Postgres, MinIO, ClickHouse, Langflow, LiteLLM, Langfuse and LocalAI all ship with simple defaults.
+- **Passwords and keys:** Postgres, Garage, ClickHouse, Langflow, LiteLLM, Langfuse and LocalAI all ship with simple defaults.
 - **Never change after first use:** the LiteLLM salt key (encrypts stored provider keys) and the Langfuse `ENCRYPTION_KEY`.
 - **Langfuse seed values** (`LANGFUSE_INIT_*`) apply only on the first start.
 - **Jupyter** runs without a token. Add one in its compose command to enable auth.
@@ -52,11 +52,11 @@ Most Open WebUI settings are stored in its database after the first start, and t
 
 ## Changing ports
 
-Every published host port is a `*_PORT` variable in the module's `.env` (for example `OLLAMA_PORT`, `LANGFUSE_PORT`, `MINIO_API_PORT`). If a port is also used in another setting (for example Langfuse's public URL or the MinIO external endpoint), update it too. Container ports and in-network addresses never change.
+Every published host port is a `*_PORT` variable in the module's `.env` (for example `OLLAMA_PORT`, `LANGFUSE_PORT`, `GARAGE_S3_PORT`). If a port is also used in another setting (for example Langfuse's public URL or the Langfuse S3 external endpoint), update it too. Container ports and in-network addresses never change.
 
 ## Versions and upgrades
 
-Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse uses `LANGFUSE_VERSION` in `.env`). The only floating tag is MinIO's `latest`, because Chainguard publishes no other for the free tier.
+Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse uses `LANGFUSE_VERSION` in `.env`). No image uses `latest` (`scripts/check_conventions.sh` enforces it).
 
 | Case | Upgrade |
 |---|---|

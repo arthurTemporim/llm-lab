@@ -29,7 +29,7 @@ Rules:
 
 ### common-services
 
-The foundation. Creates the shared network and runs Postgres (with pgvector), Redis and MinIO. Always start it first. `make common-services` creates the `langflow`, `langfuse` and `litellm` databases (with `vector`) on any volume. Redis runs with `noeviction` because Langfuse requires it.
+The foundation. Creates the shared network and runs Postgres (with pgvector), Redis and Garage (S3-compatible object storage). Always start it first. `make common-services` creates the `langflow`, `langfuse` and `litellm` databases (with `vector`) on any volume. Redis runs with `noeviction` because Langfuse requires it.
 
 ### ollama
 
@@ -65,7 +65,7 @@ OpenAI-compatible gateway in front of Ollama, LocalAI and cloud providers, with 
 
 ### langfuse
 
-LLM observability: traces, sessions, prompts, evals and datasets. Runs a web app, a worker and ClickHouse, and uses Postgres, Redis and MinIO from `common-services`. Set its secrets in `.env` before starting. `make langfuse` also checks that the MinIO credentials match. See `modules/langfuse/README.md` for the full reference.
+LLM observability: traces, sessions, prompts, evals and datasets. Runs a web app, a worker and ClickHouse, and uses Postgres, Redis and Garage from `common-services`. Set its secrets in `.env` before starting. `make langfuse` also checks that the Garage credentials match. See `modules/langfuse/README.md` for the full reference.
 
 ## Adding a module
 

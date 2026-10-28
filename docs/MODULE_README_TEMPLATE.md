@@ -85,7 +85,7 @@ Edit `modules/<name>/.env` (created by `make create-envs` from `example.env`), t
 
 | Direction | Module | How |
 |---|---|---|
-| Depends on | `common-services` | <postgres database `x`, redis, minio bucket `y`> |
+| Depends on | `common-services` | <postgres database `x`, redis, garage bucket `y`> |
 | Used by | `<module>` | <address and purpose> |
 
 ## Storage
