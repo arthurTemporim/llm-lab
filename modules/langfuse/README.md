@@ -33,7 +33,7 @@ Default login (seeded on first start): `admin@example.com` / `change-me-admin`. 
 ```sh
 make create-envs      # creates .env files and generates the secrets
 make langfuse         # starts common-services (and databases), then langfuse
-make langfuse-logs
+make logs-langfuse
 ```
 
 Wait 30-60 s on the first start (migrations), then check:
@@ -131,8 +131,8 @@ and set `litellm_settings: { success_callback: ["langfuse"] }` in its `models.ya
 ## Operations
 
 ```sh
-make langfuse-logs    # follow logs
-make langfuse-down    # stop (data is kept)
+make logs-langfuse    # follow logs
+make down-langfuse    # stop (data is kept)
 make databases        # (re)create the postgres databases if missing
 ```
 

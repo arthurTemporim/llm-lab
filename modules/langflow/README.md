@@ -30,7 +30,7 @@ Default login: `lang` / `lang` (`LANGFLOW_SUPERUSER`, `LANGFLOW_SUPERUSER_PASSWO
 
 ```sh
 make langflow
-make langflow-logs
+make logs-langflow
 ```
 
 Open http://localhost:7860, log in, then import `modules/langflow/langflow.json` from the UI to get example flows.
@@ -73,7 +73,7 @@ In components, use container names, not `localhost`:
 ## Operations
 
 ```sh
-make langflow-down     # stop, keep data
+make down-langflow     # stop, keep data
 make build             # rebuild the custom image
 ```
 

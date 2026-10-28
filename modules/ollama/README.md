@@ -30,7 +30,7 @@ No login.
 
 ```sh
 make ollama
-make ollama-logs
+make logs-ollama
 ```
 
 Pull a model (edit the list in `scripts/ollama_pull_model.sh`, or pull one):
@@ -84,7 +84,7 @@ GPU: auto-detected by the Makefile. Force with `GPU=1 make ollama` or disable wi
 ## Operations
 
 ```sh
-make ollama-down                      # stop, keep models
+make down-ollama                      # stop, keep models
 docker exec ollama ollama list        # installed models
 docker exec ollama ollama rm <model>  # free disk space
 ```

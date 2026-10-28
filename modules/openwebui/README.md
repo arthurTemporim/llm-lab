@@ -30,7 +30,7 @@ The first account you sign up becomes admin.
 
 ```sh
 make openwebui
-make openwebui-logs
+make logs-openwebui
 ```
 
 Open http://localhost:3000, create the admin account and pick a model (pull one in Ollama first, see `modules/ollama/README.md`).
@@ -76,7 +76,7 @@ To add LocalAI, LiteLLM or vLLM: Admin Settings, Connections, add an OpenAI conn
 ## Operations
 
 ```sh
-make openwebui-down    # stop, keep data
+make down-openwebui    # stop, keep data
 ```
 
 Upgrade: change the image tag in both compose files, then `docker compose pull && docker compose up -d` in `modules/openwebui/`.

@@ -30,7 +30,7 @@ Every `/v1` call needs `Authorization: Bearer $VLLM_API_KEY` (generated into `.e
 
 ```sh
 make vllm          # starts common-services first, then this module
-make vllm-logs
+make logs-vllm
 ```
 
 The first start downloads the model (many GB) and compiles kernels, which can take several minutes. Wait until the log shows `Application startup complete`.
@@ -109,7 +109,7 @@ After switching `VLLM_MODEL`, reload the page: the picker shows whatever vLLM se
 ## Operations
 
 ```sh
-make vllm-down                                  # stop, keep downloaded models
+make down-vllm                                  # stop, keep downloaded models
 docker exec vllm ls /root/.cache/huggingface/hub   # cached models
 docker volume rm vllm_huggingface               # free the disk (after down)
 ```

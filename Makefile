@@ -1,11 +1,11 @@
 # llm-lab: single entry point. Run `make help`.
 MODULES := common-services ollama localai vllm docling openwebui langflow notebooks litellm langfuse
 OTHERS  := $(filter-out common-services,$(MODULES))
-# Default set for `make build` and `make start`; the *-all targets use every module.
+# Default set for `make build` and `make up`; the *-all targets use every module.
 CORE    := common-services ollama openwebui
 
-.PHONY: help init start start-all build build-all down create-envs check-env databases logs $(MODULES) \
-	$(addprefix start-,$(MODULES)) $(addprefix build-,$(MODULES)) $(addprefix logs-,$(MODULES))
+.PHONY: help init up up-all build build-all down create-envs check-env databases logs $(MODULES) \
+	$(addprefix up-,$(MODULES)) $(addprefix down-,$(MODULES)) $(addprefix build-,$(MODULES)) $(addprefix logs-,$(MODULES))
 
 modules_dir := $(CURDIR)/modules/
 scripts_dir := $(CURDIR)/scripts/
@@ -19,16 +19,15 @@ compose = cd $(modules_dir)$(1) && docker compose $(if $(and $(filter 1,$(GPU)),
 
 help:
 	@echo "Modules: $(MODULES)"
-	@echo "  make <module>         start a module (starts common-services first)"
-	@echo "  make start-<module>   same as make <module>"
+	@echo "  make up-<module>      start a module (starts common-services first)"
+	@echo "  make <module>         same as make up-<module>"
+	@echo "  make down-<module>    stop a module (data is kept)"
 	@echo "  make build-<module>   build a module's images without starting it"
-	@echo "  make <module>-logs    follow a module's logs"
-	@echo "  make logs-<module>    same as make <module>-logs"
-	@echo "  make <module>-down    stop a module (data is kept)"
+	@echo "  make logs-<module>    follow a module's logs"
 	@echo ""
-	@echo "  make init             create-envs + build + start + pull ollama models"
-	@echo "  make start            start the core modules: $(CORE)"
-	@echo "  make start-all        start every module"
+	@echo "  make init             create-envs + build + up + pull ollama models"
+	@echo "  make up               start the core modules: $(CORE)"
+	@echo "  make up-all           start every module"
 	@echo "  make build            build the core modules: $(CORE)"
 	@echo "  make build-all        build every module that has a Dockerfile"
 	@echo "  make down             stop all modules (data is kept)"
@@ -59,14 +58,14 @@ databases:
 # =================== Orchestration ===================
 init: create-envs
 	$(MAKE) build
-	$(MAKE) start
+	$(MAKE) up
 	$(scripts_dir)ollama_pull_model.sh
 	@echo "Init done."
 
-start: $(CORE)
+up: $(addprefix up-,$(CORE))
 	@echo "Finished core start"
 
-start-all: $(MODULES)
+up-all: $(addprefix up-,$(MODULES))
 	@echo "Finished full start"
 
 build: create-envs
@@ -86,26 +85,26 @@ logs:
 	wait
 
 # =================== Modules ===================
+# Every module gets up-<module>, down-<module>, build-<module> and logs-<module>.
 # common-services creates the "lang" network, so every other module needs it first.
-common-services: create-envs
-	@$(call compose,$@) up -d --build
+up-common-services: create-envs
+	@$(call compose,common-services) up -d --build
 	@$(MAKE) --no-print-directory databases
 
-$(OTHERS): common-services
-	@$(call compose,$@) up -d --build
-	@echo "$@ is up"
+$(addprefix up-,$(OTHERS)): up-%: up-common-services
+	@$(call compose,$*) up -d --build
+	@echo "$* is up"
 
-langfuse: check-env
+up-langfuse: check-env
 
-$(addprefix start-,$(MODULES)): start-%: %
+# `make <module>` is a shortcut for `make up-<module>`
+$(MODULES): %: up-%
+
+$(addprefix down-,$(MODULES)): down-%:
+	@$(call compose,$*) down
 
 $(addprefix build-,$(MODULES)): build-%: create-envs
 	@$(call compose,$*) build
 
-%-logs:
+$(addprefix logs-,$(MODULES)): logs-%:
 	@$(call compose,$*) logs -f
-
-$(addprefix logs-,$(MODULES)): logs-%: %-logs
-
-%-down:
-	@$(call compose,$*) down

@@ -110,12 +110,11 @@ Run `make help` for the full list. Common targets:
 | Target | Description |
 |---|---|
 | `make init` | Create envs, build, start the core modules, pull models |
-| `make start` / `make build` | Start or build the core modules (`common-services`, `ollama`, `openwebui`) |
-| `make start-all` / `make build-all` | Start or build every module |
+| `make up` / `make build` | Start or build the core modules (`common-services`, `ollama`, `openwebui`) |
+| `make up-all` / `make build-all` | Start or build every module |
 | `make create-envs` | Copy each `example.env` to `.env` (never overwrites) |
-| `make <module>` | Start a module (`common-services` is started first automatically) |
-| `make start-<module>` / `build-<module>` | Start a module (same as `make <module>`) or only build its images |
-| `make <module>-logs` (or `logs-<module>`) / `<module>-down` | Follow logs or stop any module |
+| `make up-<module>` (or `make <module>`) | Start a module (`common-services` is started first automatically) |
+| `make down-<module>` / `build-<module>` / `logs-<module>` | Stop a module (data is kept), only build its images, or follow its logs |
 | `make databases` | Create the Postgres databases if missing (idempotent) |
 | `make check-env` | Verify values that must match across modules |
 | `make down` | Stop all modules, keep volumes |
@@ -123,6 +122,10 @@ Run `make help` for the full list. Common targets:
 ## Helper scripts
 
 The `scripts/` folder holds small helpers: pulling, listing and prompting Ollama models, downloading Hugging Face models for vLLM and testing the server, creating the Postgres databases, generating random secrets for new `.env` files and checking values that must match.
+
+## CI
+
+`.github/workflows/validate.yml` runs static checks on every PR into `devel` or `main`; it never pulls, builds or starts containers. It validates every compose file (with its GPU override), dry-runs the Makefile, runs `make check-env`, ShellCheck and yamllint, and runs `scripts/check_conventions.sh` (modules registered in `MODULES`, `${VAR}`s documented in `example.env`, pinned images, unique host ports). Run that script locally after `make create-envs`.
 
 ## Configuration
 

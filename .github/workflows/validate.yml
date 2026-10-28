@@ -1,0 +1,92 @@
+# Static validation only: nothing is pulled, built or started (GPU modules need real hardware).
+name: Validate
+
+on:
+  pull_request:
+    branches: [devel, main]
+  push:
+    branches: [devel, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    name: Compose config
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      # Every service has env_file: .env, so config fails without them
+      - name: Create .env files
+        run: make create-envs
+      - name: Validate compose files (base and GPU override)
+        run: |
+          status=0
+          for dir in modules/*/; do
+            m="$(basename "$dir")"
+            variants=("-f docker-compose.yml")
+            [ -f "$dir/docker-compose.gpu.yml" ] && variants+=("-f docker-compose.yml -f docker-compose.gpu.yml")
+            echo "::group::$m"
+            for files in "${variants[@]}"; do
+              # Compose only warns about unset variables, so the warning fails the check too
+              # shellcheck disable=SC2086
+              if out="$(cd "$dir" && docker compose $files config -q 2>&1)" && ! grep -qi 'variable is not set' <<<"$out"; then
+                echo "ok: docker compose $files config"
+              else
+                echo "$out"
+                echo "::error::$m: docker compose $files config failed"
+                status=1
+              fi
+            done
+            echo "::endgroup::"
+          done
+          exit "$status"
+
+  makefile:
+    name: Makefile
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Create .env files
+        run: make create-envs
+      - name: Check values shared across modules
+        run: make check-env
+      - name: Dry-run the main targets
+        run: |
+          make help
+          make -n create-envs build build-all up up-all down logs
+          make -n GPU=1 build-all up-all
+          for m in $(make -s --eval 'print-modules: ; @echo $(MODULES)' print-modules); do
+            make -n "$m" "up-$m" "down-$m" "build-$m" "logs-$m"
+          done
+
+  shell:
+    name: Shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Syntax check
+        run: for f in scripts/*.sh; do bash -n "$f"; done
+      - name: ShellCheck
+        run: |
+          shellcheck --version
+          shellcheck scripts/*.sh
+
+  conventions:
+    name: Conventions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Create .env files
+        run: make create-envs
+      - name: Check module conventions
+        run: ./scripts/check_conventions.sh
+
+  yaml:
+    name: YAML lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: yamllint
+        run: pipx run --spec yamllint==1.37.1 yamllint .

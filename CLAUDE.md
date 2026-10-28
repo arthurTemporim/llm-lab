@@ -41,8 +41,19 @@ Follow the module pattern; look at an existing module before adding or editing o
 
 ## Validating changes
 
-No tests exist. Use `docker compose -f modules/<name>/docker-compose.yml config -q`, `make -n <target>` and `bash -n scripts/<script>.sh`. Only start or stop containers when the task needs it: they may be in use and GPU modules download many GB.
+No tests exist. Use `docker compose -f modules/<name>/docker-compose.yml config -q`, `make -n <target>`, `bash -n scripts/<script>.sh` and `scripts/check_conventions.sh` (needs the `.env` files). CI (`.github/workflows/validate.yml`) runs these plus ShellCheck and yamllint on PRs. Only start or stop containers when the task needs it: they may be in use and GPU modules download many GB.
 
 ## Git
 
 Feature branch → PR into `devel` → `devel` merged into `main` by PR. Never push to `main` directly.
+
+<!-- rtk-instructions v2 -->
+# Command output
+
+Command output here is condensed to save tokens, keeping every signal and
+dropping costly noise. Treat it as the complete result: run commands
+normally, and batch related commands into one call to avoid extra turns.
+Truncated results state their recovery path in their own output. Re-run a
+command as `rtk proxy <cmd>` only when its result is unusable: empty when
+output was clearly expected, contradicting its exit code, or garbled.
+<!-- /rtk-instructions -->
