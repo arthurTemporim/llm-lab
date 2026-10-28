@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ex:
 # ./ollama_pull_model.sh
 
@@ -7,11 +7,8 @@
 models=(
 "llama3.2:3b 2.0"
 "gemma4:12b 8.0"
-"nomic-embed-text-v2-moe:latest 1.0"
 "tev1:4b 4.6"
-"lfm2.5:8b 5.2"
 "qwen3-embedding:8b 4.7"
-"embeddinggemma:300m 0.6"
 "qwen3-vl:8b 6.2"
 "nimble:9b 9.5"
 )

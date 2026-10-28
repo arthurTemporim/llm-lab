@@ -12,7 +12,7 @@ services:
     ports:
       - "${VLLM_HOST_PORT:-8000}:8000"
     volumes:
-      - huggingface:/root/.cache/huggingface
+      - vllm-huggingface:/root/.cache/huggingface
     healthcheck:
       test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/health')\""]
       interval: 30s
@@ -32,7 +32,9 @@ services:
       - lang
 
 volumes:
-  huggingface:
+  # name: keeps the docker volume created before the rename (no data loss)
+  vllm-huggingface:
+    name: vllm_huggingface
 
 networks:
   lang:

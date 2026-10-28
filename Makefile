@@ -2,9 +2,9 @@
 MODULES := common-services ollama localai vllm docling openwebui langflow notebooks litellm langfuse hatchet
 OTHERS  := $(filter-out common-services,$(MODULES))
 # Default set for `make build` and `make up`; the *-all targets use every module.
-CORE    := common-services ollama openwebui
+CORE    := common-services ollama
 
-.PHONY: help init up up-all build build-all down create-envs check-env databases logs $(MODULES) \
+.PHONY: help init configure gpu hatchet-token up up-all build build-all down create-envs check-env databases logs $(MODULES) \
 	$(addprefix up-,$(MODULES)) $(addprefix down-,$(MODULES)) $(addprefix build-,$(MODULES)) $(addprefix logs-,$(MODULES))
 
 modules_dir := $(CURDIR)/modules/
@@ -14,8 +14,10 @@ scripts_dir := $(CURDIR)/scripts/
 # the NVIDIA Container Toolkit; force it with `make GPU=1 ...` or `make GPU=0 ...`.
 GPU ?= $(if $(shell docker info --format '{{json .Runtimes}}' 2>/dev/null | grep -i nvidia),1,0)
 
-# $(call compose,<module>) -> docker compose command for that module
-compose = cd $(modules_dir)$(1) && docker compose $(if $(and $(filter 1,$(GPU)),$(wildcard $(modules_dir)$(1)/docker-compose.gpu.yml)),-f docker-compose.yml -f docker-compose.gpu.yml)
+# $(call compose,<module>) -> docker compose command for that module. The global
+# common-services/.env is loaded first, then the module's .env (later files win), so module
+# files can reference shared values as ${VAR}.
+compose = cd $(modules_dir)$(1) && docker compose --env-file ../common-services/.env --env-file .env $(if $(and $(filter 1,$(GPU)),$(wildcard $(modules_dir)$(1)/docker-compose.gpu.yml)),-f docker-compose.yml -f docker-compose.gpu.yml)
 
 help:
 	@echo "Modules: $(MODULES)"
@@ -25,7 +27,11 @@ help:
 	@echo "  make build-<module>   build a module's images without starting it"
 	@echo "  make logs-<module>    follow a module's logs"
 	@echo ""
-	@echo "  make init             create-envs + build + up + pull ollama models"
+	@echo "  make init             configure + start $(CORE) + pull ollama models + hatchet token"
+	@echo "                        (ARGS=\"--modules all\" or ARGS=\"--modules litellm,hatchet --host <ip>\")"
+	@echo "  make configure        env files, LAB_PUBLIC_HOST, GPU ids, evals/.env (starts nothing)"
+	@echo "  make gpu              pick the GPU for vllm/docling and write their GPU ids"
+	@echo "  make hatchet-token    create the Hatchet worker token (ARGS=--force to replace it)"
 	@echo "  make up               start the core modules: $(CORE)"
 	@echo "  make up-all           start every module"
 	@echo "  make build            build the core modules: $(CORE)"
@@ -33,7 +39,7 @@ help:
 	@echo "  make down             stop all modules (data is kept)"
 	@echo "  make logs             follow the logs of all running modules"
 	@echo "  make create-envs      example.env -> .env for every module (never overwrites)"
-	@echo "  make check-env        verify values that must match across modules"
+	@echo "  make check-env        verify the global env file and that modules do not redefine its values"
 	@echo "  make databases        create the postgres databases (idempotent)"
 	@echo ""
 	@echo "GPU=$(GPU) (override with GPU=0 or GPU=1)"
@@ -49,18 +55,25 @@ create-envs:
 		fi; \
 	done
 
-check-env:
+check-env: create-envs
 	@$(scripts_dir)check_env.sh
 
 databases:
 	@$(scripts_dir)create_databases.sh
 
 # =================== Orchestration ===================
-init: create-envs
-	$(MAKE) build
-	$(MAKE) up
-	$(scripts_dir)ollama_pull_model.sh
-	@echo "Init done."
+# The setup steps live in scripts/lab.py (./scripts/lab.py --help); ARGS is passed through.
+init:
+	@$(scripts_dir)lab.py init $(ARGS)
+
+configure:
+	@$(scripts_dir)lab.py configure $(ARGS)
+
+gpu:
+	@$(scripts_dir)lab.py gpu $(ARGS)
+
+hatchet-token:
+	@$(scripts_dir)lab.py hatchet-token $(ARGS)
 
 up: $(addprefix up-,$(CORE))
 	@echo "Finished core start"
@@ -87,15 +100,13 @@ logs:
 # =================== Modules ===================
 # Every module gets up-<module>, down-<module>, build-<module> and logs-<module>.
 # common-services creates the "lang" network, so every other module needs it first.
-up-common-services: create-envs
+up-common-services: create-envs check-env
 	@$(call compose,common-services) up -d --build
 	@$(MAKE) --no-print-directory databases
 
 $(addprefix up-,$(OTHERS)): up-%: up-common-services
 	@$(call compose,$*) up -d --build
 	@echo "$* is up"
-
-up-langfuse: check-env
 
 # `make <module>` is a shortcut for `make up-<module>`
 $(MODULES): %: up-%

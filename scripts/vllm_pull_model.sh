@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Downloads Hugging Face models into the vLLM cache volume, so `make vllm` starts without
 # waiting for the download. Needs Docker only (no GPU, vLLM does not have to be running).
 # Re-running skips files that are already complete. Remove a model you no longer want
@@ -7,7 +7,7 @@
 # ./vllm_pull_model.sh
 
 # "<repo> <size in GB>" per line. Size = safetensors + config/tokenizer files, from the
-# Hugging Face API on 2026-10-21. Details: docs/HUGGINGFACE_MODELS.md
+# Hugging Face API on 2026-10-21.
 models=(
 "huihui-ai/Huihui-Qwen3.5-4B-abliterated 9.10"             # chat
 "huihui-ai/Huihui-Qwen3-VL-4B-Instruct-abliterated 8.89"   # vision
@@ -20,7 +20,7 @@ models=(
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-volume=vllm_huggingface # <compose project>_<volume> of modules/vllm
+volume=vllm_huggingface # name: of the vllm-huggingface volume in modules/vllm
 image=vllm/vllm-openai:v0.32.0 # same image as modules/vllm/docker-compose.yml
 
 # HF_TOKEN is only needed for gated repos
@@ -30,7 +30,7 @@ export HF_TOKEN
 # Created with the labels Docker Compose uses, so `make vllm` adopts it without a warning.
 docker volume create \
   --label com.docker.compose.project=vllm \
-  --label com.docker.compose.volume=huggingface \
+  --label com.docker.compose.volume=vllm-huggingface \
   "$volume" > /dev/null
 
 total=$(printf '%s\n' "${models[@]}" | awk '{s+=$2} END {printf "%.2f", s}')

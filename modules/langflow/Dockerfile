@@ -1,4 +1,4 @@
-FROM langflowai/langflow:1.12.3
+FROM langflowai/langflow:1.13.0
 
 RUN uv pip install "langflow[bundles]"
 

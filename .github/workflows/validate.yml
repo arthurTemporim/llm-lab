@@ -29,9 +29,11 @@ jobs:
             [ -f "$dir/docker-compose.gpu.yml" ] && variants+=("-f docker-compose.yml -f docker-compose.gpu.yml")
             echo "::group::$m"
             for files in "${variants[@]}"; do
-              # Compose only warns about unset variables, so the warning fails the check too
+              # Compose only warns about unset variables, so the warning fails the check too.
+              # Like the Makefile, the global common-services/.env is loaded before the module's.
               # shellcheck disable=SC2086
-              if out="$(cd "$dir" && docker compose $files config -q 2>&1)" && ! grep -qi 'variable is not set' <<<"$out"; then
+              if out="$(cd "$dir" && docker compose --env-file ../common-services/.env --env-file .env $files config -q 2>&1)" \
+                && ! grep -qi 'variable is not set' <<<"$out"; then
                 echo "ok: docker compose $files config"
               else
                 echo "$out"
@@ -72,6 +74,10 @@ jobs:
         run: |
           shellcheck --version
           shellcheck scripts/*.sh
+      - name: Python scripts
+        run: |
+          python3 -c 'import ast, sys; [ast.parse(open(f).read(), f) for f in sys.argv[1:]]' scripts/*.py
+          python3 scripts/lab.py --help
 
   conventions:
     name: Conventions

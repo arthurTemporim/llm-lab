@@ -2,7 +2,7 @@ services:
   # One-shot: writes config.yaml from the Ollama models and models.yaml, then exits.
   # Runs again at every `up` (`make litellm`), so newly pulled models are picked up.
   litellm-init:
-    image: ghcr.io/berriai/litellm:v1.106.4
+    image: ghcr.io/berriai/litellm:v1.106.5
     container_name: litellm-init
     restart: "no"
     env_file: .env
@@ -10,12 +10,12 @@ services:
     volumes:
       - ./generate_config.py:/opt/llm-lab/generate_config.py:ro
       - ./models.yaml:/opt/llm-lab/models.yaml:ro
-      - litellm_config:/config
+      - litellm-config:/config
     networks:
       - lang
 
   litellm:
-    image: ghcr.io/berriai/litellm:v1.105.1
+    image: ghcr.io/berriai/litellm:v1.106.5
     container_name: litellm
     restart: unless-stopped
     env_file: .env
@@ -23,7 +23,7 @@ services:
       litellm-init:
         condition: service_completed_successfully
     volumes:
-      - litellm_config:/config:ro
+      - litellm-config:/config:ro
     command: ["--port", "4000", "--config", "/config/config.yaml"]
     ports:
       - "${LITELLM_PORT:-4000}:4000"
@@ -36,8 +36,8 @@ services:
     networks:
       - lang
 
-  prometheus:
-    image: prom/prometheus:v3.15.0
+  litellm-prometheus:
+    image: prom/prometheus:v3.15.1
     container_name: litellm-prometheus
     restart: unless-stopped
     command:
@@ -45,16 +45,19 @@ services:
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=15d"
     ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
+      - "${LITELLM_PROMETHEUS_PORT:-9090}:9090"
     volumes:
-      - prometheus_data:/prometheus
+      - litellm-prometheus-data:/prometheus
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - lang
 
 volumes:
-  litellm_config:
-  prometheus_data:
+  # name: keeps the docker volumes created before the rename (no data loss)
+  litellm-config:
+    name: litellm_litellm_config
+  litellm-prometheus-data:
+    name: litellm_prometheus_data
 
 networks:
   lang:

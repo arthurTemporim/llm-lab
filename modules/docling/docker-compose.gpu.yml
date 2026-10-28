@@ -1,7 +1,7 @@
 # NVIDIA GPU override, added automatically by the Makefile when a GPU runtime is found
 # (GPU=1 forces it, GPU=0 disables it).
 services:
-  docling:
+  docling-worker:
     image: ghcr.io/docling-project/docling-serve-cu128:v1.38.2
     deploy:
       resources:

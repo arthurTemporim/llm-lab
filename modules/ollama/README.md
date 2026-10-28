@@ -7,7 +7,7 @@ Pulls, runs and serves open-weight LLMs and embedding models over HTTP.
 | | |
 |---|---|
 | Documentation | [Ollama](https://ollama.com/), [API](https://github.com/ollama/ollama/blob/main/docs/api.md) |
-| Image | `ollama/ollama:0.40.0` |
+| Image | `ollama/ollama:0.40.12` |
 | Container(s) | `ollama` |
 | GPU | Optional (`docker-compose.gpu.yml` reserves NVIDIA GPUs, added automatically) |
 | Make target | `make ollama` |
@@ -79,7 +79,7 @@ GPU: auto-detected by the Makefile. Force with `GPU=1 make ollama` or disable wi
 
 | Data | Where | Survives `down` |
 |---|---|---|
-| Models | `ollama` named volume (`/root/.ollama`) | yes |
+| Models | `ollama-models` named volume (`/root/.ollama`) | yes |
 
 ## Operations
 

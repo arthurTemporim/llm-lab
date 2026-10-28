@@ -85,7 +85,7 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 
 **Langfuse ingestion.** SDKs or OTLP send events to `langfuse-web`, which stores raw events in Garage (S3) and queues them in Redis. `langfuse-worker` processes them into ClickHouse. Users, projects and prompts live in Postgres.
 
-**Document conversion.** A client uploads a file to `docling` (`/v1/convert/file`, or the async variant for long documents) and gets Markdown back. Conversions queue behind `DOCLING_SERVE_ENG_LOC_NUM_WORKERS`, so many clients share one capped converter.
+**Document conversion.** A client uploads a file to `docling` (`/v1/convert/file`, or the async variant for long documents) and gets Markdown back. `docling` is a manager that queues the job (at most `DOCLING_MANAGER_CONCURRENCY` at once, so many clients share one capped converter). It starts `docling-worker` (docling-serve) through the Docker socket if it is stopped and runs the job on it. If the worker crashes, fails the task or gets stuck, the manager restarts it and retries. After `DOCLING_MANAGER_IDLE_TIMEOUT` seconds without work it stops the worker, freeing its RAM and VRAM.
 
 **Workflow execution.** A client triggers a workflow through `hatchet-lite` (REST or gRPC). Hatchet stores the run in Postgres and dispatches its tasks over gRPC to workers registered with a token, retrying failed tasks. Workers run outside the lab or on the `lang` network and call `litellm`, `docling` or `ollama` from their tasks.
 
@@ -99,7 +99,7 @@ Compose `depends_on` only works inside a project. Order across modules comes fro
 | Redis, Garage objects | `common-services` named volumes |
 | Ollama models | `ollama` named volume |
 | vLLM models (Hugging Face cache) | `vllm_huggingface` named volume |
-| Docling models | inside the image (no volume) |
+| Docling models | inside the image (no volume); queued uploads and results in the manager's `/tmp` |
 | LocalAI models and backends | bind mounts in `modules/localai` (git-ignored) |
 | Open WebUI data | `openwebui` named volume |
 | Langflow flows | Postgres; extra state in a named volume |
@@ -118,7 +118,7 @@ Every host port is a `*_PORT` variable in the module's `.env`. Check what is alr
 
 ## GPU
 
-`vllm` is GPU only and always reserves one card (see [CONFIGURATIONS.md](CONFIGURATIONS.md)). `ollama`, `localai`, `docling` and `openwebui` run on CPU by default. Their `docker-compose.gpu.yml` override reserves NVIDIA GPUs, and the Makefile adds it when the NVIDIA runtime is detected. They share the GPU but compete for VRAM; on small GPUs run one inference server at a time. See [CONFIGURATIONS.md](CONFIGURATIONS.md).
+`vllm` is GPU only and always reserves one card (see [CONFIGURATIONS.md](CONFIGURATIONS.md)). `ollama`, `localai`, `docling` and `openwebui` run on CPU by default. Their `docker-compose.gpu.yml` override reserves NVIDIA GPUs, and the Makefile adds it when the NVIDIA runtime is detected. They share the GPU but compete for VRAM; on small GPUs run one inference server at a time. `docling` holds VRAM only while it has work: its manager stops the worker when idle. See [CONFIGURATIONS.md](CONFIGURATIONS.md).
 
 ## Design decisions
 
@@ -135,5 +135,4 @@ Every host port is a `*_PORT` variable in the module's `.env`. Check what is alr
 
 | Issue | Impact | Fix |
 |---|---|---|
-| Jupyter base image uses a floating `python-3.11` tag | Rebuilds can change packages | Pin a dated tag |
 | Postgres volume changed from an anonymous volume to the `postgres` named volume | A lab created before this change starts with empty databases | `pg_dumpall` from the old container before recreating it |
