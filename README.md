@@ -144,7 +144,7 @@ Run `make help` for the full list. Common targets:
 | Target | Description |
 |---|---|
 | `make init [ARGS=...]` | Configure, start the core (or `--modules` selection), pull models, print URLs |
-| `make configure [ARGS=--host IP]` | Create envs, set `LAB_PUBLIC_HOST` and GPU ids, write `evals/.env`; starts nothing |
+| `make configure [ARGS=--host IP]` | Create envs (and add new variables to existing ones), set `LAB_PUBLIC_HOST` and GPU ids, write `evals/.env`; starts nothing |
 | `make gpu [ARGS=--dry-run]` | Pick the best GPU (compute capability 7.5+, most memory) for `VLLM_GPU_ID` and `DOCLING_GPU_ID` |
 | `make hatchet-token [ARGS=--force]` | Create the Hatchet worker token in the global `.env` |
 | `make up` / `make build` | Start or build the core modules (`common-services`, `ollama`) |

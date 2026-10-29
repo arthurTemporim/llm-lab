@@ -187,12 +187,31 @@ def sync_evals() -> None:
         log("evals: LITELLM_API_KEY set to LITELLM_MASTER_KEY")
 
 
+def add_missing_vars(module: str) -> list[str]:
+    """Appends the variables of example.env that an older .env lacks (create-envs never touches an
+    existing file), then fills their CHANGE_ME* placeholders. Returns the added names."""
+    env, example = MODULES_DIR / module / ".env", MODULES_DIR / module / "example.env"
+    have = read_env(env)
+    added = [line for line in example.read_text().splitlines()
+             if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", line) and line.split("=", 1)[0] not in have]
+    if not added:
+        return []
+    with env.open("a") as f:
+        f.write("\n# Added by `make configure` from example.env\n" + "\n".join(added) + "\n")
+    if any("CHANGE_ME" in line for line in added):
+        run([str(SCRIPTS_DIR / "generate_secrets.sh"), str(env)])
+    names = [line.split("=", 1)[0] for line in added]
+    log(f"{rel(env)}: added {' '.join(names)}")
+    return names
+
+
 def configure(modules: list[str], host: str | None) -> None:
     missing = {m for m in modules if (MODULES_DIR / m / "example.env").is_file() and not (MODULES_DIR / m / ".env").is_file()}
     make("create-envs")
+    added = {m: add_missing_vars(m) for m in modules if m not in missing and (MODULES_DIR / m / "example.env").is_file()}
 
     # Only on a new global env (or when asked): never overwrite a host chosen by hand
-    if host or "common-services" in missing:
+    if host or "common-services" in missing or "LAB_PUBLIC_HOST" in added.get("common-services", []):
         public = host or detect_lan_ip()
         if set_env(GLOBAL_ENV, "LAB_PUBLIC_HOST", public):
             log(f"LAB_PUBLIC_HOST={public} in {rel(GLOBAL_ENV)}")

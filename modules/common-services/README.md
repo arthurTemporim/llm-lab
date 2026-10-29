@@ -110,9 +110,11 @@ Upgrade: change the image tag, then `docker compose pull && docker compose up -d
 | `AuthorizationHeaderMalformed` (region) | The client must use the region `s3_region` from `garage.toml` (`garage`) |
 | Port already in use | Change the matching `*_PORT` variable |
 | Databases empty after an old lab was recreated | The Postgres volume changed; restore from a `pg_dumpall` taken before |
+| `too many clients already` in Postgres logs | The modules' connection pools exceed `max_connections` (200, the `command:` of `postgres` in `docker-compose.yml`). Raise it, or lower a module's pool (for example Hatchet's `DATABASE_MAX_CONNS`) |
 
 ## Notes
 
+* Postgres runs with `max_connections=200` (default 100) because every module keeps its own connection pool on it; Hatchet alone uses up to 50.
 * Redis runs with `--maxmemory-policy noeviction` because Langfuse (BullMQ) requires it. Keep it.
 * The Garage S3 host port is 9100 on purpose to avoid clashes with ClickHouse (9000).
 * Garage runs as a single node (`--single-node`) without replication, and creates the default key and bucket at start (`--default-bucket`).

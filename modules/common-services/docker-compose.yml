@@ -5,6 +5,8 @@ services:
     container_name: postgres
     restart: unless-stopped
     env_file: .env
+    # Shared by every module's connection pool (Hatchet alone uses up to 50); the default is 100
+    command: ["postgres", "-c", "max_connections=200"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
       interval: 10s

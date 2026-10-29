@@ -64,7 +64,7 @@ Edit `modules/hatchet/.env` (created by `make create-envs` from `example.env`), 
 | `HATCHET_GRPC_PORT` | `7077` | Host port of gRPC for workers |
 | `HATCHET_PUBLIC_HOST` | `${LAB_PUBLIC_HOST}` (global, `localhost`) | Host name or IP clients use to reach this machine. Builds `SERVER_URL`, the cookie domain and the gRPC broadcast address. Set it to the LAN IP for remote access |
 | `DATABASE_URL` | `${POSTGRES_URL}/hatchet?sslmode=disable` | `POSTGRES_URL` comes from the global `common-services/.env`. `sslmode=disable` because the shared Postgres has no TLS |
-| `DATABASE_MAX_CONNS` | `20` | Connection pool cap (Hatchet default 50); Postgres is shared |
+| `DATABASE_MAX_CONNS` | `50` | Connection pool cap (Hatchet's default). Lower values starve Hatchet's components; the shared Postgres allows 200 connections |
 | `SERVER_AUTH_COOKIE_INSECURE`, `SERVER_GRPC_INSECURE` | `t` | Plain HTTP and gRPC (no TLS) |
 | `SERVER_GRPC_BIND_ADDRESS`, `SERVER_GRPC_PORT` | `0.0.0.0`, `7077` | gRPC listener inside the container |
 | `SERVER_AUTH_SET_EMAIL_VERIFIED` | `t` | New users need no email verification |
@@ -103,7 +103,8 @@ Reset: `docker compose down -v` in `modules/hatchet/` and drop the `hatchet` dat
 | Login succeeds but the dashboard sends you back to the login page | The browser URL host does not match `HATCHET_PUBLIC_HOST` (cookie domain). Open the dashboard at `http://<HATCHET_PUBLIC_HOST>:<HATCHET_PORT>` |
 | Remote worker connects, then fails with `connection refused` to `localhost:7077` | `HATCHET_PUBLIC_HOST` is `localhost`; set it to the server's IP, or set `HATCHET_CLIENT_HOST_PORT` in the worker |
 | Port 7077 or 8889 already in use | Another Hatchet runs on the host (for example a project's own `hatchet-lite`). Stop it or change `HATCHET_GRPC_PORT` / `HATCHET_PORT` |
-| `too many clients already` in Postgres logs | Lower `DATABASE_MAX_CONNS` here or in the other modules |
+| `too many clients already` in Postgres logs | The modules' pools exceed `max_connections` (200, set in `common-services/docker-compose.yml`). Raise it there or lower the pools of other modules |
+| `canceling statement due to statement timeout` on `Dispatcher` / `Ticker` heartbeats, `long transaction start` warnings | Hatchet's connection pool is too small: its transactions wait for connections while holding row locks. Keep `DATABASE_MAX_CONNS` at 50 or more |
 | `hatchet_token.sh`: tenant not found | Hatchet has not finished its first start, or the tenant slug is wrong. Check `make logs-hatchet` |
 
 ## Notes
