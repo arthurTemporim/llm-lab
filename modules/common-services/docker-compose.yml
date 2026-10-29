@@ -1,10 +1,12 @@
-# Shared services: Postgres (pgvector), Redis and MinIO. Creates the "lang" network.
+# Shared services: Postgres (pgvector), Redis and Garage (S3). Creates the "lang" network.
 services:
   postgres:
-    image: pgvector/pgvector:pg17
+    image: pgvector/pgvector:0.8.7-pg17
     container_name: postgres
     restart: unless-stopped
     env_file: .env
+    # Shared by every module's connection pool (Hatchet alone uses up to 50); the default is 100
+    command: ["postgres", "-c", "max_connections=200"]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
       interval: 10s
@@ -14,12 +16,12 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       # Must be PGDATA (/var/lib/postgresql/data), otherwise data is lost on `down`
-      - postgres:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - lang
 
   redis:
-    image: redis:8.6.7-alpine
+    image: redis:8.10.3-alpine
     container_name: redis
     restart: unless-stopped
     # noeviction is required by Langfuse (BullMQ queues must never be evicted)
@@ -36,25 +38,21 @@ services:
     networks:
       - lang
 
-  minio:
-    # MinIO no longer publishes images on Docker Hub. Chainguard only publishes
-    # "latest" for the free tier, so this is the one unpinned image.
-    image: cgr.dev/chainguard/minio:latest
-    container_name: minio
+  garage:
+    image: dxflrs/garage:v2.5.0
+    container_name: garage
     restart: unless-stopped
     env_file: .env
-    entrypoint: sh
-    # Buckets are plain directories under /data, so creating them is enough.
-    command:
-      - -c
-      - 'for b in $${MINIO_BUCKETS}; do mkdir -p "/data/$$b"; done && minio server --address ":9000" --console-address ":9001" /data'
+    # Single node, no replication. Creates the GARAGE_DEFAULT_* key and bucket if missing.
+    command: ["/garage", "server", "--single-node", "--default-bucket"]
     ports:
-      - "${MINIO_API_PORT:-9100}:9000"
-      - "127.0.0.1:${MINIO_CONSOLE_PORT:-9101}:9001"
+      - "${GARAGE_S3_PORT:-9100}:3900"
     volumes:
-      - minio-data:/data
+      - ./garage.toml:/etc/garage.toml:ro
+      - garage-data:/var/lib/garage
+    # The image has no shell, so the garage CLI is the check
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD", "/garage", "status"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -64,8 +62,10 @@ services:
 
 volumes:
   redis-data:
-  minio-data:
-  postgres:
+  garage-data:
+  # name: keeps the docker volume created before the rename (no data loss)
+  postgres-data:
+    name: common-services_postgres
 
 networks:
   lang:

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Ex:
 # ./ollama_send_prompt.sh
 

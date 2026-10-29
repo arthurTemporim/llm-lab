@@ -1,9 +1,9 @@
 # Models
 
-The models served through the LiteLLM gateway (backed by Ollama): what each one is for, how it is configured, and how to call it. Measured comparisons are in [MODEL_EVAL_REPORT.md](MODEL_EVAL_REPORT.md) (run by [evals/](../evals/README.md)). Pull them with `scripts/ollama_pull_model.sh`; the LiteLLM settings are mirrored in `modules/litellm/config.yaml`.
+The models served through the LiteLLM gateway (backed by Ollama): what each one is for, how it is configured, and how to call it. Measured comparisons are in [MODEL_EVAL_REPORT.md](MODEL_EVAL_REPORT.md) (run by [evals/](../evals/README.md)). Pull them with `scripts/ollama_pull_model.sh`; the LiteLLM settings are in `modules/litellm/models.yaml`.
 
-- **Gateway:** LiteLLM v1.105.1 at `http://<host>:4000`. Models live in its database (`STORE_MODEL_IN_DB=True`).
-- **Backend:** Ollama v0.40.5 on a server with an RTX 3060 (12 GB) + Tesla P4 (8 GB) = about 20 GB of VRAM, 48 GB RAM.
+- **Gateway:** LiteLLM ([version](../modules/litellm/README.md#overview)) at `http://<host>:4000`. Models are registered from Ollama at startup (`litellm-init`).
+- **Backend:** Ollama ([version](../modules/ollama/README.md#overview)) on a server with an RTX 3060 (12 GB) + Tesla P4 (8 GB) = about 20 GB of VRAM, 48 GB RAM.
 - **Keys:** examples use `$LITELLM_KEY`. Never commit a real key.
 
 ## Models at a glance
@@ -127,5 +127,4 @@ curl http://localhost:4000/v1/systemone \
 
 - **`typesafe/` provider:** LiteLLM's docs recommend `bespoke` for Nimble, but v1.105.1 does not list it. `typesafe/` with Ollama as `api_base` works here but is not the documented path. Check again after a LiteLLM upgrade.
 - **Removed on purpose:** `llama3.2-vision:11b` (Ollama 0.40.5 cannot load the `mllama` architecture), `embeddinggemma-2:740m` (an Apple MLX build that fails on Linux) and the duplicate `llama3.2:latest` (same digest as `llama3.2:3b`; the Ollama copy shares the same blob).
-- **Config is in the database:** a recreated LiteLLM database loses these settings unless you re-apply `modules/litellm/config.yaml` (see its header).
 - **Not covered by the evals:** tool calling, long-context quality and the decision `score` question type.

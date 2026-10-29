@@ -7,7 +7,7 @@ ChatGPT-style web UI with RAG, web search, code execution and image generation.
 | | |
 |---|---|
 | Documentation | [Open WebUI](https://docs.openwebui.com/) |
-| Image | `ghcr.io/open-webui/open-webui:v0.11.4` (GPU: `v0.11.4-cuda`) |
+| Image | `ghcr.io/open-webui/open-webui:v0.12.4` (GPU: `v0.12.4-cuda`) |
 | Container(s) | `openwebui` |
 | GPU | Optional, for local embeddings (`docker-compose.gpu.yml`, added automatically) |
 | Make target | `make openwebui` |
@@ -24,16 +24,16 @@ ChatGPT-style web UI with RAG, web search, code execution and image generation.
 |---|---|---|
 | Web UI | http://localhost:3000 | http://openwebui:8080 |
 
-The first account you sign up becomes admin.
+Login: `LAB_EMAIL` (default `llmlabuser@example.com`) / the generated `WEBUI_ADMIN_PASSWORD` in `.env`. The admin is created on the first start when no users exist; Open WebUI then turns sign-up off.
 
 ## Quick start
 
 ```sh
 make openwebui
-make openwebui-logs
+make logs-openwebui
 ```
 
-Open http://localhost:3000, create the admin account and pick a model (pull one in Ollama first, see `modules/ollama/README.md`).
+Open http://localhost:3000, log in as the admin and pick a model (pull one in Ollama first, see `modules/ollama/README.md`).
 
 ## Configuration
 
@@ -42,9 +42,11 @@ Edit `modules/openwebui/.env` (created by `make create-envs` from `example.env`)
 | Variable | Default | Description |
 |---|---|---|
 | `OPENWEBUI_PORT` | `3000` | Host port |
-| `OLLAMA_BASE_URL` | `http://ollama:11434` | Ollama address |
+| `OLLAMA_BASE_URL` | `${OLLAMA_URL}` (global, `http://ollama:11434`) | Ollama address |
 | `ENABLE_OLLAMA_API` / `ENABLE_OPENAI_API` | `true` / `true` | Enable each connection type |
-| `ENABLE_SIGNUP` | `true` | Allow new sign-ups. Set `false` after creating your users |
+| `WEBUI_ADMIN_EMAIL` / `WEBUI_ADMIN_NAME` | `${LAB_EMAIL}` / `${LAB_USER}` (global) | Admin created on the first start only |
+| `WEBUI_ADMIN_PASSWORD` | generated | Admin password |
+| `ENABLE_SIGNUP` | `true` | Allow new sign-ups. Only applies until the first-start admin is created: Open WebUI then turns sign-up off (re-enable it in Admin Settings) |
 | `ENABLE_SIGNUP_PASSWORD_CONFIRMATION` | `false` | Ask to confirm the password on sign-up |
 | `ENABLE_LOGIN_FORM` | `true` | Show the login form |
 | `ENABLE_CODE_EXECUTION` | `true` | Code execution in chats |
@@ -57,7 +59,7 @@ Edit `modules/openwebui/.env` (created by `make create-envs` from `example.env`)
 | `DATA_DIR` | `./data` | Data directory inside the container |
 | `WEBUI_URL`, `WEBUI_NAME`, `DEFAULT_PROMPT_SUGGESTIONS`, `CORS_ALLOW_ORIGIN`, `USE_CUDA_DOCKER`, `IMAGE_GENERATION_MODEL` | commented out | Optional, see `example.env` |
 
-To add LocalAI or LiteLLM: Admin Settings, Connections, add an OpenAI connection (`http://localai:8080/v1` or `http://litellm:4000/v1`) with its API key.
+To add LocalAI, LiteLLM or vLLM: Admin Settings, Connections, add an OpenAI connection (`http://localai:8080/v1`, `http://litellm:4000/v1` or `http://vllm:8000/v1`) with its API key.
 
 ## Connections
 
@@ -71,12 +73,12 @@ To add LocalAI or LiteLLM: Admin Settings, Connections, add an OpenAI connection
 
 | Data | Where | Survives `down` |
 |---|---|---|
-| Users, chats, uploads, vector data | `open-webui` named volume (`/app/backend/data`) | yes |
+| Users, chats, uploads, vector data | `openwebui-data` named volume (`/app/backend/data`) | yes |
 
 ## Operations
 
 ```sh
-make openwebui-down    # stop, keep data
+make down-openwebui    # stop, keep data
 ```
 
 Upgrade: change the image tag in both compose files, then `docker compose pull && docker compose up -d` in `modules/openwebui/`.
@@ -91,5 +93,5 @@ Upgrade: change the image tag in both compose files, then `docker compose pull &
 
 ## Notes
 
-* Sign-up is open by default. Disable it once your users exist.
+* Sign-up is turned off by Open WebUI after the admin is created.
 * Defaults are for local development only.

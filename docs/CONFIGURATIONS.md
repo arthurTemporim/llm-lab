@@ -5,28 +5,43 @@ How configuration works in llm-lab: env files, values that must match, secrets, 
 ## How configuration is loaded
 
 1. Each module has a committed **`example.env`** template.
-2. **`make create-envs`** copies it to **`.env`** (git-ignored) and never overwrites an existing one. Every `CHANGE_ME` value becomes a random secret (LocalAI key, LiteLLM keys, Langfuse secrets).
-3. Every module loads its whole `.env` with `env_file: .env`, so a new variable reaches the container with no compose change. Compose also uses the same `.env` for `${VAR:-default}` interpolation, which modules use only for host ports and derived values (for example Langfuse's S3 settings).
-4. Apply changes with `make <module>` (or `docker compose up -d` in the module folder). Check the result with `docker compose config`.
+2. **`make create-envs`** copies it to **`.env`** (git-ignored) and never overwrites an existing one. Placeholders become random values (`scripts/generate_secrets.sh`):
+
+   | Placeholder | Becomes | Used for |
+   |---|---|---|
+   | `CHANGE_ME_PASSWORD` | 15 letters and digits | Postgres, ClickHouse, Open WebUI, Langflow, LiteLLM UI, Langfuse and Hatchet admin passwords |
+   | `CHANGE_ME_HEX24` | 24 hex chars | Garage key id (`GK` + 24 hex) |
+   | `CHANGE_ME` | 64 hex chars | API keys and secrets (LiteLLM, LocalAI, vLLM, Langfuse, Garage) |
+
+   `make configure` (also run by `make init`, via `scripts/lab.py`) runs `create-envs`, adds to existing `.env` files any variable their `example.env` gained since (new placeholders get generated values; existing values are never changed), and then fills the machine-specific values: `LAB_PUBLIC_HOST` (the LAN IP, on a new global `.env` or with `--host`), `VLLM_GPU_ID`/`DOCLING_GPU_ID` (for newly created files) and `evals/.env`. It is idempotent and keeps values you set by hand.
+
+3. **`modules/common-services/.env` is the global file.** It holds the values several modules share: the public host, the default login (`LAB_USER`, `LAB_EMAIL`: user name and email of every module's admin account; set them before the first start, existing accounts are not renamed), Postgres user, password and base URL (`POSTGRES_URL`), Redis, Garage keys and endpoints, the Ollama URL, the Langfuse project keys and the Hatchet client settings (`HATCHET_CLIENT_TOKEN`, filled by `make hatchet-token`; `HATCHET_CLIENT_HOST_PORT`; `HATCHET_CLIENT_TLS_STRATEGY`). The Makefile runs every module with `docker compose --env-file ../common-services/.env --env-file .env`. Module `.env` files then reference shared values as `${VAR}`, for example `DATABASE_URL=${POSTGRES_URL}/litellm`, so you change a shared value once.
+4. Every module loads its own `.env` with `env_file: .env`, so a new variable reaches the container with no compose change. Global values reach a container only through such references. Compose also interpolates `${VAR:-default}` in the compose files; modules use it only for host ports and derived values (for example Langfuse's S3 settings).
+5. Apply changes with `make <module>`. To run Compose yourself, pass both files (`docker compose --env-file ../common-services/.env --env-file .env up -d` in the module folder) or `export COMPOSE_ENV_FILES=../common-services/.env,.env`. Without them, references to global values are empty. Check the result with `docker compose config`.
+6. **`make check-env`** (run before every module starts) fails when the global `.env` is missing a variable of its `example.env`, or when a module `.env` redefines a global variable with another value. A module `.env` is loaded last, so it would win.
 
 ## Values that must match
 
+Most shared values are set once in the global `common-services/.env` (see above), so they no longer need syncing: the Postgres credentials and URL, the Garage keys, bucket and endpoints, the public host, the Ollama URL and the Langfuse project keys. What is left:
+
 | Value | Keep in sync between |
 |---|---|
-| Postgres user, password and database names | `common-services` and the connection strings in `langflow`, `litellm`, `langfuse` |
-| MinIO user and password | `common-services/.env` and `langfuse/.env` (verified by `make check-env`, which `make langfuse` runs) |
-| MinIO bucket and endpoint | `common-services/.env` and the S3 settings in `langfuse/.env` |
+| Garage S3 region | `GARAGE_S3_REGION` in `common-services/.env` and `s3_region` in `garage.toml` |
+| Database names | `POSTGRES_DATABASES` in `common-services/.env` and the database in each module's URL |
 | Langfuse port and public URL | both in `langfuse/.env` |
-| Langfuse API keys | `langfuse/.env` and any client, such as `litellm/.env` |
-| LocalAI API key | `localai/.env` and its clients (LiteLLM, Open WebUI) |
+| Hatchet public host and ports | `LAB_PUBLIC_HOST` (or `HATCHET_PUBLIC_HOST`), `HATCHET_PORT`, `HATCHET_GRPC_PORT` and the URL clients use; tokens created before a change keep the old gRPC address; run `make hatchet-token ARGS=--force` |
+| Evals key | `LITELLM_API_KEY` in `evals/.env` equals `LITELLM_MASTER_KEY` in `litellm/.env` (synced by `make configure`) |
+| LocalAI API key | `localai/.env` and its clients (LiteLLM, Open WebUI), set in their UIs |
 
 ## Secrets
 
-All defaults are for local use. Change them before exposing anything beyond your machine, and generate values with `openssl rand -hex 32`.
+Passwords, keys and secrets are generated by `make create-envs`, so each install gets its own. Read them in the `.env` files (for example the Langfuse admin password in `langfuse/.env`). To make a new one by hand, use `openssl rand -hex 32` for keys, or `head -c 32 /dev/urandom | sha256sum | base64 | head -c 15` for passwords.
 
-- **Passwords and keys:** Postgres, MinIO, ClickHouse, Langflow, LiteLLM, Langfuse and LocalAI all ship with simple defaults.
+- **Applied once:** the Postgres user and password apply only when the `postgres` volume is created. Changing `POSTGRES_PASSWORD` later also needs `ALTER USER` in Postgres. Keep passwords URL-safe (letters and digits), because they go into connection strings.
+- **Fixed defaults left:** `CLICKHOUSE_USER` and the Postgres user (service accounts, not logins). Admin logins use `LAB_USER` / `LAB_EMAIL`.
 - **Never change after first use:** the LiteLLM salt key (encrypts stored provider keys) and the Langfuse `ENCRYPTION_KEY`.
-- **Langfuse seed values** (`LANGFUSE_INIT_*`) apply only on the first start.
+- **Langfuse seed values** (`LANGFUSE_INIT_*`) and the **Hatchet admin user** (`ADMIN_*`) apply only on the first start.
+- **Hatchet keys** live in the `hatchet-config` volume; removing it invalidates every Hatchet API token.
 - **Jupyter** runs without a token. Add one in its compose command to enable auth.
 - Never commit or print real secrets. `.env` files are git-ignored.
 
@@ -36,36 +51,42 @@ Most Open WebUI settings are stored in its database after the first start, and t
 
 ## Connecting services
 
-- **Between containers:** use container names, for example `postgres`, `redis` or `http://ollama:<port>`.
-- **From the host:** use `localhost` and the published host port.
+- **Between containers:** use the global values (`${POSTGRES_URL}`, `${OLLAMA_URL}`, …) or container names, for example `http://docling:5001`.
+- **From the host:** use `localhost` (or `LAB_PUBLIC_HOST`) and the published host port.
+
+The full rules are in [CONVENTIONS.md](CONVENTIONS.md#integration).
 
 ## GPU and CPU
 
-`ollama`, `localai` and `openwebui` have a base `docker-compose.yml` that runs on CPU and a `docker-compose.gpu.yml` override that reserves NVIDIA GPUs (and, for LocalAI and Open WebUI, swaps in the CUDA image). The Makefile adds the override when it detects the NVIDIA Container Toolkit (`docker info`).
+`ollama`, `localai`, `docling` and `openwebui` have a base `docker-compose.yml` that runs on CPU and a `docker-compose.gpu.yml` override that reserves NVIDIA GPUs (and, for LocalAI, Docling and Open WebUI, swaps in the CUDA image). The Makefile adds the override when it detects the NVIDIA Container Toolkit (`docker info`).
 
 - **Force it:** `make GPU=1 <module>` or `make GPU=0 <module>`.
 - **Without make:** `docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d` in the module folder.
 - **Limit GPUs:** set `NVIDIA_VISIBLE_DEVICES` in `ollama/.env`, or use `device_ids` instead of `count: all` in the override.
 - **CPU:** prefer small models (a few billion parameters) with low parallelism.
+- **`vllm` is GPU only.** Its NVIDIA reservation is in the base `docker-compose.yml` (no override file), so `GPU=0` does not turn it off. It needs a card with compute capability 7.5+ (the Tesla P4 does not qualify): `make gpu` (also part of `make configure`/`init`) picks it automatically; or set `VLLM_GPU_ID` to the index shown by `nvidia-smi -L`.
+- **`make gpu`** reads `nvidia-smi`, picks the card with compute capability 7.5+ and the most memory (lowest index on ties) and writes `VLLM_GPU_ID` and `DOCLING_GPU_ID`. Use `ARGS=--dry-run` to preview. Without `nvidia-smi` or an eligible card it warns and changes nothing.
+- **`docling` pins one card.** Its CUDA 12.8 image does not run on Pascal cards (Tesla P4), so the override reserves only `DOCLING_GPU_ID` (a Turing or newer index, set by `make gpu`) for `docling-worker`. The worker holds that VRAM only while it has work: the `docling` manager stops it after `DOCLING_MANAGER_IDLE_TIMEOUT` seconds idle.
 
 ## Changing ports
 
-Every published host port is a `*_PORT` variable in the module's `.env` (for example `OLLAMA_PORT`, `LANGFUSE_PORT`, `MINIO_API_PORT`). If a port is also used in another setting (for example Langfuse's public URL or the MinIO external endpoint), update it too. Container ports and in-network addresses never change.
+Every published host port is a `*_PORT` variable in the module's `.env` (for example `OLLAMA_PORT`, `LANGFUSE_PORT`, `GARAGE_S3_PORT`). If a port is also used in another setting (for example Langfuse's public URL or the Langfuse S3 external endpoint), update it too. Container ports and in-network addresses never change.
 
 ## Versions and upgrades
 
-Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse uses `LANGFUSE_VERSION` in `.env`). The only floating tag is MinIO's `latest`, because Chainguard publishes no other for the free tier.
+Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse uses `LANGFUSE_VERSION` in `.env`). No image uses `latest` (`scripts/check_conventions.sh` enforces it).
 
 | Case | Upgrade |
 |---|---|
 | Image in compose | Edit the tag, then `docker compose pull && docker compose up -d` |
-| Image in a Dockerfile (langflow, notebooks) | Edit, then `docker compose up -d --build` |
+| Image in a Dockerfile (langflow, notebooks, the docling manager) | Edit, then `docker compose up -d --build` |
 | Langfuse | Change the version, pull and restart; migrations run automatically. Check the ClickHouse version it supports first. |
+| Hatchet | Change the tag, pull and restart; migrations run at start. Keep worker SDK versions compatible. |
 | Postgres major version | Needs `pg_dumpall` and a restore |
 
 ## Integrations
 
-- **LiteLLM → Ollama / LocalAI.** Add models in the LiteLLM UI, or mount a `config.yaml` by uncommenting the volume and command lines in its compose file. Use container names for `api_base`.
+- **LiteLLM → Ollama / LocalAI.** Ollama models are registered automatically at `make litellm` (`litellm-init` builds `config.yaml` from Ollama and `modules/litellm/models.yaml`). Add LocalAI and other backends under `extra_models` in `models.yaml`. Use container names for `api_base`.
 - **LiteLLM → Langfuse.** Add the Langfuse public key, secret key and host to `litellm/.env` and enable the Langfuse success callback.
 - **Open WebUI → LocalAI / LiteLLM.** Add an OpenAI-compatible connection in the admin settings, with the matching API key.
 - **Langflow / notebooks → pgvector.** Use the Postgres connection string for the `langflow` database, where `vector` is enabled.
@@ -74,7 +95,7 @@ Image versions are pinned in each `docker-compose.yml` or `Dockerfile` (Langfuse
 
 | Goal | Command |
 |---|---|
-| Stop a module, keep data | `make <module>-down` or `docker compose down` |
+| Stop a module, keep data | `make down-<module>` or `docker compose down` |
 | Stop everything | `make down` |
 | Reset a module's `.env` | `rm modules/<name>/.env && make create-envs` |
 | Wipe a module's volumes | `docker compose down -v` in its folder |

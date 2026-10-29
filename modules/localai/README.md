@@ -7,7 +7,7 @@ OpenAI-compatible server for LLMs, embeddings, images and audio, running locally
 | | |
 |---|---|
 | Documentation | [LocalAI](https://localai.io/) |
-| Image | `localai/localai:v3.12.1-aio-cpu` (GPU: `v3.12.1-aio-gpu-nvidia-cuda-13`) |
+| Image | `localai/localai:v4.12.1` (GPU: `v4.12.1-gpu-nvidia-cuda-13`) |
 | Container(s) | `localai` |
 | GPU | Optional (`docker-compose.gpu.yml` swaps the image and reserves NVIDIA GPUs, added automatically) |
 | Make target | `make localai` |
@@ -16,7 +16,7 @@ OpenAI-compatible server for LLMs, embeddings, images and audio, running locally
 
 * Second inference server, next to Ollama, with an OpenAI-compatible API.
 * Covers more than text: images and audio models.
-* The all-in-one image ships preconfigured models and downloads them on first start.
+* Starts with no models (LocalAI 4 dropped the all-in-one images): install them from the gallery in the web UI (Models) or with `POST /models/apply`. Backends are downloaded on demand into `backends/`.
 
 ## Access
 
@@ -30,10 +30,10 @@ Clients must send `Authorization: Bearer <LOCALAI_API_KEY>`.
 
 ```sh
 make localai
-make localai-logs
+make logs-localai
 ```
 
-The first start downloads models and can take several minutes. Check that it works:
+It starts with no models: open http://localhost:8080, log in with the API key and install one from the gallery. Check that it works:
 
 ```sh
 curl http://localhost:8080/readyz
@@ -69,7 +69,7 @@ Other LocalAI settings can be added to `.env`: it is loaded into the container w
 ## Operations
 
 ```sh
-make localai-down     # stop, keep models
+make down-localai     # stop, keep models
 ```
 
 Upgrade: change the image tag in both compose files, then `docker compose pull && docker compose up -d` in `modules/localai/`.
@@ -79,7 +79,7 @@ Upgrade: change the image tag in both compose files, then `docker compose pull &
 | Symptom | Cause / fix |
 |---|---|
 | `401` from the API | Send the key from `.env` as a Bearer token |
-| Not ready for minutes | First start downloads models; follow `make localai-logs` |
+| Not ready for minutes | A model or backend is downloading; follow `make logs-localai` |
 | Out of VRAM | Run one inference server at a time (shares the GPU with Ollama and Open WebUI) |
 | Port already in use | Change `LOCALAI_PORT` |
 

@@ -1,18 +1,20 @@
 services:
   ollama:
-    image: ollama/ollama:0.40.5
+    image: ollama/ollama:0.40.12
     container_name: ollama
     restart: unless-stopped
     env_file: .env
     ports:
       - "${OLLAMA_PORT:-11434}:11434"
     volumes:
-      - ollama:/root/.ollama
+      - ollama-models:/root/.ollama
     networks:
       - lang
 
 volumes:
-  ollama:
+  # name: keeps the docker volume created before the rename (no data loss)
+  ollama-models:
+    name: ollama_ollama
 
 networks:
   lang:

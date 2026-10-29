@@ -1,0 +1,14 @@
+# Garage (S3-compatible object storage), single node. Secrets come from .env:
+# GARAGE_RPC_SECRET, and GARAGE_DEFAULT_* for the key and bucket created at startup.
+metadata_dir = "/var/lib/garage/meta"
+data_dir = "/var/lib/garage/data"
+db_engine = "sqlite"
+replication_factor = 1
+
+rpc_bind_addr = "[::]:3901"
+rpc_public_addr = "127.0.0.1:3901"
+
+[s3_api]
+api_bind_addr = "[::]:3900"
+# Clients must sign requests with this region (LANGFUSE_S3_REGION in modules/langfuse/.env)
+s3_region = "garage"

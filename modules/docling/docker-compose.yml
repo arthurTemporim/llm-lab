@@ -1,0 +1,44 @@
+services:
+  # Manager: the front door clients use (http://docling:5001, same API as docling-serve). It queues
+  # requests, starts docling-worker when there is work, restarts it and retries when a conversion
+  # fails, and stops it when idle to free RAM/VRAM. See manager/app.py.
+  docling:
+    build: ./manager
+    container_name: docling
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "${DOCLING_PORT:-5001}:5001"
+    volumes:
+      # Starts, restarts and stops docling-worker through the Docker API
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:5001/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - lang
+
+  # docling-serve. Only the manager talks to it, so it has no host port.
+  docling-worker:
+    # CPU image. docker-compose.gpu.yml swaps it for the CUDA one.
+    # Models are baked into the image (DOCLING_SERVE_ARTIFACTS_PATH), so there is no model volume.
+    image: ghcr.io/docling-project/docling-serve-cpu:v1.38.2
+    container_name: docling-worker
+    # The manager starts and stops it on demand; Docker must not bring it back by itself.
+    restart: "no"
+    env_file: .env
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:5001/health')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      # Models load at boot (DOCLING_SERVE_LOAD_MODELS_AT_BOOT).
+      start_period: 120s
+    networks:
+      - lang
+
+networks:
+  lang:
+    external: true

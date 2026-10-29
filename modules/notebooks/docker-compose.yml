@@ -1,9 +1,9 @@
 services:
-  jupyter:
+  notebooks:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: jupyter
+    container_name: notebooks
     restart: unless-stopped
     env_file: .env
     user: root

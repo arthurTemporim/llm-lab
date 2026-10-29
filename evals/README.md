@@ -10,10 +10,9 @@ The evals only call the gateway (`/v1/chat/completions`, `/v1/embeddings`, `/v1/
 cd evals
 uv venv --python 3.12 .venv          # or: python3.12 -m venv .venv
 uv pip install --python .venv/bin/python -r requirements.txt   # or: .venv/bin/pip install -r requirements.txt
-cp example.env .env                   # then set LITELLM_BASE_URL and LITELLM_API_KEY (JUDGE_MODEL defaults to tev1:4b)
 ```
 
-`.env` is git-ignored. Models and their prompt prefixes are listed in `models.yaml`.
+`evals/.env` is created by `make configure` / `make init` from `example.env`, with `LITELLM_BASE_URL` and `LITELLM_API_KEY` (synced from `LITELLM_MASTER_KEY`). To do it by hand: `cp example.env .env` and set both (`JUDGE_MODEL` defaults to `tev1:4b`). `.env` is git-ignored. Models and their prompt prefixes are listed in `models.yaml`.
 
 ## Run
 
