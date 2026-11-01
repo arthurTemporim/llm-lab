@@ -2,7 +2,7 @@
 # (GPU=1 forces it, GPU=0 disables it).
 services:
   openwebui:
-    image: ghcr.io/open-webui/open-webui:v0.11.4-cuda
+    image: ghcr.io/open-webui/open-webui:v0.12.4-cuda
     deploy:
       resources:
         reservations:

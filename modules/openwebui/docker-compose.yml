@@ -1,19 +1,21 @@
 services:
   openwebui:
     # CPU image. docker-compose.gpu.yml swaps it for the CUDA one.
-    image: ghcr.io/open-webui/open-webui:v0.11.4
+    image: ghcr.io/open-webui/open-webui:v0.12.4
     container_name: openwebui
     restart: unless-stopped
     env_file: .env
     ports:
       - "${OPENWEBUI_PORT:-3000}:8080"
     volumes:
-      - open-webui:/app/backend/data
+      - openwebui-data:/app/backend/data
     networks:
       - lang
 
 volumes:
-  open-webui:
+  # name: keeps the docker volume created before the rename (no data loss)
+  openwebui-data:
+    name: openwebui_open-webui
 
 networks:
   lang:

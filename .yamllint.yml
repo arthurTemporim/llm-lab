@@ -1,0 +1,8 @@
+# yamllint config used by CI (.github/workflows/validate.yml)
+extends: relaxed
+
+rules:
+  # Compose healthchecks and comments are often long
+  line-length: disable
+
+ignore-from-file: .gitignore

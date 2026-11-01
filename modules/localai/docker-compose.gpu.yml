@@ -2,7 +2,7 @@
 # (GPU=1 forces it, GPU=0 disables it).
 services:
   localai:
-    image: localai/localai:v3.12.1-aio-gpu-nvidia-cuda-13
+    image: localai/localai:v4.12.1-gpu-nvidia-cuda-13
     deploy:
       resources:
         reservations:
