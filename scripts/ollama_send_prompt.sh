@@ -3,7 +3,7 @@
 # ./ollama_send_prompt.sh
 
 
-model_name="gemma2"
+model_name="gemma4"
 url="http://localhost:11434"
 prompt="Why the sky is blue?"
 stream="false"
