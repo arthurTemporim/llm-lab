@@ -1,7 +1,7 @@
 services:
   localai:
     # CPU image. docker-compose.gpu.yml swaps it for the NVIDIA one.
-    image: localai/localai:v3.12.1-aio-cpu
+    image: localai/localai:v4.12.1
     container_name: localai
     restart: unless-stopped
     healthcheck:
@@ -14,7 +14,7 @@ services:
     env_file: .env
     environment:
       - DEBUG=true
-      - LOCALAI_BACKEND_ASSETS_PATH=/backends
+      - LOCALAI_BACKENDS_PATH=/backends
     volumes:
       - ./models:/models:cached
       - ./backends:/backends

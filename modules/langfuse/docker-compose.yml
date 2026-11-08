@@ -1,79 +1,80 @@
 # Langfuse v4 (web + worker) on top of the shared services:
-#   postgres, redis, minio -> modules/common-services (network "lang")
-#   clickhouse             -> this module
+#   postgres, redis, garage -> modules/common-services (network "lang")
+#   langfuse-clickhouse    -> this module
 # Start common-services first (make common-services).
-# .env is loaded as a whole (env_file); the block below only maps/derives values.
+# .env is loaded as a whole (env_file); the block below only maps/derives values. ${VAR}s not in
+# .env come from the global modules/common-services/.env (the Makefile passes both).
 x-langfuse-env: &langfuse-env
-  NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:${LANGFUSE_PORT:-3001}}
-  DATABASE_URL: ${DATABASE_URL:-postgresql://lang:lang@postgres:5432/langfuse}
+  NEXTAUTH_URL: ${NEXTAUTH_URL:-http://${LAB_PUBLIC_HOST:-localhost}:${LANGFUSE_PORT:-3001}}
+  DATABASE_URL: ${DATABASE_URL:?set DATABASE_URL in .env}
   SALT: ${SALT:?set SALT in .env}
   ENCRYPTION_KEY: ${ENCRYPTION_KEY:?set ENCRYPTION_KEY in .env}
   TELEMETRY_ENABLED: ${TELEMETRY_ENABLED:-false}
   LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES: ${LANGFUSE_ENABLE_EXPERIMENTAL_FEATURES:-false}
   # ClickHouse
-  CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL:-clickhouse://clickhouse:9000}
-  CLICKHOUSE_URL: ${CLICKHOUSE_URL:-http://clickhouse:8123}
+  CLICKHOUSE_MIGRATION_URL: ${CLICKHOUSE_MIGRATION_URL:-clickhouse://langfuse-clickhouse:9000}
+  CLICKHOUSE_URL: ${CLICKHOUSE_URL:-http://langfuse-clickhouse:8123}
   CLICKHOUSE_USER: ${CLICKHOUSE_USER:-clickhouse}
   CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse}
   CLICKHOUSE_CLUSTER_ENABLED: "false"
-  # Redis (shared, no password)
+  # Redis (shared, no password). Container port: REDIS_PORT in common-services is the host port.
   REDIS_HOST: ${REDIS_HOST:-redis}
-  REDIS_PORT: ${REDIS_PORT:-6379}
-  # S3 / MinIO (shared)
+  REDIS_PORT: "6379"
+  # S3 / Garage (shared)
   LANGFUSE_S3_EVENT_UPLOAD_BUCKET: ${LANGFUSE_S3_BUCKET:-langfuse}
-  LANGFUSE_S3_EVENT_UPLOAD_REGION: ${LANGFUSE_S3_REGION:-auto}
-  LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minio}
-  LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-miniosecret}
-  LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://minio:9000}
+  LANGFUSE_S3_EVENT_UPLOAD_REGION: ${LANGFUSE_S3_REGION:-garage}
+  LANGFUSE_S3_EVENT_UPLOAD_ACCESS_KEY_ID: ${GARAGE_DEFAULT_ACCESS_KEY:?set GARAGE_DEFAULT_ACCESS_KEY in common-services/.env}
+  LANGFUSE_S3_EVENT_UPLOAD_SECRET_ACCESS_KEY: ${GARAGE_DEFAULT_SECRET_KEY:?set GARAGE_DEFAULT_SECRET_KEY in common-services/.env}
+  LANGFUSE_S3_EVENT_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://garage:3900}
   LANGFUSE_S3_EVENT_UPLOAD_FORCE_PATH_STYLE: "true"
   LANGFUSE_S3_EVENT_UPLOAD_PREFIX: events/
   LANGFUSE_S3_MEDIA_UPLOAD_BUCKET: ${LANGFUSE_S3_BUCKET:-langfuse}
-  LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${LANGFUSE_S3_REGION:-auto}
-  LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minio}
-  LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-miniosecret}
+  LANGFUSE_S3_MEDIA_UPLOAD_REGION: ${LANGFUSE_S3_REGION:-garage}
+  LANGFUSE_S3_MEDIA_UPLOAD_ACCESS_KEY_ID: ${GARAGE_DEFAULT_ACCESS_KEY:?set GARAGE_DEFAULT_ACCESS_KEY in common-services/.env}
+  LANGFUSE_S3_MEDIA_UPLOAD_SECRET_ACCESS_KEY: ${GARAGE_DEFAULT_SECRET_KEY:?set GARAGE_DEFAULT_SECRET_KEY in common-services/.env}
   LANGFUSE_S3_MEDIA_UPLOAD_FORCE_PATH_STYLE: "true"
   LANGFUSE_S3_MEDIA_UPLOAD_PREFIX: media/
   LANGFUSE_S3_BATCH_EXPORT_ENABLED: ${LANGFUSE_S3_BATCH_EXPORT_ENABLED:-false}
   LANGFUSE_S3_BATCH_EXPORT_BUCKET: ${LANGFUSE_S3_BUCKET:-langfuse}
   LANGFUSE_S3_BATCH_EXPORT_PREFIX: exports/
-  LANGFUSE_S3_BATCH_EXPORT_REGION: ${LANGFUSE_S3_REGION:-auto}
-  LANGFUSE_S3_BATCH_EXPORT_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://minio:9000}
+  LANGFUSE_S3_BATCH_EXPORT_REGION: ${LANGFUSE_S3_REGION:-garage}
+  LANGFUSE_S3_BATCH_EXPORT_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://garage:3900}
   LANGFUSE_S3_BATCH_EXPORT_EXTERNAL_ENDPOINT: ${LANGFUSE_S3_EXTERNAL_ENDPOINT:-http://localhost:9100}
-  LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minio}
-  LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-miniosecret}
+  LANGFUSE_S3_BATCH_EXPORT_ACCESS_KEY_ID: ${GARAGE_DEFAULT_ACCESS_KEY:?set GARAGE_DEFAULT_ACCESS_KEY in common-services/.env}
+  LANGFUSE_S3_BATCH_EXPORT_SECRET_ACCESS_KEY: ${GARAGE_DEFAULT_SECRET_KEY:?set GARAGE_DEFAULT_SECRET_KEY in common-services/.env}
   LANGFUSE_S3_BATCH_EXPORT_FORCE_PATH_STYLE: "true"
 
 services:
   langfuse-worker:
-    image: langfuse/langfuse-worker:${LANGFUSE_VERSION:-4.54}
+    image: langfuse/langfuse-worker:${LANGFUSE_VERSION:-4.71}
     container_name: langfuse-worker
     restart: unless-stopped
     env_file: .env
     depends_on:
-      clickhouse:
+      langfuse-clickhouse:
         condition: service_healthy
     environment:
       <<: *langfuse-env
-      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://minio:9000}
+      LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://garage:3900}
     ports:
       - "127.0.0.1:${LANGFUSE_WORKER_PORT:-3030}:3030"
     networks:
       - lang
 
   langfuse-web:
-    image: langfuse/langfuse:${LANGFUSE_VERSION:-4.54}
+    image: langfuse/langfuse:${LANGFUSE_VERSION:-4.71}
     container_name: langfuse-web
     restart: unless-stopped
     env_file: .env
     depends_on:
-      clickhouse:
+      langfuse-clickhouse:
         condition: service_healthy
     environment:
       <<: *langfuse-env
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:?set NEXTAUTH_SECRET in .env}
       # Presigned media URLs are opened by the browser, so they use the host-reachable endpoint
       LANGFUSE_S3_MEDIA_UPLOAD_ENDPOINT: ${LANGFUSE_S3_EXTERNAL_ENDPOINT:-http://localhost:9100}
-      LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://minio:9000}
+      LANGFUSE_S3_MEDIA_UPLOAD_INTERNAL_ENDPOINT: ${LANGFUSE_S3_ENDPOINT:-http://garage:3900}
       # Headless initialization (org, project, API keys, admin user)
       LANGFUSE_INIT_ORG_ID: ${LANGFUSE_INIT_ORG_ID:-}
       LANGFUSE_INIT_ORG_NAME: ${LANGFUSE_INIT_ORG_NAME:-}
@@ -90,7 +91,7 @@ services:
     networks:
       - lang
 
-  clickhouse:
+  langfuse-clickhouse:
     image: clickhouse/clickhouse-server:25.12
     container_name: langfuse-clickhouse
     restart: unless-stopped

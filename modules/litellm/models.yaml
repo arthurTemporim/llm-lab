@@ -1,0 +1,70 @@
+defaults:
+  # Reasoning models: keep max_tokens high, thinking counts against it
+  chat:
+    provider: ollama_chat
+    litellm_params:
+      num_ctx: 16384
+      max_tokens: 8192
+      keep_alive: 5m
+      timeout: 300
+      num_retries: 2
+  # Embeddings use the ollama/ prefix, not ollama_chat/
+  embedding:
+    provider: ollama
+    litellm_params:
+      keep_alive: 5m
+      timeout: 120
+      num_retries: 2
+  evaluation:               # decision models (LiteLLM mode for /v1/decisions, /v1/systemone)
+    provider: typesafe
+    litellm_params:
+      api_key: ollama
+      keep_alive: 5m
+      timeout: 120
+      num_retries: 2
+
+models:
+  # ---- Chat
+  gemma4:12b:
+    litellm_params: { keep_alive: 15m }
+  qwen3-vl:8b:
+    litellm_params: { keep_alive: 3m }
+  llama3.2:3b:              # no thinking, short answers
+    litellm_params: { max_tokens: 4096 }
+
+  # ---- Embeddings
+  qwen3-embedding:8b:
+    model_info: { max_input_tokens: 8192 }
+  # Prefix the text with "search_query: " or "search_document: " (done by the client)
+  nomic-embed-text-v2-moe:latest:
+    litellm_params: { keep_alive: 10m }
+    model_info: { max_input_tokens: 512 }
+  embeddinggemma:300m:
+    litellm_params: { keep_alive: 10m }
+    model_info: { max_input_tokens: 2048 }
+
+  # ---- Decision models
+  tev1:4b:                  # ~2K token context, short inputs
+    litellm_params: { keep_alive: 15m }
+    model_info: { mode: evaluation }
+  nimble:9b:                # 8K token context, rarely used: short keep_alive
+    litellm_params: { keep_alive: 2m }
+    model_info: { mode: evaluation }
+
+# Non-Ollama models (LocalAI, vLLM, cloud), copied as-is into model_list.
+extra_models: []
+#  - model_name: qwen-vllm
+#    litellm_params:
+#      model: openai/Qwen/Qwen3-8B
+#      api_base: http://vllm:8000/v1
+#      api_key: os.environ/VLLM_API_KEY
+
+# Copied as-is into config.yaml (litellm_settings, general_settings,
+# router_settings, environment_variables).
+# Request/response bodies in the UI Logs page (stored in Postgres, new requests only)
+general_settings:
+  store_prompts_in_spend_logs: true
+
+# Langfuse tracing: add the LANGFUSE_* keys to .env and uncomment.
+# litellm_settings:
+#   success_callback: ["langfuse"]
