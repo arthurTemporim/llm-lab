@@ -17,6 +17,7 @@ The models served through the LiteLLM gateway (backed by Ollama): what each one 
 | `qwen3-embedding:8b` | embedding (4096 dims) | 4.7 GB | 8K input | Best-quality multilingual search and RAG | [Ollama](https://ollama.com/library/qwen3-embedding) |
 | `nomic-embed-text-v2-moe` | embedding (768 dims) | 1.0 GB | 512 tokens | Small, fast embeddings for short texts | [Ollama](https://ollama.com/library/nomic-embed-text-v2-moe) |
 | `embeddinggemma:300m` | embedding (768 dims) | 0.6 GB | 2K input | Smallest embedding model, good default | [Ollama](https://ollama.com/library/embeddinggemma) |
+| `embeddinggemma-2:740m` | embedding (768 dims), text and image input | 1.3 GB | 8K input | Longer passages than `embeddinggemma:300m`, and images | [Ollama](https://ollama.com/library/embeddinggemma-2) |
 | `tev1:4b` | decision (classifier) | 4.6 GB | about 2K tokens | Routing, moderation and yes/no gates on short inputs | [Ollama](https://ollama.com/library/tev1) |
 | `nimble:9b` | decision (classifier) | 9.5 GB | 8K tokens | Same tasks with longer inputs | [Ollama](https://ollama.com/library/nimble), [independent test](https://blog.devgenius.io/evaluating-a-decision-model-nimble-9b-and-its-base-model-qwen3-5-9b-a845c2bbd7f0) |
 
@@ -34,6 +35,7 @@ Other references: [LiteLLM decision API](https://docs.litellm.ai/docs/decisions)
 **Embeddings**
 - **`qwen3-embedding:8b`** for the best retrieval quality, multilingual content or long passages. It is the heaviest (4096-dimension vectors).
 - **`embeddinggemma:300m`** as the light default: tiny, fast, 768 dimensions. In the retrieval eval all three models found the right passage in the top 3 every time (96–100% first place), so the larger one is only worth it for long passages or if it wins on your own data.
+- **`embeddinggemma-2:740m`** when `embeddinggemma:300m` is too short (8K instead of 2K input) or you need to embed images. Not evaluated yet.
 - **`nomic-embed-text-v2-moe`** for short passages only (512-token limit). Add its `search_query: ` / `search_document: ` prefixes.
 - Never mix vectors from different models in one index.
 
@@ -57,6 +59,7 @@ Every entry points at the Ollama server and retries twice (`num_retries: 2`). Th
 | `qwen3-embedding:8b` | `ollama/` | embedding | Ollama default | n/a | 120 s | 5m |
 | `nomic-embed-text-v2-moe` | `ollama/` | embedding | Ollama default | n/a | 120 s | 10m |
 | `embeddinggemma:300m` | `ollama/` | embedding | Ollama default | n/a | 120 s | 10m |
+| `embeddinggemma-2:740m` | `ollama/` | embedding | Ollama default | n/a | 120 s | 10m |
 | `tev1:4b` | `typesafe/` | decisions | about 2K (Ollama) | n/a | 120 s | 15m |
 | `nimble:9b` | `typesafe/` | decisions | 8K (Ollama) | n/a | 120 s | 2m |
 
@@ -92,6 +95,7 @@ curl http://localhost:4000/v1/embeddings \
 | `qwen3-embedding:8b` | 4096 (32–4096 possible) | Optional query instruction: `Instruct: <task>\nQuery: <text>`. Documents are embedded as plain text |
 | `nomic-embed-text-v2-moe` | 768 (can truncate to 256) | Prefix `search_query: ` for queries and `search_document: ` for documents. 512 tokens maximum |
 | `embeddinggemma:300m` | 768 | Plain text works. The model card also describes prompts (`task: search result \| query: ...`, `title: none \| text: ...`) |
+| `embeddinggemma-2:740m` | 768 (can truncate to 512, 256, 128) | Plain text works. The model card mentions task prefixes but does not list them. Also accepts images. Context: the model card says 8K, the Ollama tag page 256K |
 
 ### Decisions
 
@@ -126,5 +130,5 @@ curl http://localhost:4000/v1/systemone \
 ## Known limitations
 
 - **`typesafe/` provider:** LiteLLM's docs recommend `bespoke` for Nimble, but v1.105.1 does not list it. `typesafe/` with Ollama as `api_base` works here but is not the documented path. Check again after a LiteLLM upgrade.
-- **Removed on purpose:** `llama3.2-vision:11b` (Ollama 0.40.5 cannot load the `mllama` architecture), `embeddinggemma-2:740m` (an Apple MLX build that fails on Linux) and the duplicate `llama3.2:latest` (same digest as `llama3.2:3b`; the Ollama copy shares the same blob).
+- **Removed on purpose:** `llama3.2-vision:11b` (Ollama 0.40.5 cannot load the `mllama` architecture) and the duplicate `llama3.2:latest` (same digest as `llama3.2:3b`; the Ollama copy shares the same blob).
 - **Not covered by the evals:** tool calling, long-context quality and the decision `score` question type.

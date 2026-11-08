@@ -29,6 +29,8 @@ embeddings:
     name: embeddinggemma:300m
     query_prefix: "task: search result | query: "
     doc_prefix: "title: none | text: "
+  - label: embeddinggemma-2:740m
+    name: embeddinggemma-2:740m
 
 # Decision models answer through /v1/systemone. `chat_baselines` solve the same task as
 # plain chat models (prompted to answer with a label), to show what a decision model adds.

@@ -42,6 +42,9 @@ models:
   embeddinggemma:300m:
     litellm_params: { keep_alive: 10m }
     model_info: { max_input_tokens: 2048 }
+  embeddinggemma-2:740m:    # model card: 8K context (the Ollama tag page shows 256K)
+    litellm_params: { keep_alive: 10m }
+    model_info: { max_input_tokens: 8192 }
 
   # ---- Decision models
   tev1:4b:                  # ~2K token context, short inputs

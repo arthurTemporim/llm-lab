@@ -9,7 +9,7 @@ models=(
 "gemma4:12b 8.0"
 "tev1:4b 4.6"
 "qwen3-embedding:8b 4.7"
-"embeddinggemma-2:740m"
+"embeddinggemma-2:740m 1.3"
 "qwen3-vl:8b 6.2"
 "nimble:9b 9.5"
 )
